@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Vector 3D | Wireframe Space Simulator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <a href="../index.html" class="back-link">◀ ARCADE HUB</a>
+
+    <div class="crt-scanlines"></div>
+    <div class="crt-vignette"></div>
+    <div id="damage-flash" class="damage-flash"></div>
+
+    <div id="viewport"></div>
+
+    <div id="hud">
+        <div class="hud-top">
+            <div class="hud-panel">
+                <div class="panel-title">TELEMETRIA DE VOO</div>
+                <div class="data-row">
+                    <span class="data-label">VELOCIDADE:</span>
+                    <span class="data-value"><span id="hud-speed">0</span> M/S</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">CASCO:</span>
+                    <span class="data-value" id="hud-hull-text" style="color: #00ff66;">100%</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">ALVOS:</span>
+                    <span class="data-value" id="hud-kills" style="color: #ffaa00;">0</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">SETORES:</span>
+                    <span class="data-value" id="hud-sector">[0, 0, 0]</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">CÂMERA:</span>
+                    <span class="data-value" id="hud-cam">CHASE</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">GANCHO:</span>
+                    <span class="data-value" id="hud-grapple" style="color: #00ff66;">PRONTO</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">MÍSSIL HANABI:</span>
+                    <span class="data-value" id="hud-missile" style="color: #00f0ff;">PRONTO [G]</span>
+                </div>
+            </div>
+
+            <div class="hud-panel">
+                <div class="panel-title">NAVE-MÃE (CARRIER)</div>
+                <div class="data-row">
+                    <span class="data-label">DISTÂNCIA:</span>
+                    <span class="data-value" id="hud-distance">0 M</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">SINAL HOMING:</span>
+                    <span class="data-value" style="color: #00ff66;">CONECTADO</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">HANGAR:</span>
+                    <span class="data-value" style="color: #ffd700;">ATIVO</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hud-reticle-container">
+            <div class="hud-reticle">
+                <div class="reticle-dot"></div>
+                <div class="reticle-cross-h"></div>
+                <div class="reticle-cross-v"></div>
+                <div id="hud-hitmarker" class="hitmarker"></div>
+            </div>
+        </div>
+
+        <div id="docking-banner" class="docking-banner">
+            <h2>CORREDOR DE POUSO DETECTADO</h2>
+            <p>Alinhe os vetores e desacelere</p>
+        </div>
+
+        <div class="hud-bottom">
+            <div class="hud-panel">
+                <div class="panel-title">STATUS DA NAVE</div>
+                <div class="bar-container">
+                    <div class="bar-label-group">
+                        <span class="data-label">INTEGRIDADE DO CASCO:</span>
+                        <span id="hud-hull-pct" class="data-value" style="font-size: 11px;">100%</span>
+                    </div>
+                    <div class="bar-frame">
+                        <div id="bar-hull" class="bar-fill-hull"></div>
+                    </div>
+                </div>
+                <div class="bar-container" style="margin-top: 6px;">
+                    <div class="bar-label-group">
+                        <span class="data-label">THROTTLE (W/S):</span>
+                    </div>
+                    <div class="bar-frame">
+                        <div id="bar-throttle" class="bar-fill-throttle"></div>
+                    </div>
+                </div>
+                <div class="bar-container" style="margin-top: 6px;">
+                    <div class="bar-label-group">
+                        <span class="data-label">BOOST (ESPAÇO):</span>
+                    </div>
+                    <div class="bar-frame">
+                        <div id="bar-boost" class="bar-fill-boost"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mothership-locator">
+                <div class="radar-compass">
+                    <div class="radar-sweep"></div>
+                    <div id="radar-needle" class="radar-needle"></div>
+                </div>
+                <span class="data-label" style="font-size: 11px; letter-spacing: 1px;">RADAR CARRIER</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="docked-modal">
+        <div class="docked-card">
+            <h1>ACOPLADO À NAVE-MÃE</h1>
+            <p>Travas magnéticas do hangar ativadas com sucesso. A nave foi totalmente reparada e os sistemas de propulsão e boost foram reabastecidos.</p>
+            <div class="docked-stats">
+                <div>ESTADO: <strong style="color: #00ff66;">REPARADO</strong></div>
+                <div>BOOST: <strong style="color: #00f0ff;">100%</strong></div>
+                <div>LOCAL: <strong>DECK DE POUSO</strong></div>
+                <div>RADAR: <strong style="color: #ffd700;">ONLINE</strong></div>
+            </div>
+            <button id="btn-undock" class="btn-undock">DESACOPLAR E DECOLAR [F / ESPAÇO]</button>
+        </div>
+    </div>
+
+    <div id="gameover-modal">
+        <div class="gameover-card">
+            <h1>NAVE DESTRUÍDA</h1>
+            <p>Impacto crítico severo detectado. O caça foi pulverizado pelas colisões no espaço.</p>
+            <button id="btn-respawn" class="btn-respawn">RESTAURAR NA NAVE-MÃE [R]</button>
+        </div>
+    </div>
+
+    <div id="overlay-instructions">
+        <div class="instructions-card">
+            <h1 class="instructions-title">STAR VECTOR 3D</h1>
+            <p class="instructions-desc">
+                Simulador espacial em estética puramente vetorial e wireframe. Pilote seu caça interestelar em um universo infinito procedural e retorne à sua gigantesca Nave-Mãe quando quiser reabastecer e pousar.
+            </p>
+            <div class="controls-table">
+                <span class="control-key">CLIQUE ESQ.</span>
+                <span class="control-action">Disparar Canhões Laser (destruir asteroides)</span>
+
+                <span class="control-key">CLIQUE DIR.</span>
+                <span class="control-action">Múltiplos Ganchos: Toque p/ rebocar à nave | Segure no alvo 1 e solte no alvo 2 p/ ligar ambos (lance quantos quiser)</span>
+
+                <span class="control-key">TECLA G / SCROLL</span>
+                <span class="control-action">Míssil Hanabi: Foguete com rastro wireframe e explosão procedural em 5 gerações de fogos japoneses</span>
+
+                <span class="control-key">TECLA C</span>
+                <span class="control-action">Apertar guincho de TODOS os cabos ativos simultaneamente (colisão e explosão em cadeia)</span>
+
+                <span class="control-key">TECLA X</span>
+                <span class="control-action">Cortar / soltar todos os cabos</span>
+
+                <span class="control-key">MOUSE</span>
+                <span class="control-action">Mira / Inclinação (Pitch) e Direção (Yaw)</span>
+
+                <span class="control-key">W / S</span>
+                <span class="control-action">Acelerar (Throttle) / Reduzir / Ré</span>
+
+                <span class="control-key">A / D</span>
+                <span class="control-action">Inclinar Asas (Roll)</span>
+
+                <span class="control-key">ESPAÇO</span>
+                <span class="control-action">Pós-combustor (Boost de hiper-velocidade)</span>
+
+                <span class="control-key">SHIFT</span>
+                <span class="control-action">Freio aeroespacial reverso</span>
+
+                <span class="control-key">V</span>
+                <span class="control-action">Alternar Câmera (3ª Pessoa / Cockpit)</span>
+
+                <span class="control-key">F</span>
+                <span class="control-action">Pousar no Hangar da Nave-Mãe / Desacoplar</span>
+
+                <span class="control-key">R</span>
+                <span class="control-action">Resetar posição de emergência</span>
+            </div>
+            <button id="btn-start" class="btn-start">INICIAR VOO ESPACIAL</button>
+        </div>
+    </div>
+
+    <script src="js/audio.js"></script>
+    <script src="js/ship.js"></script>
+    <script src="js/mothership.js"></script>
+    <script src="js/world.js"></script>
+    <script src="js/grapple.js"></script>
+    <script src="js/missile.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
+

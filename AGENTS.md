@@ -93,5 +93,7 @@ Os projetos não precisam necessariamente seguir padrões de produção ou repre
 
 Sempre que criar um novo projeto, adicione-o ao `index.html` na raiz do projeto, seguindo o mesmo padrão utilizado nos projetos já cadastrados.
 
+Cada projeto deve possuir sua própria pasta na raiz do repositório, sendo completamente independente dos demais. Projetos não devem compartilhar dependências, arquivos ou código entre si.
+
 
 **Crie de forma simples. Execute de forma eficiente. Não desperdice recursos.**
