@@ -1,0 +1,317 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+body {
+    background-color: #000000;
+    color: #00ffcc;
+    font-family: 'Share Tech Mono', monospace;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+}
+
+#viewport {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.crt-lines {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%),
+                linear-gradient(90deg, rgba(0, 255, 204, 0.02), rgba(0, 0, 0, 0), rgba(0, 255, 100, 0.02));
+    background-size: 100% 3px, 6px 100%;
+    z-index: 50;
+}
+
+#hud {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px 30px;
+}
+
+#reticle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 24px;
+    border: 2px solid rgba(0, 255, 204, 0.6);
+    border-radius: 50%;
+    pointer-events: none;
+    transition: all 0.1s ease;
+}
+
+#reticle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 4px;
+    height: 4px;
+    background: #00ffcc;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #00ffcc;
+}
+
+.reticle-empty {
+    border-color: #ff3344 !important;
+    transform: translate(-50%, -50%) scale(1.4) !important;
+}
+
+.hud-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.hud-panel {
+    background: rgba(4, 12, 10, 0.75);
+    border: 1px solid rgba(0, 255, 204, 0.4);
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.15), inset 0 0 8px rgba(0, 0, 0, 0.8);
+    padding: 10px 18px;
+    border-radius: 4px;
+    backdrop-filter: blur(4px);
+}
+
+.hud-title-tag {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: #00ff66;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+}
+
+#hud-objective {
+    font-size: 19px;
+    color: #ffffff;
+    text-shadow: 0 0 8px #00ffcc;
+    letter-spacing: 1px;
+}
+
+.beacons-box {
+    text-align: right;
+}
+
+.beacons-value {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px;
+    color: #ff0077;
+    text-shadow: 0 0 10px #ff0077;
+}
+
+.hud-middle {
+    text-align: center;
+}
+
+#hud-log {
+    display: inline-block;
+    font-size: 20px;
+    color: #00ffcc;
+    text-shadow: 0 0 8px rgba(0, 255, 204, 0.8);
+    background: rgba(0, 15, 10, 0.6);
+    padding: 6px 18px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 255, 204, 0.3);
+    transition: opacity 0.3s ease;
+}
+
+.hud-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.energy-container {
+    width: 280px;
+}
+
+.energy-bar-wrap {
+    height: 16px;
+    background: #0d1a15;
+    border: 1px solid #00ffcc;
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+#energy-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #00aa66 0%, #00ffcc 100%);
+    box-shadow: 0 0 10px #00ffcc;
+    transition: width 0.1s linear;
+}
+
+.controls-hint {
+    font-size: 16px;
+    color: #64748b;
+    text-align: right;
+    line-height: 1.4;
+}
+
+.controls-hint span {
+    color: #94a3b8;
+}
+
+#blocker {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+#instructions {
+    max-width: 620px;
+    background: #060b09;
+    border: 2px solid #00ffcc;
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.35), inset 0 0 15px rgba(0, 0, 0, 0.9);
+    border-radius: 8px;
+    padding: 32px 28px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.modal-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 22px;
+    color: #00ffcc;
+    text-shadow: 0 0 15px #00ffcc;
+    margin-bottom: 16px;
+}
+
+.modal-desc {
+    font-size: 20px;
+    color: #cbd5e1;
+    line-height: 1.4;
+    margin-bottom: 22px;
+}
+
+.modal-controls {
+    background: #0d1512;
+    border: 1px solid #1e3a2f;
+    border-radius: 4px;
+    padding: 14px;
+    margin-bottom: 24px;
+    font-size: 18px;
+    color: #94a3b8;
+    text-align: left;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.modal-controls b {
+    color: #00ffcc;
+}
+
+.modal-click {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    color: #00ff66;
+    animation: blink-text 1.2s infinite ease-in-out;
+}
+
+@keyframes blink-text {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+#victory-screen {
+    position: absolute;
+    inset: 0;
+    background: rgba(2, 8, 6, 0.94);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    gap: 18px;
+}
+
+.victory-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 26px;
+    color: #00ff66;
+    text-shadow: 0 0 20px #00ff66;
+}
+
+.victory-sub {
+    font-size: 22px;
+    color: #cbd5e1;
+    max-width: 600px;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.btn-retro {
+    background: #0b1a13;
+    border: 2px solid #00ff66;
+    color: #00ff66;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    padding: 14px 24px;
+    cursor: pointer;
+    border-radius: 4px;
+    box-shadow: 0 4px 0 #040a07;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.1s ease;
+}
+
+.btn-retro:hover {
+    background: #00ff66;
+    color: #000000;
+    box-shadow: 0 0 20px #00ff66;
+}
+
+.mobile-bar {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    gap: 14px;
+    z-index: 80;
+}
+
+.btn-mobile {
+    background: rgba(0, 255, 204, 0.2);
+    border: 2px solid #00ffcc;
+    color: #00ffcc;
+    padding: 16px 20px;
+    border-radius: 50px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+}
+
+@media (max-width: 768px) {
+    .mobile-bar {
+        display: flex;
+    }
+    .modal-controls {
+        grid-template-columns: 1fr;
+    }
+}
+

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echo Scanner 3D | Ecolocalização e LIDAR</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div id="viewport"></div>
+    <div class="crt-lines"></div>
+    <div id="reticle"></div>
+
+    <div id="hud">
+        <div class="hud-top">
+            <div class="hud-panel">
+                <div class="hud-title-tag">SISTEMA DE ECOLOCALIZAÇÃO</div>
+                <div id="hud-objective">OBJETIVO: ENCONTRE AS 3 BALIZAS DE RESSONÂNCIA</div>
+            </div>
+            <div class="hud-panel beacons-box">
+                <div class="hud-title-tag">BALIZAS RECOLHIDAS</div>
+                <div class="beacons-value" id="beacon-val">0 / 3</div>
+            </div>
+        </div>
+
+        <div class="hud-middle">
+            <div id="hud-log">COMPLEXO SUBMERSO EM ESCURIDÃO - DISPARE O SCANNER PARA MAPEAR</div>
+        </div>
+
+        <div class="hud-bottom">
+            <div class="hud-panel energy-container">
+                <div class="hud-title-tag">ENERGIA DO SCANNER: <span id="energy-val">100%</span></div>
+                <div class="energy-bar-wrap">
+                    <div id="energy-fill"></div>
+                </div>
+            </div>
+            <div class="controls-hint">
+                [CLIQUE ESQ / ESPAÇO] <span>FEIXE DIRECIONAL</span><br>
+                [CLIQUE DIR / Q] <span>PULSO 360°</span><br>
+                [WASD / SHIFT] <span>MOVER E CORRER</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="blocker">
+        <div id="instructions">
+            <h1 class="modal-title">ECHO SCANNER 3D</h1>
+            <p class="modal-desc">
+                O complexo está mergulhado em escuridão total. Você empunha uma arma de ecolocalização que emite pulsos sonares acústicos. Ao colidirem com as superfícies, as ondas deixam pontos luminosos que revelam o mapa por breves segundos antes de desaparecerem.
+            </p>
+            <div class="modal-controls">
+                <div><b>W, A, S, D:</b> Mover-se</div>
+                <div><b>Mouse:</b> Olhar ao redor (360°)</div>
+                <div><b>Clique Esquerdo:</b> Feixe de Varredura</div>
+                <div><b>Clique Direito / Q:</b> Pulso Sonar 360°</div>
+                <div><b>Shift:</b> Correr</div>
+                <div><b>Espaço:</b> Pular</div>
+            </div>
+            <div class="modal-click">CLIQUE AQUI PARA TRAVAR O MOUSE E ENTRAR NO COMPLEXO</div>
+        </div>
+    </div>
+
+    <div id="victory-screen">
+        <h1 class="victory-title">EXTRAÇÃO CONCLUÍDA!</h1>
+        <p class="victory-sub">Você navegou com sucesso na escuridão profunda, mapeou o complexo com ondas de ecolocalização e recuperou todas as balizas de ressonância.</p>
+        <div style="display: flex; gap: 14px;">
+            <button class="btn-retro" id="btn-restart">REPETIR MISSÃO</button>
+            <a href="../index.html" class="btn-retro" style="background: #111d28; border-color: #00ccff; color: #00ccff;">VOLTAR AO HUB</a>
+        </div>
+    </div>
+
+    <div class="mobile-bar">
+        <button class="btn-mobile" id="mobile-fire-btn">FEIXE</button>
+        <button class="btn-mobile" id="mobile-pulse-btn">PULSO</button>
+    </div>
+
+    <script src="js/audio.js"></script>
+    <script src="js/level.js"></script>
+    <script src="js/scanner.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
+

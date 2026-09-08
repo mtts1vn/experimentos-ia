@@ -1,1 +1,3 @@
 Este repositório reúne diversos projetos, programas e jogos criados exclusivamente com Inteligência Artificial. O único objetivo é experimentar e descobrir o que é possível criar utilizando IA, explorando diferentes ideias, tecnologias e tipos de software.
+
+Dê uma olhada nas ideias e nos conceitos apresentados. Acima de tudo, tudo aqui foi pensado por mim no tempo livre e transformado em projetos com o auxílio da IA. Caso alguma dessas ideias te inspire ou faça surgir uma nova ideia na sua cabeça, sinta-se à vontade para explorá-la e criar a partir dela.
