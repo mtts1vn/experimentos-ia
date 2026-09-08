@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Arcade Lab | Hub de Projetos Feitos com IA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --card-bg: #141318;
+            --border-bronze: #5a4533;
+            --gold: #f7d070;
+            --gold-bright: #ffd700;
+            --cyan: #00ffcc;
+            --red: #e74c3c;
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(ellipse at 50% 0%, rgba(247, 208, 112, 0.08) 0%, transparent 60%),
+                linear-gradient(180deg, #0e0d13 0%, #060608 100%);
+        }
+
+        .crt-scanlines {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%),
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 4px, 6px 100%;
+            z-index: 999;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1120px;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            z-index: 10;
+        }
+
+        header {
+            background: linear-gradient(180deg, #2b1f16 0%, #15100c 100%);
+            border: 4px solid var(--border-bronze);
+            border-radius: 6px;
+            padding: 24px;
+            box-shadow: 
+                0 0 25px rgba(0, 0, 0, 0.9),
+                inset 0 0 15px rgba(0, 0, 0, 0.8),
+                0 0 0 2px #20140b;
+            text-align: center;
+            position: relative;
+        }
+
+        .hub-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(18px, 4vw, 32px);
+            color: var(--gold);
+            text-shadow: 3px 3px 0 #000, 0 0 15px rgba(247, 208, 112, 0.4);
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+        }
+
+        .hub-subtitle {
+            font-size: 22px;
+            color: var(--text-dim);
+            max-width: 780px;
+            margin: 0 auto;
+            line-height: 1.3;
+        }
+
+        .status-strip {
+            margin-top: 18px;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 18px;
+        }
+
+        .badge {
+            background: #231b14;
+            border: 2px solid var(--border-bronze);
+            padding: 4px 12px;
+            border-radius: 4px;
+            color: var(--gold);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-online {
+            border-color: #27ae60;
+            color: #2ecc71;
+        }
+
+        .badge-online::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #2ecc71;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px #2ecc71;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--border-bronze);
+            padding-bottom: 8px;
+        }
+
+        .section-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 16px;
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .project-card {
+            background: var(--card-bg);
+            border: 4px solid var(--border-bronze);
+            border-radius: 6px;
+            box-shadow: 0 6px 0 #120e0a, 0 10px 20px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+            position: relative;
+        }
+
+        .project-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--gold);
+            box-shadow: 0 10px 0 #120e0a, 0 0 20px rgba(247, 208, 112, 0.25);
+        }
+
+        .card-banner {
+            height: 160px;
+            background: #08080c;
+            border-bottom: 3px solid var(--border-bronze);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-banner-bg-dungeon {
+            background: 
+                radial-gradient(circle at center, rgba(231, 76, 60, 0.2) 0%, rgba(0,0,0,0.85) 80%),
+                repeating-linear-gradient(45deg, #18151f, #18151f 10px, #121019 10px, #121019 20px);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .banner-icon {
+            font-size: 56px;
+            filter: drop-shadow(0 0 12px rgba(247, 208, 112, 0.4));
+            animation: pulse-icon 2.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse-icon {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .card-body {
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 12px;
+        }
+
+        .card-category {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 9px;
+            color: var(--cyan);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .card-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 14px;
+            color: var(--gold);
+            line-height: 1.4;
+        }
+
+        .card-desc {
+            font-size: 19px;
+            color: var(--text-dim);
+            line-height: 1.35;
+            flex: 1;
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .tag {
+            font-size: 15px;
+            background: #1e1b26;
+            color: #a5b4fc;
+            border: 1px solid #3b354d;
+            padding: 2px 8px;
+            border-radius: 3px;
+        }
+
+        .btn-launch {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            background: linear-gradient(180deg, #4a3b2c 0%, #241a12 100%);
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            padding: 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 11px;
+            box-shadow: 0 4px 0 #150f0a;
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+
+        .btn-launch:hover {
+            background: linear-gradient(180deg, #5e4a36 0%, #302217 100%);
+            color: #ffffff;
+            border-color: #ffffff;
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #150f0a;
+        }
+
+        .btn-launch:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #150f0a;
+        }
+
+        .card-coming-soon {
+            opacity: 0.75;
+            border-style: dashed;
+        }
+
+        .card-coming-soon:hover {
+            border-color: var(--cyan);
+            box-shadow: 0 6px 0 #120e0a, 0 0 15px rgba(0, 255, 204, 0.2);
+        }
+
+        .banner-icon-placeholder {
+            font-size: 48px;
+            opacity: 0.6;
+        }
+
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 24px 12px;
+            color: #64748b;
+            font-size: 18px;
+            border-top: 1px solid #1e1b26;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="crt-scanlines"></div>
+
+    <div class="container">
+        <header>
+            <h1 class="hub-title">🕹️ AI ARCADE & EXPERIMENTS</h1>
+            <p class="hub-subtitle">Laboratório de projetos, jogos e programas criados 100% por Inteligência Artificial. Cada aplicação é um experimento do que é possível construir autonomamente.</p>
+            
+            <div class="status-strip">
+                <span class="badge badge-online">SISTEMA ONLINE</span>
+                <span class="badge">PROJETOS: 1 ATIVO</span>
+                <span class="badge">MOTOR: IA NATIVO</span>
+            </div>
+        </header>
+
+        <main>
+            <div class="section-header">
+                <h2 class="section-title">📦 CATÁLOGO DE JOGOS & PROJETOS</h2>
+            </div>
+
+            <div class="projects-grid" style="margin-top: 18px;">
+                <article class="project-card">
+                    <div class="card-banner">
+                        <div class="card-banner-bg-dungeon">
+                            <span class="banner-icon">⚔️</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-category">RPG 3D / DUNGEON CRAWLER</span>
+                        <h3 class="card-title">Mazer: As Profundezas da Cripta</h3>
+                        <p class="card-desc">
+                            Labirinto 3D em primeira pessoa estilo Old School RPG anos 90. Explore catacumbas procedurais, abra portas com chaves místicas, evite armadilhas e enfrente monstros com espadas e bolas de fogo.
+                        </p>
+                        <div class="tags-container">
+                            <span class="tag">Three.js</span>
+                            <span class="tag">Grid 3D</span>
+                            <span class="tag">Web Audio API</span>
+                            <span class="tag">Procedural</span>
+                            <span class="tag">100% IA</span>
+                        </div>
+                        <a href="./3D Dungeon Crawler/index.html" class="btn-launch" id="launch-dungeon">
+                            ▶ JOGAR AGORA
+                        </a>
+                    </div>
+                </article>
+
+                <article class="project-card card-coming-soon">
+                    <div class="card-banner">
+                        <span class="banner-icon-placeholder">✨</span>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-category" style="color: #94a3b8;">EM DESENVOLVIMENTO</span>
+                        <h3 class="card-title" style="color: #cbd5e1;">Próximo Experimento</h3>
+                        <p class="card-desc">
+                            Novos jogos, simulações interativas e ferramentas de software estão sendo concebidos e implementados neste laboratório. Fique ligado para novidades!
+                        </p>
+                        <div class="tags-container">
+                            <span class="tag">Em Breve</span>
+                            <span class="tag">Laboratório IA</span>
+                        </div>
+                        <button class="btn-launch" style="opacity: 0.5; cursor: not-allowed; border-color: #64748b; color: #94a3b8;" disabled>
+                            AGUARDANDO NOVO PROJETO
+                        </button>
+                    </div>
+                </article>
+            </div>
+        </main>
+
+        <footer>
+            Mazer AI Experiments Hub • Desenvolvido exclusivamente com Inteligência Artificial
+        </footer>
+    </div>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playRetroBlip(freq = 440, duration = 0.06) {
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(freq * 1.5, audioCtx.currentTime + duration);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        document.querySelectorAll('.btn-launch').forEach(btn => {
+            btn.addEventListener('mouseenter', () => playRetroBlip(520, 0.04));
+            btn.addEventListener('click', () => playRetroBlip(880, 0.08));
+        });
+    </script>
+</body>
+</html>
+

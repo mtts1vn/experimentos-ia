@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mazer: As Profundezas da Cripta (3D Old School RPG)</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <div id="game-frame">
+        <header id="game-header">
+            <div class="title-badge">⚔️ MAZER: LABIRINTO DA CRIPTA</div>
+            <div class="floor-badge" id="floor-val">PISO 1</div>
+        </header>
+
+        <div id="main-view">
+            <div id="viewport-container">
+                <div class="crt-overlay"></div>
+                <div id="screen-flash" class="screen-flash"></div>
+                <div id="slash-fx"></div>
+                <img id="weapon-view" alt="Arma do Jogador">
+            </div>
+
+            <aside id="side-panel">
+                <div class="panel-box">
+                    <div class="box-title">🗺️ AUTOMAPA</div>
+                    <canvas id="minimap-canvas" width="200" height="150"></canvas>
+                </div>
+
+                <div class="panel-box">
+                    <div class="box-title">🛡️ ESTADO DO HERÓI</div>
+                    
+                    <div class="status-row">
+                        <div class="status-label">
+                            <span>VIDA (HP)</span>
+                            <span id="hp-val">100/100</span>
+                        </div>
+                        <div class="stat-bar-container">
+                            <div id="hp-bar" class="stat-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="status-row">
+                        <div class="status-label">
+                            <span>MANA (MP)</span>
+                            <span id="mp-val">50/50</span>
+                        </div>
+                        <div class="stat-bar-container">
+                            <div id="mp-bar" class="stat-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="status-row">
+                        <div class="status-label">
+                            <span>EXP (NV <span id="lvl-val">1</span>)</span>
+                            <span>🪙 <span id="gold-val">0</span></span>
+                        </div>
+                        <div class="stat-bar-container">
+                            <div id="xp-bar" class="stat-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="inventory-grid">
+                        <div class="inv-slot" title="Poções de Vida">🧪 <span id="pot-hp-count">2</span></div>
+                        <div class="inv-slot" title="Poções de Mana">🔮 <span id="pot-mp-count">2</span></div>
+                        <div class="inv-slot" title="Chaves Douradas da Cripta">🔑 <span id="key-gold-count">0</span></div>
+                    </div>
+                </div>
+
+                <div class="panel-box">
+                    <div class="box-title">🧭 MOVIMENTAÇÃO</div>
+                    <div class="dpad-container">
+                        <button class="btn-retro" id="btn-left" title="Girar Esquerda (Q)">↶ Q</button>
+                        <button class="btn-retro" id="btn-up" title="Avançar (W)">▲ W</button>
+                        <button class="btn-retro" id="btn-right" title="Girar Direita (E)">↷ E</button>
+
+                        <button class="btn-retro" id="btn-strafe-left" title="Passo Lateral Esquerdo (A)">◀ A</button>
+                        <button class="btn-retro" id="btn-down" title="Recuar (S)">▼ S</button>
+                        <button class="btn-retro" id="btn-strafe-right" title="Passo Lateral Direito (D)">▶ D</button>
+                    </div>
+                </div>
+
+                <div class="panel-box">
+                    <div class="box-title">⚔️ AÇÕES</div>
+                    <div class="action-grid">
+                        <button class="btn-action btn-attack" id="btn-attack" title="Golpe de Espada (Espaço)">
+                            ⚔️ Espada
+                        </button>
+                        <button class="btn-action btn-magic" id="btn-magic" title="Bola de Fogo (F - 15 MP)">
+                            🔥 Fogo
+                        </button>
+                        <button class="btn-action btn-potion" id="btn-pot-hp" title="Beber Poção de Vida (Tecla 1)">
+                            🧪 Curar
+                        </button>
+                        <button class="btn-action btn-potion" id="btn-pot-mp" title="Beber Poção de Mana (Tecla 2)">
+                            🔮 Mana
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <footer id="bottom-log">
+            <div id="combat-log"></div>
+            <div class="key-hints">
+                <span>[W/A/S/D] Mover / Passo Lateral &nbsp; [Q/E] Girar</span>
+                <span>[Espaço] Atacar &nbsp; [F] Bola de Fogo &nbsp; [1/2] Poções</span>
+            </div>
+        </footer>
+
+        <div id="game-over-screen" class="hidden">
+            <h1 class="game-over-title">💀 VOCÊ PERECEU NA CRIPTA 💀</h1>
+            <p class="game-over-sub">Sua jornada terminou nas profundezas sombrias do labirinto.</p>
+            <button id="restart-btn">RESSUSCITAR (RECOMEÇAR)</button>
+        </div>
+    </div>
+
+    <script src="js/audio.js"></script>
+    <script src="js/textures.js"></script>
+    <script src="js/dungeon.js"></script>
+    <script src="js/entities.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

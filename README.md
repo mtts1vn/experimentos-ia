@@ -1,0 +1,1 @@
+Este repositório reúne diversos projetos, programas e jogos criados exclusivamente com Inteligência Artificial. O único objetivo é experimentar e descobrir o que é possível criar utilizando IA, explorando diferentes ideias, tecnologias e tipos de software.
