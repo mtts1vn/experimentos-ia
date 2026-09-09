@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Night Trader 3D | Terminal de Opcoes Binarias no Quarto</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <a href="../index.html" class="back-link">VOLTAR AO HUB</a>
+
+    <div id="launcher-modal" class="launcher-overlay">
+        <div class="launcher-container">
+            <div class="launcher-header">
+                <div class="launcher-tag">SELECIONE O MODO DE INICIALIZACAO</div>
+                <h1 class="launcher-title">NIGHT TRADER 3D</h1>
+                <p class="launcher-subtitle">Escolha como deseja executar o jogo com base no desempenho do seu dispositivo:</p>
+            </div>
+
+            <div class="launcher-options">
+                <div class="launcher-card launcher-card-3d" id="btn-mode-3d">
+                    <div class="launcher-badge badge-immersive">EXPERIENCIA COMPLETA</div>
+                    <div class="launcher-card-icon">&#127968;</div>
+                    <div class="launcher-card-title">QUARTO 3D IMERSIVO</div>
+                    <div class="launcher-card-desc">Cenario completo em primeira pessoa. Explore o quarto noturno, visualize a neve caindo pela janela e sente-se na estacao de operacoes.</div>
+                    <div class="launcher-card-specs">
+                        <span class="spec-tag spec-heavy">Mais Pesado</span>
+                        <span class="spec-tag">Requer GPU / WebGL 3D</span>
+                    </div>
+                    <button class="btn-launcher btn-launcher-3d">INICIAR NO QUARTO 3D</button>
+                </div>
+
+                <div class="launcher-card launcher-card-2d" id="btn-mode-2d">
+                    <div class="launcher-badge badge-performance">ALTA PERFORMANCE</div>
+                    <div class="launcher-card-icon">&#128187;</div>
+                    <div class="launcher-card-title">APENAS O DESKTOP</div>
+                    <div class="launcher-card-desc">Acesso direto ao CYBER_OS e terminal de operacoes financeiras. Sem carga de renderizacao 3D no processador ou placa de video.</div>
+                    <div class="launcher-card-specs">
+                        <span class="spec-tag spec-light">Ultra Leve</span>
+                        <span class="spec-tag">Ideal para PCs Fracos</span>
+                    </div>
+                    <button class="btn-launcher btn-launcher-2d">INICIAR NO DESKTOP</button>
+                </div>
+            </div>
+
+            <div class="launcher-footer">
+                <span>Voce pode alternar modos ou configurar os graficos a qualquer momento durante a sessao.</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewport"></div>
+
+    <div id="reticle"></div>
+
+    <div id="room-hud">
+        <div class="hud-top-bar">
+            <div class="hud-title-box">
+                <div class="hud-title">NIGHT TRADER 3D</div>
+                <div class="hud-subtitle">Apartamento 42B - 3:00 AM - Iluminacao Lunar</div>
+            </div>
+            <div class="hud-actions">
+                <button class="btn-hud" id="btn-room-graphics">GRAFICOS: ALTO</button>
+                <button class="btn-hud btn-hud-primary" id="btn-interact-pc">SENTAR NO PC [E]</button>
+            </div>
+        </div>
+
+        <div class="hud-controls-bar" id="room-controls-hint">
+            <div class="control-pill"><strong>W A S D</strong> Andar</div>
+            <div class="control-pill"><strong>MOUSE</strong> Olhar / Girar</div>
+            <div class="control-pill"><strong>CLIQUE</strong> Travar Mouse</div>
+            <div class="control-pill"><strong>[E]</strong> Sentar na Cadeira</div>
+        </div>
+
+        <div class="hud-bottom-bar">
+            <div class="room-prompt hidden" id="room-interaction-prompt">
+                <div class="room-prompt-title">ESTACAO DE TRADING</div>
+                <div class="room-prompt-desc">Pressione [E] ou clique para sentar na cadeira e operar</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="desktop-terminal-container" class="hidden">
+        <div class="desktop-wallpaper">
+            <div class="desktop-center-dashboard">
+                <div class="os-logo-brand">
+                    <span class="os-brand-icon">&#9889;</span>
+                    <div class="os-brand-texts">
+                        <span class="os-brand-title">CYBER_OS <span>v4.2</span></span>
+                        <span class="os-brand-desc">ESTACAO DE MERCADOS &amp; OPERACOES NOTURNAS</span>
+                    </div>
+                </div>
+
+                <div class="desktop-quick-cards">
+                    <div class="quick-card desktop-quick-btn" data-app="trading">
+                        <div class="quick-card-icon icon-trading">&#128200;</div>
+                        <div class="quick-card-info">
+                            <div class="quick-card-title">Terminal de Trading</div>
+                            <div class="quick-card-sub">Opere Opcoes Binarias com payout de ate 92%</div>
+                        </div>
+                    </div>
+
+                    <div class="quick-card desktop-quick-btn" data-app="history">
+                        <div class="quick-card-icon icon-history">&#128220;</div>
+                        <div class="quick-card-info">
+                            <div class="quick-card-title">Historico de Trades</div>
+                            <div class="quick-card-sub">Relatorio completo das suas operacoes</div>
+                        </div>
+                    </div>
+
+                    <div class="quick-card desktop-quick-btn" data-app="stats">
+                        <div class="quick-card-icon icon-stats">&#128202;</div>
+                        <div class="quick-card-info">
+                            <div class="quick-card-title">Estatisticas &amp; Metricas</div>
+                            <div class="quick-card-sub">Taxa de acerto, sequencias e lucro</div>
+                        </div>
+                    </div>
+
+                    <div class="quick-card desktop-quick-btn" data-app="ranking">
+                        <div class="quick-card-icon icon-ranking">&#127942;</div>
+                        <div class="quick-card-info">
+                            <div class="quick-card-title">Ranking Global</div>
+                            <div class="quick-card-sub">Classificacao dos melhores traders</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="desktop-status-bar-widget">
+                    <div class="status-item">
+                        <span class="label">SALDO:</span>
+                        <span class="val" id="wallpaper-user-balance">R$ 10.000,00</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">CONEXAO:</span>
+                        <span class="val status-green">&#9679; LATENCIA 12ms</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">MERCADO:</span>
+                        <span class="val status-blue">24/7 OTC ATIVO</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="desktop-icons-grid">
+                <div class="desktop-icon" data-app="trading">
+                    <div class="icon-visual icon-trading">
+                        <span class="icon-glyph">[TRD]</span>
+                    </div>
+                    <span class="icon-label">CyberTrader</span>
+                </div>
+
+                <div class="desktop-icon" data-app="history">
+                    <div class="icon-visual icon-history">
+                        <span class="icon-glyph">[HST]</span>
+                    </div>
+                    <span class="icon-label">Historico</span>
+                </div>
+
+                <div class="desktop-icon" data-app="stats">
+                    <div class="icon-visual icon-stats">
+                        <span class="icon-glyph">[STS]</span>
+                    </div>
+                    <span class="icon-label">Estatisticas</span>
+                </div>
+
+                <div class="desktop-icon" data-app="ranking">
+                    <div class="icon-visual icon-ranking">
+                        <span class="icon-glyph">[RNK]</span>
+                    </div>
+                    <span class="icon-label">Ranking Global</span>
+                </div>
+
+                <div class="desktop-icon" data-app="news">
+                    <div class="icon-visual icon-news">
+                        <span class="icon-glyph">[NWS]</span>
+                    </div>
+                    <span class="icon-label">Noticias</span>
+                </div>
+
+                <div class="desktop-icon" data-app="settings">
+                    <div class="icon-visual icon-settings">
+                        <span class="icon-glyph">[CFG]</span>
+                    </div>
+                    <span class="icon-label">Graficos</span>
+                </div>
+            </div>
+
+            <div class="desktop-windows-area">
+                <div class="desktop-window hidden" data-window="trading">
+                    <div class="window-titlebar">
+                        <div class="win-title-left">
+                            <span class="win-tag">[APP]</span>
+                            <span class="win-title-text">CYBER_OPTION_TERMINAL_V4.2</span>
+                            <span class="header-payout" id="header-payout-badge">RETORNO: +88%</span>
+                        </div>
+                        <div class="win-title-center">
+                            <span class="asset-badge-name" id="header-asset-name">Bitcoin / USD</span>
+                            <span class="asset-badge-price" id="header-current-price">64280.00</span>
+                            <span class="badge-pos" id="header-var-24h">+1.24%</span>
+                        </div>
+                        <div class="win-title-right">
+                            <div class="balance-card">
+                                <span class="balance-label">SALDO VIRTUAL</span>
+                                <span class="balance-val" id="header-user-balance">R$ 10.000,00</span>
+                            </div>
+                            <button class="win-btn-control win-btn-close" data-app="trading">X</button>
+                        </div>
+                    </div>
+
+                    <div class="window-content-trading">
+                        <aside class="sidebar-left">
+                            <div class="category-tabs">
+                                <button class="cat-btn active" data-category="all">TODOS</button>
+                                <button class="cat-btn" data-category="crypto">CRIPTO</button>
+                                <button class="cat-btn" data-category="forex">FOREX</button>
+                                <button class="cat-btn" data-category="stocks">ACOES</button>
+                                <button class="cat-btn" data-category="commodities">COMMODITIES</button>
+                                <button class="cat-btn" data-category="trending">TENDENCIA</button>
+                            </div>
+                            <div class="asset-list" id="asset-list-container"></div>
+                        </aside>
+
+                        <section class="center-chart-panel">
+                            <div class="chart-toolbar">
+                                <div class="toolbar-group">
+                                    <span class="toolbar-label">TEMPO:</span>
+                                    <button class="tf-btn active" data-tf="1m">1M</button>
+                                    <button class="tf-btn" data-tf="5m">5M</button>
+                                    <button class="tf-btn" data-tf="15m">15M</button>
+                                    <button class="tf-btn" data-tf="1h">1H</button>
+                                </div>
+                                <div class="toolbar-group">
+                                    <span class="toolbar-label">TIPO:</span>
+                                    <button class="chart-type-btn active" data-type="candles">VELAS</button>
+                                    <button class="chart-type-btn" data-type="line">LINHA</button>
+                                </div>
+                                <div class="toolbar-group">
+                                    <span class="toolbar-label">INDICADORES:</span>
+                                    <button class="ind-btn active" data-indicator="sma">MEDIA (SMA)</button>
+                                    <button class="ind-btn" data-indicator="bollinger">BOLLINGER</button>
+                                    <button class="ind-btn" data-indicator="rsi">RSI</button>
+                                    <button class="ind-btn" data-indicator="macd">MACD</button>
+                                    <button class="ind-btn active" data-indicator="volume">VOLUME</button>
+                                </div>
+                            </div>
+
+                            <div class="chart-canvas-wrapper">
+                                <canvas id="trading-canvas"></canvas>
+                            </div>
+
+                            <div class="active-trades-bar" id="active-trades-container"></div>
+                        </section>
+
+                        <aside class="sidebar-right">
+                            <div class="panel-block">
+                                <span class="panel-block-title">VALOR DA ENTRADA</span>
+                                <div class="trade-input-box">
+                                    <span class="currency-tag">R$</span>
+                                    <input type="number" id="input-trade-amount" class="trade-input" value="100" min="1" step="10">
+                                </div>
+                                <div class="quick-amount-pills">
+                                    <button class="amt-quick-btn" data-amount="10">10</button>
+                                    <button class="amt-quick-btn" data-amount="50">50</button>
+                                    <button class="amt-quick-btn" data-amount="100">100</button>
+                                    <button class="amt-quick-btn" data-amount="500">500</button>
+                                    <button class="amt-quick-btn" data-amount="max">MAX</button>
+                                </div>
+                            </div>
+
+                            <div class="panel-block">
+                                <span class="panel-block-title">TEMPO DE EXPIRACAO</span>
+                                <div class="expiration-pills">
+                                    <button class="exp-btn active" data-seconds="30">30s</button>
+                                    <button class="exp-btn" data-seconds="60">1m</button>
+                                    <button class="exp-btn" data-seconds="300">5m</button>
+                                    <button class="exp-btn" data-seconds="900">15m</button>
+                                    <button class="exp-btn" data-seconds="3600">1h</button>
+                                </div>
+                            </div>
+
+                            <div class="actions-container">
+                                <button class="btn-trade-action btn-action-call" id="btn-action-call">
+                                    <span class="btn-action-title">SUBIR (CALL)</span>
+                                    <span class="btn-action-calc" id="calc-call-return">+R$ 88.00</span>
+                                </button>
+                                <button class="btn-trade-action btn-action-put" id="btn-action-put">
+                                    <span class="btn-action-title">DESCER (PUT)</span>
+                                    <span class="btn-action-calc" id="calc-put-return">+R$ 88.00</span>
+                                </button>
+                            </div>
+
+                            <div class="panel-block" style="flex: 1;">
+                                <span class="panel-block-title">FLUXO DE NOTICIAS DO MERCADO</span>
+                                <div class="news-box-container" id="news-list-container"></div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+
+                <div class="desktop-window hidden" data-window="history">
+                    <div class="window-titlebar">
+                        <span class="win-title-text">HISTORICO DE OPERACOES REALIZADAS</span>
+                        <button class="win-btn-control win-btn-close" data-app="history">X</button>
+                    </div>
+                    <div class="window-view-panel">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>HORARIO</th>
+                                    <th>ATIVO</th>
+                                    <th>DIRECAO</th>
+                                    <th>PRECO ENTRADA</th>
+                                    <th>PRECO FECHAMENTO</th>
+                                    <th>VALOR</th>
+                                    <th>RESULTADO</th>
+                                    <th>LUCRO / PREJUIZO</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="desktop-window hidden" data-window="stats">
+                    <div class="window-titlebar">
+                        <span class="win-title-text">PAINEL DE ESTATISTICAS E PERFORMANCE</span>
+                        <button class="win-btn-control win-btn-close" data-app="stats">X</button>
+                    </div>
+                    <div class="window-view-panel">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-label">TAXA DE ACERTO GLOBAL</span>
+                                <span class="stat-value text-pos" id="stat-win-rate">0.0%</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-label">TOTAL DE OPERACOES</span>
+                                <span class="stat-value" id="stat-total-trades">0</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-label">OPERACOES VITORIOSAS</span>
+                                <span class="stat-value text-pos" id="stat-wins">0</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-label">OPERACOES COM DERROTA</span>
+                                <span class="stat-value text-neg" id="stat-losses">0</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-label">SEQUENCIA ATUAL</span>
+                                <span class="stat-value" id="stat-cur-streak">0</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-label">MELHOR SEQUENCIA</span>
+                                <span class="stat-value text-pos" id="stat-best-streak">0</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-label">LUCRO / PREJUIZO TOTAL</span>
+                                <span class="stat-value" id="stat-total-profit">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="desktop-window hidden" data-window="ranking">
+                    <div class="window-titlebar">
+                        <span class="win-title-text">RANKING GLOBAL DE TRADERS</span>
+                        <button class="win-btn-control win-btn-close" data-app="ranking">X</button>
+                    </div>
+                    <div class="window-view-panel">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>POSICAO</th>
+                                    <th>NOME DO TRADER</th>
+                                    <th>SALDO VIRTUAL</th>
+                                    <th>TAXA DE ACERTO</th>
+                                    <th>MELHOR SEQUENCIA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ranking-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="desktop-window hidden" data-window="settings">
+                    <div class="window-titlebar">
+                        <div class="win-title-left">
+                            <span class="win-tag">[CFG]</span>
+                            <span class="win-title-text">CONFIGURACOES DE GRAFICOS E DESEMPENHO</span>
+                        </div>
+                        <button class="win-btn-control win-btn-close" data-app="settings">X</button>
+                    </div>
+                    <div class="window-view-panel settings-view-panel">
+                        <div class="settings-section">
+                            <div class="settings-title">PRESETS DE QUALIDADE GRAFICA</div>
+                            <div class="settings-desc">Selecione o preset de acordo com a capacidade do seu computador para obter a melhor taxa de quadros (FPS):</div>
+                            <div class="preset-cards-grid">
+                                <div class="preset-card active" data-preset="high">
+                                    <div class="preset-badge">RECOMENDADO</div>
+                                    <div class="preset-name">ALTO (MAXIMO)</div>
+                                    <div class="preset-specs">
+                                        <div>&bull; Resolucao Nativa HD/4K</div>
+                                        <div>&bull; Sombras Suaves (PCF Soft)</div>
+                                        <div>&bull; 800 Particulas de Neve</div>
+                                        <div>&bull; Iluminacao Noturna Completa</div>
+                                    </div>
+                                </div>
+                                <div class="preset-card" data-preset="medium">
+                                    <div class="preset-badge">EQUILIBRADO</div>
+                                    <div class="preset-name">MEDIO (BALANCEADO)</div>
+                                    <div class="preset-specs">
+                                        <div>&bull; Resolucao 1.0x Fixa</div>
+                                        <div>&bull; Sombras Basicas</div>
+                                        <div>&bull; 250 Particulas de Neve</div>
+                                        <div>&bull; Otimizado para Intel Iris / Vega</div>
+                                    </div>
+                                </div>
+                                <div class="preset-card" data-preset="low">
+                                    <div class="preset-badge">DESEMPENHO</div>
+                                    <div class="preset-name">BAIXO (MAX FPS)</div>
+                                    <div class="preset-specs">
+                                        <div>&bull; Resolucao 0.75x Otimizada</div>
+                                        <div>&bull; Sombras Desativadas</div>
+                                        <div>&bull; Neve Desativada</div>
+                                        <div>&bull; Ideal para PCs e Laptops Fracos</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="desktop-taskbar">
+            <div class="taskbar-left">
+                <div class="start-badge">CYBER_OS</div>
+                <div class="taskbar-apps">
+                    <button class="app-nav-btn" data-tab="trading">TERMINAL</button>
+                    <button class="app-nav-btn" data-tab="history">HISTORICO</button>
+                    <button class="app-nav-btn" data-tab="stats">ESTATISTICAS</button>
+                    <button class="app-nav-btn" data-tab="ranking">RANKING</button>
+                    <button class="app-nav-btn" data-tab="news">NOTICIAS</button>
+                    <button class="app-nav-btn" data-tab="settings">GRAFICOS</button>
+                </div>
+            </div>
+
+            <div class="taskbar-tray">
+                <button class="btn-header-action" id="btn-desktop-graphics">GRAFICOS: ALTO</button>
+                <button class="btn-header-action" id="btn-toggle-audio">AUDIO: LIGADO</button>
+                <button class="btn-header-action" id="btn-reset-account">REINICIAR CONTA</button>
+                <button class="btn-header-action btn-leave-desk" id="btn-leave-pc">LEVANTAR DA MESA [ESC]</button>
+                <div class="system-status-indicator">
+                    <span class="status-dot"></span>
+                    <span>ONLINE</span>
+                </div>
+                <span id="system-clock">00:00:00</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="src/audio.js"></script>
+    <script src="src/market.js"></script>
+    <script src="src/chart.js"></script>
+    <script src="src/trading.js"></script>
+    <script src="src/desktop.js"></script>
+    <script src="src/scene.js"></script>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const launcher = document.getElementById('launcher-modal');
+            const btnMode3d = document.getElementById('btn-mode-3d');
+            const btnMode2d = document.getElementById('btn-mode-2d');
+
+            const start3D = () => {
+                if (launcher) launcher.classList.add('hidden');
+                if (!window.desktopUI) window.desktopUI = new window.DesktopUI();
+                if (!window.roomScene) window.roomScene = new window.RoomScene();
+                if (window.soundEngine) window.soundEngine.init();
+            };
+
+            const start2D = () => {
+                if (launcher) launcher.classList.add('hidden');
+                const roomHud = document.getElementById('room-hud');
+                if (roomHud) roomHud.classList.add('hidden');
+                const reticle = document.getElementById('reticle');
+                if (reticle) reticle.classList.add('hidden');
+                const desktopOverlay = document.getElementById('desktop-terminal-container');
+                if (desktopOverlay) desktopOverlay.classList.remove('hidden');
+                if (!window.desktopUI) window.desktopUI = new window.DesktopUI();
+                if (window.soundEngine) window.soundEngine.init();
+
+                const btnLeave = document.getElementById('btn-leave-pc');
+                if (btnLeave) {
+                    btnLeave.textContent = 'EXPLORAR QUARTO 3D';
+                    btnLeave.onclick = (e) => {
+                        e.stopPropagation();
+                        desktopOverlay.classList.add('hidden');
+                        if (roomHud) roomHud.classList.remove('hidden');
+                        if (reticle) reticle.classList.remove('hidden');
+                        if (!window.roomScene) {
+                            window.roomScene = new window.RoomScene();
+                        } else {
+                            window.roomScene.state = 'walk';
+                            window.roomScene.updateCameraFromPlayer();
+                        }
+                        btnLeave.textContent = 'LEVANTAR DA MESA [ESC]';
+                        btnLeave.onclick = null;
+                    };
+                }
+            };
+
+            if (btnMode3d) btnMode3d.addEventListener('click', start3D);
+            if (btnMode2d) btnMode2d.addEventListener('click', start2D);
+        });
+    </script>
+</body>
+</html>
