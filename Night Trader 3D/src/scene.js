@@ -44,6 +44,13 @@ class RoomScene {
         this.beaconLights = [];
         this.graphicsQuality = 'high';
 
+        this.miningRigGroup = null;
+        this.ashtrayGroup = null;
+        this.whiskyGroup = null;
+        this.rigFanMeshes = [];
+        this.smokeParticles = null;
+        this.smokeTimer = 0;
+
         this.init();
     }
 
@@ -420,6 +427,218 @@ class RoomScene {
         this.buildWallShelving(parent);
         this.buildDeskMonitorsAndExtras(parent);
         this.buildArchitecturalLighting(parent);
+        this.buildDynamicAccessories(parent);
+    }
+
+    buildDynamicAccessories(parent) {
+        this.buildMiningRig(parent);
+        this.buildAshtrayAndSmoke(parent);
+        this.buildWhiskyBar(parent);
+        this.updateRoomAccessories();
+    }
+
+    buildMiningRig(parent) {
+        this.miningRigGroup = new THREE.Group();
+        this.miningRigGroup.position.set(-2.5, 0, -1.8);
+        this.miningRigGroup.rotation.y = Math.PI * 0.15;
+
+        const frameMat = new THREE.MeshStandardMaterial({ color: 0x111622, metalness: 0.9, roughness: 0.2 });
+        const psuMat = new THREE.MeshStandardMaterial({ color: 0x0a0c10, metalness: 0.8, roughness: 0.3 });
+        const gpuBodyMat = new THREE.MeshStandardMaterial({ color: 0x182030, metalness: 0.7, roughness: 0.4 });
+        const heatsinkMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.95, roughness: 0.2 });
+        const rgbMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
+
+        const bar1 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.02, 0.02), frameMat);
+        bar1.position.set(0, 0.02, -0.18);
+        this.miningRigGroup.add(bar1);
+        const bar2 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.02, 0.02), frameMat);
+        bar2.position.set(0, 0.02, 0.18);
+        this.miningRigGroup.add(bar2);
+
+        const bar3 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.02, 0.02), frameMat);
+        bar3.position.set(0, 0.45, -0.18);
+        this.miningRigGroup.add(bar3);
+        const bar4 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.02, 0.02), frameMat);
+        bar4.position.set(0, 0.45, 0.18);
+        this.miningRigGroup.add(bar4);
+
+        for (let i = 0; i < 4; i++) {
+            const leg = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.52, 0.02), frameMat);
+            leg.position.set((i % 2 === 0 ? -0.39 : 0.39), 0.26, (i < 2 ? -0.18 : 0.18));
+            leg.castShadow = true;
+            this.miningRigGroup.add(leg);
+        }
+
+        const psu = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.12, 0.24), psuMat);
+        psu.position.set(-0.25, 0.08, 0);
+        psu.castShadow = true;
+        this.miningRigGroup.add(psu);
+
+        for (let g = 0; g < 4; g++) {
+            const gpuGroup = new THREE.Group();
+            gpuGroup.position.set(-0.28 + g * 0.18, 0.36, 0);
+
+            const pcb = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.22, 0.34), gpuBodyMat);
+            pcb.castShadow = true;
+            gpuGroup.add(pcb);
+
+            const heatsink = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.16, 0.32), heatsinkMat);
+            heatsink.position.set(0.02, -0.01, 0);
+            gpuGroup.add(heatsink);
+
+            const fan1 = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.008, 8, 16), rgbMat);
+            fan1.position.set(0.04, 0, -0.075);
+            fan1.rotation.y = Math.PI / 2;
+            gpuGroup.add(fan1);
+            this.rigFanMeshes.push(fan1);
+
+            const fan2 = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.008, 8, 16), rgbMat);
+            fan2.position.set(0.04, 0, 0.075);
+            fan2.rotation.y = Math.PI / 2;
+            gpuGroup.add(fan2);
+            this.rigFanMeshes.push(fan2);
+
+            this.miningRigGroup.add(gpuGroup);
+        }
+
+        this.miningRigLight = new THREE.PointLight(0x00e5ff, 0.8, 2.5);
+        this.miningRigLight.position.set(0, 0.4, 0);
+        this.miningRigGroup.add(this.miningRigLight);
+
+        this.miningRigGroup.visible = false;
+        parent.add(this.miningRigGroup);
+    }
+
+    buildAshtrayAndSmoke(parent) {
+        this.ashtrayGroup = new THREE.Group();
+        this.ashtrayGroup.position.set(-1.42, 0.78, -2.15);
+
+        const glassMat = new THREE.MeshPhysicalMaterial({
+            color: 0x111622,
+            metalness: 0.1,
+            roughness: 0.2,
+            transparent: true,
+            opacity: 0.85
+        });
+
+        const ashtrayDish = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.055, 0.022, 16), glassMat);
+        ashtrayDish.position.y = 0.011;
+        ashtrayDish.castShadow = true;
+        this.ashtrayGroup.add(ashtrayDish);
+
+        const cigMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
+        const cigFilterMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.8 });
+        const cigEmberMat = new THREE.MeshBasicMaterial({ color: 0xff4500 });
+
+        const cig = new THREE.Mesh(new THREE.CylinderGeometry(0.0035, 0.0035, 0.045, 8), cigMat);
+        cig.position.set(0.01, 0.018, 0);
+        cig.rotation.z = Math.PI * 0.46;
+        this.ashtrayGroup.add(cig);
+
+        const filter = new THREE.Mesh(new THREE.CylinderGeometry(0.0036, 0.0036, 0.012, 8), cigFilterMat);
+        filter.position.set(0.028, 0.02, 0);
+        filter.rotation.z = Math.PI * 0.46;
+        this.ashtrayGroup.add(filter);
+
+        const ember = new THREE.Mesh(new THREE.SphereGeometry(0.004, 8, 8), cigEmberMat);
+        ember.position.set(-0.014, 0.016, 0);
+        this.ashtrayGroup.add(ember);
+
+        const smokeGeo = new THREE.BufferGeometry();
+        const smokeCount = 45;
+        const smokePositions = new Float32Array(smokeCount * 3);
+        for (let i = 0; i < smokeCount; i++) {
+            smokePositions[i * 3] = -1.43 + (Math.random() - 0.5) * 0.02;
+            smokePositions[i * 3 + 1] = 0.81 + (i / smokeCount) * 0.45;
+            smokePositions[i * 3 + 2] = -2.15 + (Math.random() - 0.5) * 0.02;
+        }
+        smokeGeo.setAttribute('position', new THREE.BufferAttribute(smokePositions, 3));
+        const smokeMat = new THREE.PointsMaterial({
+            color: 0x94a3b8,
+            size: 0.025,
+            transparent: true,
+            opacity: 0.4
+        });
+        this.smokeParticles = new THREE.Points(smokeGeo, smokeMat);
+        this.smokeParticles.visible = false;
+        parent.add(this.smokeParticles);
+
+        this.ashtrayGroup.visible = false;
+        parent.add(this.ashtrayGroup);
+    }
+
+    buildWhiskyBar(parent) {
+        this.whiskyGroup = new THREE.Group();
+        this.whiskyGroup.position.set(-0.48, 0.78, -2.42);
+
+        const bottleGlassMat = new THREE.MeshPhysicalMaterial({
+            color: 0x1c1208,
+            metalness: 0.1,
+            roughness: 0.15,
+            transparent: true,
+            opacity: 0.88
+        });
+        const amberMat = new THREE.MeshStandardMaterial({
+            color: 0xb45309,
+            emissive: 0x78350f,
+            emissiveIntensity: 0.3,
+            roughness: 0.2
+        });
+
+        const bottle = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.2, 0.07), bottleGlassMat);
+        bottle.position.y = 0.1;
+        bottle.castShadow = true;
+        this.whiskyGroup.add(bottle);
+
+        const bottleNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.06, 10), bottleGlassMat);
+        bottleNeck.position.y = 0.23;
+        this.whiskyGroup.add(bottleNeck);
+
+        const labelMat = new THREE.MeshStandardMaterial({ color: 0x1e1e1e, roughness: 0.8 });
+        const label = new THREE.Mesh(new THREE.PlaneGeometry(0.055, 0.07), labelMat);
+        label.position.set(0, 0.1, 0.036);
+        this.whiskyGroup.add(label);
+
+        const glassMat = new THREE.MeshPhysicalMaterial({
+            color: 0x182030,
+            transparent: true,
+            opacity: 0.7,
+            roughness: 0.1
+        });
+        const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.03, 0.07, 12), glassMat);
+        glass.position.set(0.12, 0.035, 0.02);
+        glass.castShadow = true;
+        this.whiskyGroup.add(glass);
+
+        const liquid = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.028, 0.035, 12), amberMat);
+        liquid.position.set(0.12, 0.02, 0.02);
+        this.whiskyGroup.add(liquid);
+
+        this.whiskyGroup.visible = false;
+        parent.add(this.whiskyGroup);
+    }
+
+    updateRoomAccessories() {
+        const inv = window.storeEngine ? window.storeEngine.inventory : {};
+        const hasGpu = (inv.gpu_1660 || inv.gpu_3070 || inv.gpu_4090 || inv.asic_s19 || inv.rig_frame);
+        if (this.miningRigGroup) {
+            this.miningRigGroup.visible = !!hasGpu;
+        }
+
+        const hasCig = (inv.cigarettes || inv.ashtray || inv.zippo);
+        if (this.ashtrayGroup) {
+            this.ashtrayGroup.visible = !!hasCig;
+        }
+
+        const hasWhisky = (inv.whisky || inv.whisky_glass);
+        if (this.whiskyGroup) {
+            this.whiskyGroup.visible = !!hasWhisky;
+        }
+    }
+
+    onSmokeTriggered() {
+        this.smokeTimer = 15.0;
+        if (this.smokeParticles) this.smokeParticles.visible = true;
     }
 
     createArtTexture(type) {
@@ -1617,6 +1836,40 @@ class RoomScene {
 
         if (this.screenLight) {
             this.screenLight.intensity = 1.2 + Math.sin(time * 2.0) * 0.15;
+        }
+
+        if (this.miningRigGroup && this.miningRigGroup.visible) {
+            const isRunning = window.miningEngine ? window.miningEngine.isRunning : true;
+            if (isRunning) {
+                const rgbHue = (time * 0.4) % 1;
+                const rgbColor = new THREE.Color().setHSL(rgbHue, 0.9, 0.55);
+                this.rigFanMeshes.forEach(fan => {
+                    fan.material.color = rgbColor;
+                    fan.rotation.z += delta * 15;
+                });
+                if (this.miningRigLight) {
+                    this.miningRigLight.color = rgbColor;
+                    this.miningRigLight.intensity = 0.6 + Math.sin(time * 6.0) * 0.2;
+                }
+            }
+        }
+
+        if (this.smokeParticles && this.smokeParticles.visible) {
+            if (this.smokeTimer > 0) {
+                this.smokeTimer -= delta;
+                const pos = this.smokeParticles.geometry.attributes.position.array;
+                for (let i = 0; i < pos.length; i += 3) {
+                    pos[i + 1] += delta * 0.08;
+                    pos[i] += Math.sin(time * 2 + i) * delta * 0.015;
+                    if (pos[i + 1] > 1.3) {
+                        pos[i + 1] = 0.81;
+                        pos[i] = -1.43 + (Math.random() - 0.5) * 0.02;
+                    }
+                }
+                this.smokeParticles.geometry.attributes.position.needsUpdate = true;
+            } else {
+                this.smokeParticles.visible = false;
+            }
         }
 
         this.renderer.render(this.scene, this.camera);

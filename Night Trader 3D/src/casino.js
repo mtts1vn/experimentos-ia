@@ -186,7 +186,8 @@ class CasinoEngine {
             chip.addEventListener('click', (e) => {
                 document.querySelectorAll('.casino-chip-selector .casino-chip').forEach(c => c.classList.remove('active'));
                 e.currentTarget.classList.add('active');
-                this.selectedChip = parseInt(e.currentTarget.dataset.value, 10);
+                const val = e.currentTarget.dataset.value;
+                this.selectedChip = val === 'allin' ? 'allin' : parseInt(val, 10);
                 if (window.soundEngine && window.soundEngine.playChip) {
                     window.soundEngine.playChip();
                 }
@@ -200,6 +201,13 @@ class CasinoEngine {
         this.bindMines();
         this.bindBaccarat();
         this.bindPoker();
+    }
+
+    getSelectedChipValue() {
+        if (this.selectedChip === 'allin') {
+            return Math.max(10, Math.floor(this.getWalletBalance()));
+        }
+        return Number(this.selectedChip) || 50;
     }
 
     switchGame(gameName) {
@@ -241,12 +249,13 @@ class CasinoEngine {
                 const curBalance = this.getWalletBalance();
                 const totalCurrentBet = Object.values(this.rouletteBets).reduce((a, b) => a + b, 0);
 
-                if (totalCurrentBet + this.selectedChip > curBalance) {
+                const chipVal = this.getSelectedChipValue();
+                if (totalCurrentBet + chipVal > curBalance) {
                     this.showCasinoToast('Saldo insuficiente para esta ficha!', 'error');
                     return;
                 }
 
-                this.rouletteBets[betKey] = (this.rouletteBets[betKey] || 0) + this.selectedChip;
+                this.rouletteBets[betKey] = (this.rouletteBets[betKey] || 0) + chipVal;
                 if (window.soundEngine && window.soundEngine.playChip) {
                     window.soundEngine.playChip();
                 }
@@ -587,13 +596,18 @@ class CasinoEngine {
                 if (this.bjState === 'playing') return;
                 document.querySelectorAll('.bj-bet-pill').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
-                this.bjBet = parseInt(e.target.dataset.amount, 10);
+                const amt = e.target.dataset.amount;
+                this.bjBet = amt === 'allin' ? Math.max(10, Math.floor(this.getWalletBalance())) : parseInt(amt, 10);
                 if (window.soundEngine && window.soundEngine.playChip) window.soundEngine.playChip();
             });
         });
     }
 
     startBlackjack() {
+        const activePill = document.querySelector('.bj-bet-pill.active');
+        if (activePill && activePill.dataset.amount === 'allin') {
+            this.bjBet = Math.max(10, Math.floor(this.getWalletBalance()));
+        }
         if (!this.deductWallet(this.bjBet)) {
             this.showCasinoToast('Saldo insuficiente para a aposta!', 'error');
             return;
@@ -769,7 +783,8 @@ class CasinoEngine {
                 if (this.slotSpinning) return;
                 document.querySelectorAll('.slot-bet-pill').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
-                this.slotBet = parseInt(e.target.dataset.amount, 10);
+                const amt = e.target.dataset.amount;
+                this.slotBet = amt === 'allin' ? Math.max(10, Math.floor(this.getWalletBalance())) : parseInt(amt, 10);
                 if (window.soundEngine && window.soundEngine.playChip) window.soundEngine.playChip();
             });
         });
@@ -777,6 +792,10 @@ class CasinoEngine {
 
     spinSlots() {
         if (this.slotSpinning) return;
+        const activePill = document.querySelector('.slot-bet-pill.active');
+        if (activePill && activePill.dataset.amount === 'allin') {
+            this.slotBet = Math.max(10, Math.floor(this.getWalletBalance()));
+        }
         if (!this.deductWallet(this.slotBet)) {
             this.showCasinoToast('Saldo insuficiente para girar o slot!', 'error');
             return;
@@ -927,7 +946,8 @@ class CasinoEngine {
                 if (this.crashState === 'flying') return;
                 document.querySelectorAll('.crash-bet-pill').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
-                this.crashBet = parseInt(e.target.dataset.amount, 10);
+                const amt = e.target.dataset.amount;
+                this.crashBet = amt === 'allin' ? Math.max(10, Math.floor(this.getWalletBalance())) : parseInt(amt, 10);
                 if (window.soundEngine && window.soundEngine.playChip) window.soundEngine.playChip();
             });
         });
@@ -935,6 +955,10 @@ class CasinoEngine {
 
     startCrash() {
         if (this.crashState === 'flying') return;
+        const activePill = document.querySelector('.crash-bet-pill.active');
+        if (activePill && activePill.dataset.amount === 'allin') {
+            this.crashBet = Math.max(10, Math.floor(this.getWalletBalance()));
+        }
         if (!this.deductWallet(this.crashBet)) {
             this.showCasinoToast('Saldo insuficiente para lancar!', 'error');
             return;
@@ -1220,13 +1244,18 @@ class CasinoEngine {
                 if (this.minesState === 'playing') return;
                 document.querySelectorAll('.mines-bet-pill').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
-                this.minesBet = parseInt(e.target.dataset.amount, 10);
+                const amt = e.target.dataset.amount;
+                this.minesBet = amt === 'allin' ? Math.max(10, Math.floor(this.getWalletBalance())) : parseInt(amt, 10);
                 if (window.soundEngine && window.soundEngine.playChip) window.soundEngine.playChip();
             });
         });
     }
 
     startMines() {
+        const activePill = document.querySelector('.mines-bet-pill.active');
+        if (activePill && activePill.dataset.amount === 'allin') {
+            this.minesBet = Math.max(10, Math.floor(this.getWalletBalance()));
+        }
         if (!this.deductWallet(this.minesBet)) {
             this.showCasinoToast('Saldo insuficiente para iniciar o Campo Minado!', 'error');
             return;
@@ -1364,7 +1393,8 @@ class CasinoEngine {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.bac-bet-pill').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
-                this.bacBetAmount = parseInt(e.target.dataset.amount, 10);
+                const amt = e.target.dataset.amount;
+                this.bacBetAmount = amt === 'allin' ? Math.max(10, Math.floor(this.getWalletBalance())) : parseInt(amt, 10);
                 if (window.soundEngine && window.soundEngine.playChip) window.soundEngine.playChip();
             });
         });
@@ -1381,6 +1411,10 @@ class CasinoEngine {
     }
 
     playBaccarat() {
+        const activePill = document.querySelector('.bac-bet-pill.active');
+        if (activePill && activePill.dataset.amount === 'allin') {
+            this.bacBetAmount = Math.max(10, Math.floor(this.getWalletBalance()));
+        }
         if (!this.deductWallet(this.bacBetAmount)) {
             this.showCasinoToast('Saldo insuficiente para o Baccarat!', 'error');
             return;
@@ -1495,13 +1529,18 @@ class CasinoEngine {
                 if (this.pokerState === 'draw') return;
                 document.querySelectorAll('.poker-bet-pill').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
-                this.pokerBet = parseInt(e.target.dataset.amount, 10);
+                const amt = e.target.dataset.amount;
+                this.pokerBet = amt === 'allin' ? Math.max(10, Math.floor(this.getWalletBalance())) : parseInt(amt, 10);
                 if (window.soundEngine && window.soundEngine.playChip) window.soundEngine.playChip();
             });
         });
     }
 
     dealPoker() {
+        const activePill = document.querySelector('.poker-bet-pill.active');
+        if (activePill && activePill.dataset.amount === 'allin') {
+            this.pokerBet = Math.max(10, Math.floor(this.getWalletBalance()));
+        }
         if (!this.deductWallet(this.pokerBet)) {
             this.showCasinoToast('Saldo insuficiente para o Video Poker!', 'error');
             return;
