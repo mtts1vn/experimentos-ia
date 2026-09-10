@@ -78,7 +78,7 @@ class RoomScene {
     }
 
     setupLighting() {
-        const ambientLight = new THREE.AmbientLight(0x0a1020, 0.7);
+        const ambientLight = new THREE.AmbientLight(0x0c1322, 0.75);
         this.scene.add(ambientLight);
 
         this.moonLight = new THREE.DirectionalLight(0x9ab8f5, 1.8);
@@ -102,6 +102,18 @@ class RoomScene {
         const pcTowerLight = new THREE.PointLight(0x00ff88, 0.45, 1.8);
         pcTowerLight.position.set(-0.35, 0.65, -1.75);
         this.scene.add(pcTowerLight);
+
+        const floorLampLight = new THREE.PointLight(0x9ec5ff, 0.65, 4.5);
+        floorLampLight.position.set(-2.8, 1.85, 2.4);
+        this.scene.add(floorLampLight);
+
+        const bedLampLight = new THREE.PointLight(0x6da4e8, 0.35, 2.5);
+        bedLampLight.position.set(0.85, 0.75, 1.25);
+        this.scene.add(bedLampLight);
+
+        const artSpotLight = new THREE.PointLight(0x7cb5ec, 0.45, 3.5);
+        artSpotLight.position.set(-3.2, 2.4, -0.2);
+        this.scene.add(artSpotLight);
 
         const hallwayLight = new THREE.PointLight(0x1a284a, 0.35, 5);
         hallwayLight.position.set(2.8, 1.8, 2.0);
@@ -401,27 +413,643 @@ class RoomScene {
     }
 
     buildDecorations(parent) {
-        const mugMat = new THREE.MeshStandardMaterial({ color: 0x222b3d, roughness: 0.5 });
-        const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.035, 0.09, 12), mugMat);
-        mug.position.set(-1.55, 0.8, -2.1);
+        this.buildWallArt(parent);
+        this.buildRugs(parent);
+        this.buildNightstand(parent);
+        this.buildLoungeCorner(parent);
+        this.buildWallShelving(parent);
+        this.buildDeskMonitorsAndExtras(parent);
+        this.buildArchitecturalLighting(parent);
+    }
+
+    createArtTexture(type) {
+        const canvas = document.createElement('canvas');
+        if (type === 'main_abstract') {
+            canvas.width = 512;
+            canvas.height = 320;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createLinearGradient(0, 0, 512, 320);
+            grad.addColorStop(0, '#060911');
+            grad.addColorStop(0.5, '#0b1322');
+            grad.addColorStop(1, '#080d18');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 512, 320);
+
+            ctx.strokeStyle = 'rgba(0, 229, 255, 0.08)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < 512; x += 32) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, 320);
+                ctx.stroke();
+            }
+            for (let y = 0; y < 320; y += 32) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(512, y);
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = '#111e33';
+            ctx.beginPath();
+            ctx.moveTo(80, 280);
+            ctx.lineTo(240, 40);
+            ctx.lineTo(360, 180);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = 'rgba(0, 180, 216, 0.25)';
+            ctx.beginPath();
+            ctx.moveTo(180, 290);
+            ctx.lineTo(320, 90);
+            ctx.lineTo(440, 260);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.strokeStyle = '#00e5ff';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(40, 240);
+            ctx.lineTo(240, 40);
+            ctx.lineTo(470, 270);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(120, 40);
+            ctx.lineTo(440, 40);
+            ctx.stroke();
+
+            ctx.fillStyle = '#0a101d';
+            ctx.beginPath();
+            ctx.arc(360, 110, 42, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.font = 'bold 11px monospace';
+            ctx.fillText('MODERN STRUCTURE // 0.42', 40, 300);
+            ctx.fillStyle = 'rgba(0, 229, 255, 0.8)';
+            ctx.font = '9px monospace';
+            ctx.fillText('NIGHT TRADER COLLECTION · SERIES 01', 280, 300);
+        } else if (type === 'diptych_1') {
+            canvas.width = 256;
+            canvas.height = 384;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#060a12';
+            ctx.fillRect(0, 0, 256, 384);
+
+            for (let i = 0; i < 18; i++) {
+                ctx.strokeStyle = i % 2 === 0 ? 'rgba(0, 229, 255, 0.4)' : 'rgba(148, 163, 184, 0.25)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                for (let x = 0; x < 256; x += 4) {
+                    const y = 192 + Math.sin((x + i * 16) * 0.035) * (30 + i * 4);
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = '#00e5ff';
+            ctx.fillRect(24, 30, 20, 2);
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'bold 9px monospace';
+            ctx.fillText('HARMONIC FREQUENCY', 52, 34);
+            ctx.fillText('01 / MODULATION', 24, 355);
+        } else if (type === 'diptych_2') {
+            canvas.width = 256;
+            canvas.height = 384;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#070c16';
+            ctx.fillRect(0, 0, 256, 384);
+
+            const blocks = [
+                { x: 35, y: 70, w: 90, h: 140, col: '#0f1d31' },
+                { x: 100, y: 140, w: 120, h: 160, col: '#162842' },
+                { x: 60, y: 220, w: 140, h: 80, col: '#0a1424' }
+            ];
+            blocks.forEach(b => {
+                ctx.fillStyle = b.col;
+                ctx.fillRect(b.x, b.y, b.w, b.h);
+                ctx.strokeStyle = 'rgba(0, 229, 255, 0.2)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(b.x, b.y, b.w, b.h);
+            });
+
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(35, 70);
+            ctx.lineTo(220, 300);
+            ctx.stroke();
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(24, 30, 20, 2);
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'bold 9px monospace';
+            ctx.fillText('BRUTALIST EQUATION', 52, 34);
+            ctx.fillText('02 / ELEVATION', 24, 355);
+        } else if (type === 'panoramic_bed') {
+            canvas.width = 512;
+            canvas.height = 180;
+            const ctx = canvas.getContext('2d');
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, 180);
+            bgGrad.addColorStop(0, '#04070e');
+            bgGrad.addColorStop(0.6, '#0a1120');
+            bgGrad.addColorStop(1, '#050912');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, 512, 180);
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
+            for (let y = 20; y < 180; y += 20) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(512, y);
+                ctx.stroke();
+            }
+
+            ctx.strokeStyle = '#00e5ff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 110);
+            ctx.lineTo(512, 110);
+            ctx.stroke();
+
+            ctx.fillStyle = '#0f1a2c';
+            ctx.beginPath();
+            ctx.arc(256, 110, 55, Math.PI, 0);
+            ctx.fill();
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 10px monospace';
+            ctx.fillText('COLD HORIZON // 03:00 AM', 28, 155);
+            ctx.fillStyle = '#00e5ff';
+            ctx.fillText('42°19\'N · LUNAR ILLUMINATION', 300, 155);
+        }
+
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.wrapS = THREE.ClampToEdgeWrapping;
+        tex.wrapT = THREE.ClampToEdgeWrapping;
+        return tex;
+    }
+
+    createRugTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = '#0b0f17';
+        ctx.fillRect(0, 0, 512, 512);
+
+        ctx.strokeStyle = '#141c2b';
+        ctx.lineWidth = 4;
+        for (let i = -512; i < 1024; i += 48) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i + 512, 512);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(i + 512, 0);
+            ctx.lineTo(i, 512);
+            ctx.stroke();
+        }
+
+        ctx.strokeStyle = '#1c283d';
+        ctx.lineWidth = 2;
+        for (let x = 32; x < 512; x += 64) {
+            for (let y = 32; y < 512; y += 64) {
+                ctx.strokeRect(x, y, 32, 32);
+            }
+        }
+
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.25)';
+        ctx.lineWidth = 6;
+        ctx.strokeRect(8, 8, 496, 496);
+
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        return tex;
+    }
+
+    createDigitalClockTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 128;
+        canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#05070c';
+        ctx.fillRect(0, 0, 128, 64);
+        ctx.fillStyle = '#00e5ff';
+        ctx.font = 'bold 24px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('03:42', 64, 38);
+        ctx.fillStyle = 'rgba(0, 229, 255, 0.5)';
+        ctx.font = '8px monospace';
+        ctx.fillText('AM · NIGHT TRADER', 64, 52);
+        const tex = new THREE.CanvasTexture(canvas);
+        return tex;
+    }
+
+    buildWallArt(parent) {
+        const frameMat = new THREE.MeshStandardMaterial({ color: 0x080a10, metalness: 0.85, roughness: 0.2 });
+
+        const mainArtGroup = new THREE.Group();
+        mainArtGroup.position.set(-3.47, 1.7, -0.1);
+        mainArtGroup.rotation.y = Math.PI / 2;
+
+        const mainFrame = new THREE.Mesh(new THREE.BoxGeometry(1.86, 1.16, 0.04), frameMat);
+        mainFrame.castShadow = true;
+        mainArtGroup.add(mainFrame);
+
+        const mainCanvasMat = new THREE.MeshStandardMaterial({
+            map: this.createArtTexture('main_abstract'),
+            roughness: 0.4
+        });
+        const mainCanvas = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.1), mainCanvasMat);
+        mainCanvas.position.z = 0.022;
+        mainArtGroup.add(mainCanvas);
+
+        const lampRod = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.015, 0.12), frameMat);
+        lampRod.position.set(0, 0.62, 0.06);
+        mainArtGroup.add(lampRod);
+
+        const lampHead = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.02, 0.03), frameMat);
+        lampHead.position.set(0, 0.62, 0.12);
+        mainArtGroup.add(lampHead);
+
+        parent.add(mainArtGroup);
+
+        const diptychGroup = new THREE.Group();
+        diptychGroup.position.set(0, 1.75, 3.47);
+        diptychGroup.rotation.y = Math.PI;
+
+        const f1 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.03), frameMat);
+        f1.position.set(-1.4, 0, 0);
+        f1.castShadow = true;
+        diptychGroup.add(f1);
+
+        const c1Mat = new THREE.MeshStandardMaterial({ map: this.createArtTexture('diptych_1'), roughness: 0.4 });
+        const c1 = new THREE.Mesh(new THREE.PlaneGeometry(0.74, 1.14), c1Mat);
+        c1.position.set(-1.4, 0, 0.018);
+        diptychGroup.add(c1);
+
+        const f2 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.03), frameMat);
+        f2.position.set(-0.4, 0, 0);
+        f2.castShadow = true;
+        diptychGroup.add(f2);
+
+        const c2Mat = new THREE.MeshStandardMaterial({ map: this.createArtTexture('diptych_2'), roughness: 0.4 });
+        const c2 = new THREE.Mesh(new THREE.PlaneGeometry(0.74, 1.14), c2Mat);
+        c2.position.set(-0.4, 0, 0.018);
+        diptychGroup.add(c2);
+
+        parent.add(diptychGroup);
+
+        const bedArtGroup = new THREE.Group();
+        bedArtGroup.position.set(3.47, 2.0, 0.2);
+        bedArtGroup.rotation.y = -Math.PI / 2;
+
+        const bedFrame = new THREE.Mesh(new THREE.BoxGeometry(1.76, 0.66, 0.03), frameMat);
+        bedFrame.castShadow = true;
+        bedArtGroup.add(bedFrame);
+
+        const bedCanvasMat = new THREE.MeshStandardMaterial({ map: this.createArtTexture('panoramic_bed'), roughness: 0.4 });
+        const bedCanvas = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 0.6), bedCanvasMat);
+        bedCanvas.position.z = 0.018;
+        bedArtGroup.add(bedCanvas);
+
+        parent.add(bedArtGroup);
+    }
+
+    buildRugs(parent) {
+        const rugTex = this.createRugTexture();
+        const mainRugMat = new THREE.MeshStandardMaterial({
+            map: rugTex,
+            roughness: 0.88,
+            metalness: 0.05
+        });
+        const mainRug = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 3.2), mainRugMat);
+        mainRug.rotation.x = -Math.PI / 2;
+        mainRug.position.set(1.1, 0.005, 0.4);
+        mainRug.receiveShadow = true;
+        parent.add(mainRug);
+
+        const deskRugMat = new THREE.MeshStandardMaterial({
+            color: 0x080b12,
+            roughness: 0.95
+        });
+        const deskRug = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.4), deskRugMat);
+        deskRug.rotation.x = -Math.PI / 2;
+        deskRug.position.set(-0.95, 0.006, -1.8);
+        deskRug.receiveShadow = true;
+        parent.add(deskRug);
+    }
+
+    buildNightstand(parent) {
+        const nsGroup = new THREE.Group();
+        nsGroup.position.set(0.85, 0, 1.25);
+
+        const woodMat = new THREE.MeshStandardMaterial({ color: 0x0c101a, roughness: 0.4, metalness: 0.2 });
+        const metalMat = new THREE.MeshStandardMaterial({ color: 0x08090d, metalness: 0.85, roughness: 0.25 });
+
+        const box = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.38, 0.45), woodMat);
+        box.position.set(0, 0.31, 0);
+        box.castShadow = true;
+        box.receiveShadow = true;
+        nsGroup.add(box);
+
+        const legGeo = new THREE.BoxGeometry(0.025, 0.12, 0.025);
+        const l1 = new THREE.Mesh(legGeo, metalMat);
+        l1.position.set(-0.24, 0.06, -0.19);
+        nsGroup.add(l1);
+        const l2 = new THREE.Mesh(legGeo, metalMat);
+        l2.position.set(0.24, 0.06, -0.19);
+        nsGroup.add(l2);
+        const l3 = new THREE.Mesh(legGeo, metalMat);
+        l3.position.set(-0.24, 0.06, 0.19);
+        nsGroup.add(l3);
+        const l4 = new THREE.Mesh(legGeo, metalMat);
+        l4.position.set(0.24, 0.06, 0.19);
+        nsGroup.add(l4);
+
+        const clockMat = new THREE.MeshStandardMaterial({ color: 0x0a0d14, roughness: 0.3 });
+        const clockDisplayMat = new THREE.MeshBasicMaterial({ map: this.createDigitalClockTexture() });
+        const clockMesh = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.06, 0.06), [
+            clockMat, clockMat, clockMat, clockMat, clockDisplayMat, clockMat
+        ]);
+        clockMesh.position.set(-0.14, 0.53, 0.05);
+        clockMesh.rotation.y = -Math.PI / 6;
+        clockMesh.castShadow = true;
+        nsGroup.add(clockMesh);
+
+        const bookMat1 = new THREE.MeshStandardMaterial({ color: 0x121b2d, roughness: 0.7 });
+        const bookMat2 = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
+        const book1 = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.03, 0.28), bookMat1);
+        book1.position.set(0.12, 0.515, -0.04);
+        book1.rotation.y = 0.1;
+        book1.castShadow = true;
+        nsGroup.add(book1);
+        const book2 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.025, 0.26), bookMat2);
+        book2.position.set(0.12, 0.542, -0.04);
+        book2.rotation.y = 0.04;
+        book2.castShadow = true;
+        nsGroup.add(book2);
+
+        const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.015, 12), metalMat);
+        lampBase.position.set(0.08, 0.51, 0.12);
+        nsGroup.add(lampBase);
+
+        const lampStem = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.28, 8), metalMat);
+        lampStem.position.set(0.08, 0.65, 0.12);
+        nsGroup.add(lampStem);
+
+        const shadeMat = new THREE.MeshStandardMaterial({
+            color: 0x131d2e,
+            roughness: 0.5,
+            emissive: 0x6da4e8,
+            emissiveIntensity: 0.15
+        });
+        const lampShade = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.11, 0.14, 12), shadeMat);
+        lampShade.position.set(0.08, 0.76, 0.12);
+        lampShade.castShadow = true;
+        nsGroup.add(lampShade);
+
+        parent.add(nsGroup);
+    }
+
+    buildLoungeCorner(parent) {
+        const loungeGroup = new THREE.Group();
+        loungeGroup.position.set(-2.4, 0, 1.8);
+        loungeGroup.rotation.y = Math.PI * 0.28;
+
+        const frameMat = new THREE.MeshStandardMaterial({ color: 0x08090d, metalness: 0.9, roughness: 0.2 });
+        const leatherMat = new THREE.MeshStandardMaterial({ color: 0x111622, roughness: 0.65 });
+        const pillowMat = new THREE.MeshStandardMaterial({ color: 0x13243d, roughness: 0.85 });
+
+        const seat = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.1, 0.68), leatherMat);
+        seat.position.set(0, 0.38, 0);
+        seat.castShadow = true;
+        loungeGroup.add(seat);
+
+        const back = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.6, 0.1), leatherMat);
+        back.position.set(0, 0.66, 0.32);
+        back.rotation.x = -0.12;
+        back.castShadow = true;
+        loungeGroup.add(back);
+
+        const pillow = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.32, 0.12), pillowMat);
+        pillow.position.set(0, 0.52, 0.24);
+        pillow.rotation.x = 0.1;
+        pillow.castShadow = true;
+        loungeGroup.add(pillow);
+
+        const legGeo = new THREE.CylinderGeometry(0.014, 0.014, 0.34, 8);
+        const l1 = new THREE.Mesh(legGeo, frameMat);
+        l1.position.set(-0.3, 0.17, -0.3);
+        l1.castShadow = true;
+        loungeGroup.add(l1);
+        const l2 = new THREE.Mesh(legGeo, frameMat);
+        l2.position.set(0.3, 0.17, -0.3);
+        l2.castShadow = true;
+        loungeGroup.add(l2);
+        const l3 = new THREE.Mesh(legGeo, frameMat);
+        l3.position.set(-0.3, 0.17, 0.3);
+        l3.castShadow = true;
+        loungeGroup.add(l3);
+        const l4 = new THREE.Mesh(legGeo, frameMat);
+        l4.position.set(0.3, 0.17, 0.3);
+        l4.castShadow = true;
+        loungeGroup.add(l4);
+
+        parent.add(loungeGroup);
+
+        const tableGroup = new THREE.Group();
+        tableGroup.position.set(-1.55, 0, 1.85);
+
+        const glassMat = new THREE.MeshPhysicalMaterial({
+            color: 0x141f30,
+            metalness: 0.1,
+            roughness: 0.15,
+            transmission: 0.6,
+            transparent: true,
+            opacity: 0.85
+        });
+        const tableTop = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.02, 16), glassMat);
+        tableTop.position.set(0, 0.44, 0);
+        tableTop.castShadow = true;
+        tableGroup.add(tableTop);
+
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.43, 8), frameMat);
+        stem.position.set(0, 0.22, 0);
+        tableGroup.add(stem);
+
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.015, 16), frameMat);
+        base.position.set(0, 0.01, 0);
+        tableGroup.add(base);
+
+        const cupMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.3, metalness: 0.8 });
+        const tumbler = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.028, 0.11, 10), cupMat);
+        tumbler.position.set(0.05, 0.505, 0.02);
+        tumbler.castShadow = true;
+        tableGroup.add(tumbler);
+
+        parent.add(tableGroup);
+
+        const lampGroup = new THREE.Group();
+        lampGroup.position.set(-2.8, 0, 2.4);
+
+        const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.025, 16), frameMat);
+        lampBase.position.set(0, 0.015, 0);
+        lampGroup.add(lampBase);
+
+        const lampPole = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 1.85, 8), frameMat);
+        lampPole.position.set(0, 0.94, 0);
+        lampGroup.add(lampPole);
+
+        const lampArm = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.015, 0.5), frameMat);
+        lampArm.position.set(0.15, 1.86, -0.2);
+        lampArm.rotation.y = -Math.PI / 4;
+        lampGroup.add(lampArm);
+
+        const lampDomeMat = new THREE.MeshStandardMaterial({
+            color: 0x0c111a,
+            metalness: 0.8,
+            roughness: 0.2,
+            emissive: 0x9ec5ff,
+            emissiveIntensity: 0.2
+        });
+        const lampDome = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2), lampDomeMat);
+        lampDome.position.set(0.3, 1.84, -0.35);
+        lampDome.rotation.x = Math.PI;
+        lampDome.castShadow = true;
+        lampGroup.add(lampDome);
+
+        parent.add(lampGroup);
+    }
+
+    buildWallShelving(parent) {
+        const shelfMat = new THREE.MeshStandardMaterial({ color: 0x090c14, metalness: 0.75, roughness: 0.3 });
+
+        const s1 = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.03, 1.3), shelfMat);
+        s1.position.set(-3.38, 1.45, -1.8);
+        s1.castShadow = true;
+        parent.add(s1);
+
+        const s2 = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.03, 1.3), shelfMat);
+        s2.position.set(-3.38, 2.05, -1.8);
+        s2.castShadow = true;
+        parent.add(s2);
+
+        const colors = [0x1e293b, 0x0f172a, 0x334155, 0x1e3a5f, 0x111827];
+        for (let i = 0; i < 5; i++) {
+            const bMat = new THREE.MeshStandardMaterial({ color: colors[i], roughness: 0.6 });
+            const b = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.24, 0.04), bMat);
+            b.position.set(-3.38, 1.58, -2.25 + i * 0.045);
+            b.castShadow = true;
+            parent.add(b);
+        }
+
+        const sculptureMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95, roughness: 0.08 });
+        const sculpture = new THREE.Mesh(new THREE.IcosahedronGeometry(0.07, 0), sculptureMat);
+        sculpture.position.set(-3.38, 1.54, -1.45);
+        sculpture.rotation.set(0.4, 0.6, 0.2);
+        sculpture.castShadow = true;
+        parent.add(sculpture);
+
+        const potMat = new THREE.MeshStandardMaterial({ color: 0x121722, roughness: 0.7 });
+        const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.045, 0.09, 12), potMat);
+        pot.position.set(-3.38, 2.11, -2.15);
+        pot.castShadow = true;
+        parent.add(pot);
+
+        const leafMat = new THREE.MeshStandardMaterial({ color: 0x1b3834, roughness: 0.5 });
+        const plant = new THREE.Mesh(new THREE.DodecahedronGeometry(0.07, 1), leafMat);
+        plant.position.set(-3.38, 2.19, -2.15);
+        parent.add(plant);
+
+        const frameMini = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.16, 0.12), shelfMat);
+        frameMini.position.set(-3.37, 2.14, -1.55);
+        frameMini.rotation.y = 0.1;
+        parent.add(frameMini);
+    }
+
+    buildDeskMonitorsAndExtras(parent) {
+        const spkMat = new THREE.MeshStandardMaterial({ color: 0x0a0d14, roughness: 0.4, metalness: 0.4 });
+        const coneMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.3, metalness: 0.7 });
+        const cyanLedMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
+
+        const createSpeaker = (x, z, rotY) => {
+            const spkGroup = new THREE.Group();
+            spkGroup.position.set(x, 0.78, z);
+            spkGroup.rotation.y = rotY;
+
+            const box = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.28, 0.18), spkMat);
+            box.position.y = 0.14;
+            box.castShadow = true;
+            spkGroup.add(box);
+
+            const woofer = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.01, 14), coneMat);
+            woofer.position.set(0, 0.1, 0.09);
+            woofer.rotation.x = Math.PI / 2;
+            spkGroup.add(woofer);
+
+            const tweeter = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.01, 12), spkMat);
+            tweeter.position.set(0, 0.2, 0.09);
+            tweeter.rotation.x = Math.PI / 2;
+            spkGroup.add(tweeter);
+
+            const led = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.005, 0.005), cyanLedMat);
+            led.position.set(0, 0.03, 0.091);
+            spkGroup.add(led);
+
+            return spkGroup;
+        };
+
+        const leftSpk = createSpeaker(-1.75, -2.15, 0.2);
+        parent.add(leftSpk);
+        const rightSpk = createSpeaker(-0.15, -2.15, -0.2);
+        parent.add(rightSpk);
+
+        const mugMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.35, metalness: 0.3 });
+        const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.035, 0.095, 12), mugMat);
+        mug.position.set(-1.55, 0.83, -2.05);
         mug.castShadow = true;
         parent.add(mug);
 
-        const shelfMat = new THREE.MeshStandardMaterial({ color: 0x11141c, roughness: 0.7 });
-        const shelf = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.04, 0.24), shelfMat);
-        shelf.position.set(-0.95, 2.2, -3.38);
-        shelf.castShadow = true;
-        parent.add(shelf);
+        const acMat = new THREE.MeshStandardMaterial({ color: 0x121620, roughness: 0.3, metalness: 0.6 });
+        const acGroup = new THREE.Group();
+        acGroup.position.set(2.2, 2.85, -3.42);
 
-        const plantPotMat = new THREE.MeshStandardMaterial({ color: 0x1b202e, roughness: 0.8 });
-        const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.04, 0.1, 10), plantPotMat);
-        pot.position.set(-1.4, 2.27, -3.38);
-        parent.add(pot);
+        const acBody = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.25, 0.18), acMat);
+        acBody.castShadow = true;
+        acGroup.add(acBody);
 
-        const leafMat = new THREE.MeshStandardMaterial({ color: 0x1b3b2b, roughness: 0.6 });
-        const leaves = new THREE.Mesh(new THREE.DodecahedronGeometry(0.08, 1), leafMat);
-        leaves.position.set(-1.4, 2.36, -3.38);
-        parent.add(leaves);
+        const acLed = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.006, 0.01), cyanLedMat);
+        acLed.position.set(0.15, -0.06, 0.091);
+        acGroup.add(acLed);
+
+        parent.add(acGroup);
+    }
+
+    buildArchitecturalLighting(parent) {
+        const lineMat = new THREE.MeshBasicMaterial({ color: 0x172c4a });
+        const strip1 = new THREE.Mesh(new THREE.BoxGeometry(6.9, 0.02, 0.02), lineMat);
+        strip1.position.set(0, 3.18, 3.48);
+        parent.add(strip1);
+
+        const strip2 = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 6.9), lineMat);
+        strip2.position.set(-3.48, 3.18, 0);
+        parent.add(strip2);
     }
 
     createBuildingTexture() {

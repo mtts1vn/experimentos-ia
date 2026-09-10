@@ -117,6 +117,10 @@ class TradingEngine {
         localStorage.setItem(this.statsKey, JSON.stringify(this.stats));
     }
 
+    saveWallet() {
+        this.saveState();
+    }
+
     resetAccount() {
         this.wallet = {
             balance: 10000.00,

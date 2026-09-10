@@ -40,6 +40,16 @@ class DesktopUI {
                 svg: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>',
                 defaultLeft: 300, defaultTop: 100, defaultWidth: 650, defaultHeight: 460
             },
+            copywriter: {
+                title: 'Copywriter Center',
+                svg: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
+                defaultLeft: 160, defaultTop: 35, defaultWidth: 880, defaultHeight: 560
+            },
+            casino: {
+                title: 'Cassino Royale',
+                svg: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="8.5" cy="8.5" r="1.5" fill="#e11d48"/><circle cx="15.5" cy="8.5" r="1.5" fill="#e11d48"/><circle cx="12" cy="12" r="1.5" fill="#e11d48"/><circle cx="8.5" cy="15.5" r="1.5" fill="#e11d48"/><circle cx="15.5" cy="15.5" r="1.5" fill="#e11d48"/></svg>',
+                defaultLeft: 120, defaultTop: 30, defaultWidth: 980, defaultHeight: 620
+            },
             settings: {
                 title: 'Graficos & Configuracoes',
                 svg: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ff8c00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
@@ -64,8 +74,6 @@ class DesktopUI {
         this.updateAudioButtonUI();
         this.updateGraphicsButtonUI();
         this.startClock();
-
-        this.openApp('trading');
 
         window.marketEngine.subscribe((asset, candles) => {
             this.updateHeader();
@@ -558,6 +566,10 @@ class DesktopUI {
             this.renderRanking();
         } else if (appName === 'news') {
             this.renderNews();
+        } else if (appName === 'copywriter') {
+            if (window.copywriterEngine) window.copywriterEngine.render();
+        } else if (appName === 'casino') {
+            if (window.casinoEngine) window.casinoEngine.render();
         } else if (appName === 'settings') {
             if (window.roomScene) window.roomScene.updateGraphicsUI();
             if (window.marketEngine) window.marketEngine.updateConnectionStatus(window.marketEngine.isWsConnected);
@@ -734,6 +746,8 @@ class DesktopUI {
         if (balanceEl) balanceEl.textContent = `R$ ${window.tradingEngine.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         const wallpaperBal = document.getElementById('wallpaper-user-balance');
         if (wallpaperBal) wallpaperBal.textContent = `R$ ${window.tradingEngine.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        const cwBal = document.getElementById('copywriter-wallet-balance');
+        if (cwBal) cwBal.textContent = `R$ ${window.tradingEngine.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
         if (curPriceEl) {
             curPriceEl.textContent = asset.currentPrice.toFixed(asset.decimals);
