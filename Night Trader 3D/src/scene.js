@@ -775,15 +775,6 @@ class RoomScene {
                 if (window.soundEngine) window.soundEngine.playClick();
             });
         }
-
-        const btnDeskGfx = document.getElementById('btn-desktop-graphics');
-        if (btnDeskGfx) {
-            btnDeskGfx.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.cycleGraphicsQuality();
-                if (window.soundEngine) window.soundEngine.playClick();
-            });
-        }
     }
 
     startSitAnimation() {
@@ -1060,8 +1051,9 @@ class RoomScene {
         const text = `GRAFICOS: ${labelMap[this.graphicsQuality] || 'ALTO'}`;
         const roomBtn = document.getElementById('btn-room-graphics');
         if (roomBtn) roomBtn.textContent = text;
-        const deskBtn = document.getElementById('btn-desktop-graphics');
-        if (deskBtn) deskBtn.textContent = text;
+        if (window.desktopUI && typeof window.desktopUI.updateGraphicsButtonUI === 'function') {
+            window.desktopUI.updateGraphicsButtonUI(this.graphicsQuality);
+        }
 
         document.querySelectorAll('.preset-card').forEach(card => {
             card.classList.toggle('active', card.dataset.preset === this.graphicsQuality);

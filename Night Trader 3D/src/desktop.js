@@ -61,6 +61,8 @@ class DesktopUI {
         this.renderNews();
         this.renderExchange();
         this.updateHeader();
+        this.updateAudioButtonUI();
+        this.updateGraphicsButtonUI();
         this.startClock();
 
         this.openApp('trading');
@@ -353,9 +355,30 @@ class DesktopUI {
         const btnAudio = document.getElementById('btn-toggle-audio');
         if (btnAudio) {
             btnAudio.addEventListener('click', () => {
-                const isMuted = window.soundEngine.toggleMute();
-                btnAudio.textContent = isMuted ? 'AUDIO: MUDO' : 'AUDIO: LIGADO';
-                btnAudio.classList.toggle('muted', isMuted);
+                if (window.soundEngine) {
+                    window.soundEngine.toggleMute();
+                }
+                this.updateAudioButtonUI();
+                if (window.soundEngine) window.soundEngine.playClick();
+            });
+        }
+
+        const btnDeskGfx = document.getElementById('btn-desktop-graphics');
+        if (btnDeskGfx) {
+            btnDeskGfx.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (window.roomScene) {
+                    window.roomScene.cycleGraphicsQuality();
+                } else {
+                    const cur = localStorage.getItem('night_trader_graphics') || 'high';
+                    const next = cur === 'high' ? 'medium' : (cur === 'medium' ? 'low' : 'high');
+                    localStorage.setItem('night_trader_graphics', next);
+                    this.updateGraphicsButtonUI(next);
+                    document.querySelectorAll('.preset-card').forEach(card => {
+                        card.classList.toggle('active', card.dataset.preset === next);
+                    });
+                }
+                if (window.soundEngine) window.soundEngine.playClick();
             });
         }
 
@@ -399,8 +422,7 @@ class DesktopUI {
                     if (win.classList.contains('window-maximized')) {
                         const rect = win.getBoundingClientRect();
                         win.classList.remove('window-maximized');
-                        const maxBtn = win.querySelector('.win-btn-maximize');
-                        if (maxBtn) maxBtn.innerHTML = '&#9633;';
+                        this.updateMaximizeButtonUI(win, false);
 
                         const newWidth = parseFloat(win.dataset.preMaxWidth) || 800;
                         const newHeight = parseFloat(win.dataset.preMaxHeight) || 500;
@@ -596,17 +618,15 @@ class DesktopUI {
         const win = document.querySelector(`.desktop-window[data-window="${appName}"]`);
         if (!win) return;
 
-        const maxBtn = win.querySelector('.win-btn-maximize');
         const isMaximized = win.classList.toggle('window-maximized');
+        this.updateMaximizeButtonUI(win, isMaximized);
 
         if (isMaximized) {
             win.dataset.preMaxWidth = win.offsetWidth;
             win.dataset.preMaxHeight = win.offsetHeight;
             win.dataset.preMaxLeft = win.offsetLeft;
             win.dataset.preMaxTop = win.offsetTop;
-            if (maxBtn) maxBtn.innerHTML = '&#10064;';
         } else {
-            if (maxBtn) maxBtn.innerHTML = '&#9633;';
             const w = parseFloat(win.dataset.preMaxWidth) || 800;
             const h = parseFloat(win.dataset.preMaxHeight) || 500;
             const l = parseFloat(win.dataset.preMaxLeft) || 50;
@@ -629,8 +649,7 @@ class DesktopUI {
         if (win) {
             win.classList.add('hidden');
             win.classList.remove('window-focused', 'window-minimized', 'window-maximized');
-            const maxBtn = win.querySelector('.win-btn-maximize');
-            if (maxBtn) maxBtn.innerHTML = '&#9633;';
+            this.updateMaximizeButtonUI(win, false);
         }
 
         this.openApps.delete(appName);
@@ -1288,6 +1307,48 @@ class DesktopUI {
             toast.classList.add('toast-fadeout');
             setTimeout(() => toast.remove(), 400);
         }, 3200);
+    }
+
+    updateAudioButtonUI() {
+        const btnAudio = document.getElementById('btn-toggle-audio');
+        if (!btnAudio) return;
+        const isMuted = window.soundEngine ? window.soundEngine.muted : false;
+        btnAudio.classList.toggle('muted', isMuted);
+        if (isMuted) {
+            btnAudio.title = 'Audio: Mudo (Clique para ativar som)';
+            btnAudio.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ff3d71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+        } else {
+            btnAudio.title = 'Audio: Ligado (Clique para mutar)';
+            btnAudio.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+        }
+    }
+
+    updateGraphicsButtonUI(quality) {
+        const q = quality || (window.roomScene ? window.roomScene.graphicsQuality : (localStorage.getItem('night_trader_graphics') || 'high'));
+        const deskBtn = document.getElementById('btn-desktop-graphics');
+        if (!deskBtn) return;
+        if (q === 'low') {
+            deskBtn.title = 'Graficos: Baixo / Max FPS (Clique para alternar)';
+            deskBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><polyline points="13 7 10 11 14 11 11 15"/></svg>';
+        } else if (q === 'medium') {
+            deskBtn.title = 'Graficos: Medio / Equilibrado (Clique para alternar)';
+            deskBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ffd700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="6" y1="10" x2="18" y2="10"/></svg>';
+        } else {
+            deskBtn.title = 'Graficos: Alto / Maxima Fidelidade (Clique para alternar)';
+            deskBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#00e676" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><circle cx="7" cy="8" r="1.5" fill="#00e676"/><path d="M12 7l2 6 3-3"/></svg>';
+        }
+    }
+
+    updateMaximizeButtonUI(win, isMaximized) {
+        const maxBtn = win ? win.querySelector('.win-btn-maximize') : null;
+        if (!maxBtn) return;
+        if (isMaximized) {
+            maxBtn.title = 'Restaurar Janela';
+            maxBtn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="4" width="13" height="13" rx="1"/><polyline points="4 8 4 20 16 20"/></svg>';
+        } else {
+            maxBtn.title = 'Maximizar Janela';
+            maxBtn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>';
+        }
     }
 }
 
