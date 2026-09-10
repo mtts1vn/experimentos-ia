@@ -13,39 +13,64 @@
     <div id="launcher-modal" class="launcher-overlay">
         <div class="launcher-container">
             <div class="launcher-header">
-                <div class="launcher-tag">SELECIONE O MODO DE INICIALIZACAO</div>
+                <div class="launcher-tag">CONFIGURACAO DE INICIALIZACAO</div>
                 <h1 class="launcher-title">NIGHT TRADER 3D</h1>
-                <p class="launcher-subtitle">Escolha como deseja executar o jogo com base no desempenho do seu dispositivo:</p>
+                <p class="launcher-subtitle">Configure a fonte de dados e o ambiente de execucao antes de iniciar:</p>
             </div>
 
-            <div class="launcher-options">
-                <div class="launcher-card launcher-card-3d" id="btn-mode-3d">
-                    <div class="launcher-badge badge-immersive">EXPERIENCIA COMPLETA</div>
-                    <div class="launcher-card-icon">&#127968;</div>
-                    <div class="launcher-card-title">QUARTO 3D IMERSIVO</div>
-                    <div class="launcher-card-desc">Cenario completo em primeira pessoa. Explore o quarto noturno, visualize a neve caindo pela janela e sente-se na estacao de operacoes.</div>
-                    <div class="launcher-card-specs">
-                        <span class="spec-tag spec-heavy">Mais Pesado</span>
-                        <span class="spec-tag">Requer GPU / WebGL 3D</span>
+            <div class="launcher-section-block">
+                <div class="launcher-section-label">1. FONTE DE DADOS DE MERCADO:</div>
+                <div class="launcher-data-source-grid">
+                    <div class="launcher-source-card active" data-source="real">
+                        <div class="source-card-header">
+                            <span class="source-status-dot dot-real">&#9679;</span>
+                            <span class="source-title">DADOS REAIS AO VIVO</span>
+                            <span class="source-badge">RECOMENDADO</span>
+                        </div>
+                        <div class="source-desc">Conexao WebSocket direta com a <strong>Binance</strong> em tempo real. Cotacoes reais tick-a-tick e historico oficial de criptomoedas.</div>
                     </div>
-                    <button class="btn-launcher btn-launcher-3d">INICIAR NO QUARTO 3D</button>
+                    <div class="launcher-source-card" data-source="simulated">
+                        <div class="source-card-header">
+                            <span class="source-status-dot dot-sim">&#9679;</span>
+                            <span class="source-title">DADOS SIMULADOS (OTC)</span>
+                            <span class="source-badge badge-sim">OFFLINE</span>
+                        </div>
+                        <div class="source-desc">Algoritmo sintetico gerador de velas e cotacoes. Ideal para conexoes lentas ou operacoes offline.</div>
+                    </div>
                 </div>
+            </div>
 
-                <div class="launcher-card launcher-card-2d" id="btn-mode-2d">
-                    <div class="launcher-badge badge-performance">ALTA PERFORMANCE</div>
-                    <div class="launcher-card-icon">&#128187;</div>
-                    <div class="launcher-card-title">APENAS O DESKTOP</div>
-                    <div class="launcher-card-desc">Acesso direto ao CYBER_OS e terminal de operacoes financeiras. Sem carga de renderizacao 3D no processador ou placa de video.</div>
-                    <div class="launcher-card-specs">
-                        <span class="spec-tag spec-light">Ultra Leve</span>
-                        <span class="spec-tag">Ideal para PCs Fracos</span>
+            <div class="launcher-section-block">
+                <div class="launcher-section-label">2. AMBIENTE VISUAL:</div>
+                <div class="launcher-options">
+                    <div class="launcher-card launcher-card-3d" id="btn-mode-3d">
+                        <div class="launcher-badge badge-immersive">EXPERIENCIA COMPLETA</div>
+                        <div class="launcher-card-icon">&#127968;</div>
+                        <div class="launcher-card-title">QUARTO 3D IMERSIVO</div>
+                        <div class="launcher-card-desc">Cenario 3D em primeira pessoa. Explore o quarto, observe a cidade noturna e neve caindo, e opere no computador.</div>
+                        <div class="launcher-card-specs">
+                            <span class="spec-tag spec-heavy">Mais Pesado</span>
+                            <span class="spec-tag">Requer GPU / WebGL 3D</span>
+                        </div>
+                        <button class="btn-launcher btn-launcher-3d">INICIAR NO QUARTO 3D</button>
                     </div>
-                    <button class="btn-launcher btn-launcher-2d">INICIAR NO DESKTOP</button>
+
+                    <div class="launcher-card launcher-card-2d" id="btn-mode-2d">
+                        <div class="launcher-badge badge-performance">ALTA PERFORMANCE</div>
+                        <div class="launcher-card-icon">&#128187;</div>
+                        <div class="launcher-card-title">APENAS O DESKTOP</div>
+                        <div class="launcher-card-desc">Acesso direto ao CYBER_OS e terminal financeiro. Sem renderizacao 3D pesada no processador ou placa de video.</div>
+                        <div class="launcher-card-specs">
+                            <span class="spec-tag spec-light">Ultra Leve</span>
+                            <span class="spec-tag">Ideal para PCs Fracos</span>
+                        </div>
+                        <button class="btn-launcher btn-launcher-2d">INICIAR NO DESKTOP</button>
+                    </div>
                 </div>
             </div>
 
             <div class="launcher-footer">
-                <span>Voce pode alternar modos ou configurar os graficos a qualquer momento durante a sessao.</span>
+                <span>Voce pode alternar fontes de dados e ajustar graficos a qualquer momento nas configuracoes.</span>
             </div>
         </div>
     </div>
@@ -101,6 +126,14 @@
                         </div>
                     </div>
 
+                    <div class="quick-card desktop-quick-btn" data-app="exchange">
+                        <div class="quick-card-icon icon-exchange">&#128176;</div>
+                        <div class="quick-card-info">
+                            <div class="quick-card-title">Corretora Spot &amp; Carteira</div>
+                            <div class="quick-card-sub">Compre acoes, criptos e moedas para sua carteira</div>
+                        </div>
+                    </div>
+
                     <div class="quick-card desktop-quick-btn" data-app="history">
                         <div class="quick-card-icon icon-history">&#128220;</div>
                         <div class="quick-card-info">
@@ -137,7 +170,7 @@
                     </div>
                     <div class="status-item">
                         <span class="label">MERCADO:</span>
-                        <span class="val status-blue">24/7 OTC ATIVO</span>
+                        <span class="val status-green" id="wallpaper-market-mode">BINANCE LIVE (REAL)</span>
                     </div>
                 </div>
             </div>
@@ -145,42 +178,49 @@
             <div class="desktop-icons-grid">
                 <div class="desktop-icon" data-app="trading">
                     <div class="icon-visual icon-trading">
-                        <span class="icon-glyph">[TRD]</span>
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#00e676" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-5 5"/><polyline points="14 9 18 9 18 13"/></svg>
                     </div>
                     <span class="icon-label">CyberTrader</span>
                 </div>
 
+                <div class="desktop-icon" data-app="exchange">
+                    <div class="icon-visual icon-exchange">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ffd700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="6"/><path d="M15 6l4 3-4 3"/><path d="M19 9H9"/><path d="M9 18l-4-3 4-3"/><path d="M5 15h10"/></svg>
+                    </div>
+                    <span class="icon-label">Corretora Spot</span>
+                </div>
+
                 <div class="desktop-icon" data-app="history">
                     <div class="icon-visual icon-history">
-                        <span class="icon-glyph">[HST]</span>
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/><path d="M4 12a8 8 0 0 1 2.3-5.6L4 4"/></svg>
                     </div>
                     <span class="icon-label">Historico</span>
                 </div>
 
                 <div class="desktop-icon" data-app="stats">
                     <div class="icon-visual icon-stats">
-                        <span class="icon-glyph">[STS]</span>
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
                     </div>
                     <span class="icon-label">Estatisticas</span>
                 </div>
 
                 <div class="desktop-icon" data-app="ranking">
                     <div class="icon-visual icon-ranking">
-                        <span class="icon-glyph">[RNK]</span>
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3"/><path d="M18 9h3a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-3"/><path d="M6 3h12v7a6 6 0 0 1-12 0V3z"/><path d="M9 21h6"/><path d="M12 16v5"/></svg>
                     </div>
                     <span class="icon-label">Ranking Global</span>
                 </div>
 
                 <div class="desktop-icon" data-app="news">
                     <div class="icon-visual icon-news">
-                        <span class="icon-glyph">[NWS]</span>
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
                     </div>
                     <span class="icon-label">Noticias</span>
                 </div>
 
                 <div class="desktop-icon" data-app="settings">
                     <div class="icon-visual icon-settings">
-                        <span class="icon-glyph">[CFG]</span>
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ff8c00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                     </div>
                     <span class="icon-label">Graficos</span>
                 </div>
@@ -188,9 +228,9 @@
 
             <div class="desktop-windows-area">
                 <div class="desktop-window hidden" data-window="trading">
-                    <div class="window-titlebar">
+                    <div class="window-titlebar" data-app="trading">
                         <div class="win-title-left">
-                            <span class="win-tag">[APP]</span>
+                            <span class="win-title-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#00e676" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-5 5"/><polyline points="14 9 18 9 18 13"/></svg></span>
                             <span class="win-title-text">CYBER_OPTION_TERMINAL_V4.2</span>
                             <span class="header-payout" id="header-payout-badge">RETORNO: +88%</span>
                         </div>
@@ -204,7 +244,11 @@
                                 <span class="balance-label">SALDO VIRTUAL</span>
                                 <span class="balance-val" id="header-user-balance">R$ 10.000,00</span>
                             </div>
-                            <button class="win-btn-control win-btn-close" data-app="trading">X</button>
+                            <div class="window-controls">
+                                <button class="win-btn-control win-btn-minimize" data-app="trading" title="Minimizar">&#9472;</button>
+                                <button class="win-btn-control win-btn-maximize" data-app="trading" title="Maximizar / Restaurar">&#9633;</button>
+                                <button class="win-btn-control win-btn-close" data-app="trading" title="Fechar">&#10005;</button>
+                            </div>
                         </div>
                     </div>
 
@@ -296,12 +340,20 @@
                             </div>
                         </aside>
                     </div>
+                    <div class="win-resize-handle" data-app="trading"></div>
                 </div>
 
                 <div class="desktop-window hidden" data-window="history">
-                    <div class="window-titlebar">
-                        <span class="win-title-text">HISTORICO DE OPERACOES REALIZADAS</span>
-                        <button class="win-btn-control win-btn-close" data-app="history">X</button>
+                    <div class="window-titlebar" data-app="history">
+                        <div class="win-title-left">
+                            <span class="win-title-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/><path d="M4 12a8 8 0 0 1 2.3-5.6L4 4"/></svg></span>
+                            <span class="win-title-text">HISTORICO DE OPERACOES REALIZADAS</span>
+                        </div>
+                        <div class="window-controls">
+                            <button class="win-btn-control win-btn-minimize" data-app="history" title="Minimizar">&#9472;</button>
+                            <button class="win-btn-control win-btn-maximize" data-app="history" title="Maximizar / Restaurar">&#9633;</button>
+                            <button class="win-btn-control win-btn-close" data-app="history" title="Fechar">&#10005;</button>
+                        </div>
                     </div>
                     <div class="window-view-panel">
                         <table class="data-table">
@@ -320,12 +372,20 @@
                             <tbody id="history-table-body"></tbody>
                         </table>
                     </div>
+                    <div class="win-resize-handle" data-app="history"></div>
                 </div>
 
                 <div class="desktop-window hidden" data-window="stats">
-                    <div class="window-titlebar">
-                        <span class="win-title-text">PAINEL DE ESTATISTICAS E PERFORMANCE</span>
-                        <button class="win-btn-control win-btn-close" data-app="stats">X</button>
+                    <div class="window-titlebar" data-app="stats">
+                        <div class="win-title-left">
+                            <span class="win-title-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg></span>
+                            <span class="win-title-text">PAINEL DE ESTATISTICAS E PERFORMANCE</span>
+                        </div>
+                        <div class="window-controls">
+                            <button class="win-btn-control win-btn-minimize" data-app="stats" title="Minimizar">&#9472;</button>
+                            <button class="win-btn-control win-btn-maximize" data-app="stats" title="Maximizar / Restaurar">&#9633;</button>
+                            <button class="win-btn-control win-btn-close" data-app="stats" title="Fechar">&#10005;</button>
+                        </div>
                     </div>
                     <div class="window-view-panel">
                         <div class="stats-grid">
@@ -359,12 +419,20 @@
                             </div>
                         </div>
                     </div>
+                    <div class="win-resize-handle" data-app="stats"></div>
                 </div>
 
                 <div class="desktop-window hidden" data-window="ranking">
-                    <div class="window-titlebar">
-                        <span class="win-title-text">RANKING GLOBAL DE TRADERS</span>
-                        <button class="win-btn-control win-btn-close" data-app="ranking">X</button>
+                    <div class="window-titlebar" data-app="ranking">
+                        <div class="win-title-left">
+                            <span class="win-title-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3"/><path d="M18 9h3a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-3"/><path d="M6 3h12v7a6 6 0 0 1-12 0V3z"/><path d="M9 21h6"/><path d="M12 16v5"/></svg></span>
+                            <span class="win-title-text">RANKING GLOBAL DE TRADERS</span>
+                        </div>
+                        <div class="window-controls">
+                            <button class="win-btn-control win-btn-minimize" data-app="ranking" title="Minimizar">&#9472;</button>
+                            <button class="win-btn-control win-btn-maximize" data-app="ranking" title="Maximizar / Restaurar">&#9633;</button>
+                            <button class="win-btn-control win-btn-close" data-app="ranking" title="Fechar">&#10005;</button>
+                        </div>
                     </div>
                     <div class="window-view-panel">
                         <table class="data-table">
@@ -380,17 +448,45 @@
                             <tbody id="ranking-table-body"></tbody>
                         </table>
                     </div>
+                    <div class="win-resize-handle" data-app="ranking"></div>
                 </div>
 
                 <div class="desktop-window hidden" data-window="settings">
-                    <div class="window-titlebar">
+                    <div class="window-titlebar" data-app="settings">
                         <div class="win-title-left">
-                            <span class="win-tag">[CFG]</span>
-                            <span class="win-title-text">CONFIGURACOES DE GRAFICOS E DESEMPENHO</span>
+                            <span class="win-title-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ff8c00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                            <span class="win-title-text">CONFIGURACOES DE MERCADO E GRAFICOS</span>
                         </div>
-                        <button class="win-btn-control win-btn-close" data-app="settings">X</button>
+                        <div class="window-controls">
+                            <button class="win-btn-control win-btn-minimize" data-app="settings" title="Minimizar">&#9472;</button>
+                            <button class="win-btn-control win-btn-maximize" data-app="settings" title="Maximizar / Restaurar">&#9633;</button>
+                            <button class="win-btn-control win-btn-close" data-app="settings" title="Fechar">&#10005;</button>
+                        </div>
                     </div>
                     <div class="window-view-panel settings-view-panel">
+                        <div class="settings-section">
+                            <div class="settings-title">FONTE DE DADOS DO MERCADO</div>
+                            <div class="settings-desc">Escolha entre cotacoes reais via WebSocket da Binance ou simulacao sintetica procedural:</div>
+                            <div class="data-source-grid">
+                                <div class="data-source-card active" data-source="real">
+                                    <div class="source-card-header">
+                                        <span class="source-status-dot dot-real">&#9679;</span>
+                                        <span class="source-title">DADOS REAIS (BINANCE WS)</span>
+                                        <span class="source-badge">ONLINE</span>
+                                    </div>
+                                    <div class="source-desc">Streaming em tempo real direto da Binance com cotacoes de Bitcoin, Ethereum, Solana e mais.</div>
+                                </div>
+                                <div class="data-source-card" data-source="simulated">
+                                    <div class="source-card-header">
+                                        <span class="source-status-dot dot-sim">&#9679;</span>
+                                        <span class="source-title">SIMULADOR SINTETICO (OTC)</span>
+                                        <span class="source-badge badge-sim">OFFLINE</span>
+                                    </div>
+                                    <div class="source-desc">Algoritmo local de variacao de precos. Nao requer conexao com corretoras externas.</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="settings-section">
                             <div class="settings-title">PRESETS DE QUALIDADE GRAFICA</div>
                             <div class="settings-desc">Selecione o preset de acordo com a capacidade do seu computador para obter a melhor taxa de quadros (FPS):</div>
@@ -428,41 +524,181 @@
                             </div>
                         </div>
                     </div>
+                    <div class="win-resize-handle" data-app="settings"></div>
+                </div>
+
+                <div class="desktop-window hidden" data-window="exchange">
+                    <div class="window-titlebar" data-app="exchange">
+                        <div class="win-title-left">
+                            <span class="win-title-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ffd700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="6"/><path d="M15 6l4 3-4 3"/><path d="M19 9H9"/><path d="M9 18l-4-3 4-3"/><path d="M5 15h10"/></svg></span>
+                            <span class="win-title-text">CYBER_EXCHANGE_SPOT_V1.0</span>
+                            <span class="header-payout">CORRETORA SPOT &amp; CARTEIRA</span>
+                        </div>
+                        <div class="win-title-center">
+                            <span class="asset-badge-name">PATRIMONIO TOTAL:</span>
+                            <span class="asset-badge-price text-pos" id="exchange-total-networth">R$ 10.000,00</span>
+                        </div>
+                        <div class="win-title-right">
+                            <div class="balance-card">
+                                <span class="balance-label">SALDO DISPONIVEL</span>
+                                <span class="balance-val" id="exchange-cash-balance">R$ 10.000,00</span>
+                            </div>
+                            <div class="window-controls">
+                                <button class="win-btn-control win-btn-minimize" data-app="exchange" title="Minimizar">&#9472;</button>
+                                <button class="win-btn-control win-btn-maximize" data-app="exchange" title="Maximizar / Restaurar">&#9633;</button>
+                                <button class="win-btn-control win-btn-close" data-app="exchange" title="Fechar">&#10005;</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="window-view-panel exchange-view-panel">
+                        <div class="exchange-summary-bar">
+                            <div class="summary-pill">
+                                <span class="pill-label">SALDO EM CAIXA</span>
+                                <span class="pill-val" id="pill-cash-balance">R$ 10.000,00</span>
+                            </div>
+                            <div class="summary-pill">
+                                <span class="pill-label">VALOR EM ATIVOS</span>
+                                <span class="pill-val" id="pill-crypto-valuation">R$ 0,00</span>
+                            </div>
+                            <div class="summary-pill">
+                                <span class="pill-label">TOTAL INVESTIDO</span>
+                                <span class="pill-val" id="pill-total-invested">R$ 0,00</span>
+                            </div>
+                            <div class="summary-pill">
+                                <span class="pill-label">LUCRO / PREJUIZO CARTEIRA</span>
+                                <span class="pill-val" id="pill-unrealized-pnl">R$ 0,00 (+0.00%)</span>
+                            </div>
+                        </div>
+
+                        <div class="exchange-nav-tabs">
+                            <button class="exchange-tab-btn active" data-exchange-tab="positions">MINHA CARTEIRA (POSICOES)</button>
+                            <button class="exchange-tab-btn" data-exchange-tab="market">COMPRAR ATIVOS (MERCADO)</button>
+                            <button class="exchange-tab-btn" data-exchange-tab="history">HISTORICO DE ORDENS SPOT</button>
+                        </div>
+
+                        <div class="exchange-tab-content" id="tab-positions-content">
+                            <div class="exchange-positions-grid" id="exchange-positions-container"></div>
+                        </div>
+
+                        <div class="exchange-tab-content hidden" id="tab-market-content">
+                            <div class="exchange-market-layout">
+                                <div class="exchange-market-list-container">
+                                    <div class="category-tabs" style="margin-bottom: 8px;">
+                                        <button class="spot-cat-btn active" data-category="all">TODOS</button>
+                                        <button class="spot-cat-btn" data-category="crypto">CRIPTO</button>
+                                        <button class="spot-cat-btn" data-category="forex">FOREX</button>
+                                        <button class="spot-cat-btn" data-category="stocks">ACOES</button>
+                                        <button class="spot-cat-btn" data-category="commodities">COMMODITIES</button>
+                                    </div>
+                                    <div class="exchange-market-list" id="exchange-market-assets"></div>
+                                </div>
+                                <div class="exchange-buy-panel">
+                                    <div class="panel-block-title">COMPRA SPOT DE ATIVO</div>
+                                    <div class="selected-buy-asset-info" id="buy-selected-asset-header">
+                                        <div class="buy-sym-box">
+                                            <span class="buy-sym" id="buy-asset-symbol">BTC/USDT</span>
+                                            <span class="buy-name" id="buy-asset-name">Bitcoin</span>
+                                        </div>
+                                        <span class="buy-price" id="buy-asset-price">R$ 90.000,00</span>
+                                    </div>
+                                    <div class="panel-block" style="margin-top: 10px;">
+                                        <span class="panel-block-title">VALOR A INVESTIR (BRL)</span>
+                                        <div class="trade-input-box">
+                                            <span class="currency-tag">R$</span>
+                                            <input type="number" id="input-spot-buy-amount" class="trade-input" value="100" min="10" step="10">
+                                        </div>
+                                        <div class="quick-amount-pills" style="margin-top: 8px;">
+                                            <button class="spot-quick-btn" data-amount="50">50</button>
+                                            <button class="spot-quick-btn" data-amount="100">100</button>
+                                            <button class="spot-quick-btn" data-amount="500">500</button>
+                                            <button class="spot-quick-btn" data-amount="1000">1000</button>
+                                            <button class="spot-quick-btn" data-amount="max">MAX</button>
+                                        </div>
+                                    </div>
+                                    <div class="buy-estimate-box">
+                                        <span class="estimate-label">Quantidade estimada:</span>
+                                        <strong class="estimate-val" id="buy-estimate-qty">0.001111 BTC</strong>
+                                    </div>
+                                    <button class="btn-spot-buy" id="btn-execute-spot-buy">CONFIRMAR COMPRA SPOT</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="exchange-tab-content hidden" id="tab-history-content">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>HORARIO</th>
+                                        <th>TIPO</th>
+                                        <th>ATIVO</th>
+                                        <th>QUANTIDADE</th>
+                                        <th>PRECO</th>
+                                        <th>TOTAL (R$)</th>
+                                        <th>LUCRO REALIZADO</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="spot-history-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="win-resize-handle" data-app="exchange"></div>
+                </div>
+
+                <div class="desktop-window hidden" data-window="news">
+                    <div class="window-titlebar" data-app="news">
+                        <div class="win-title-left">
+                            <span class="win-title-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg></span>
+                            <span class="win-title-text">FLUXO DE NOTICIAS DO MERCADO</span>
+                        </div>
+                        <div class="window-controls">
+                            <button class="win-btn-control win-btn-minimize" data-app="news" title="Minimizar">&#9472;</button>
+                            <button class="win-btn-control win-btn-maximize" data-app="news" title="Maximizar / Restaurar">&#9633;</button>
+                            <button class="win-btn-control win-btn-close" data-app="news" title="Fechar">&#10005;</button>
+                        </div>
+                    </div>
+                    <div class="window-view-panel">
+                        <div class="news-box-container" id="news-full-list" style="height: 100%; overflow-y: auto;"></div>
+                    </div>
+                    <div class="win-resize-handle" data-app="news"></div>
                 </div>
             </div>
         </div>
 
-        <footer class="desktop-taskbar">
-            <div class="taskbar-left">
-                <div class="start-badge">CYBER_OS</div>
-                <div class="taskbar-apps">
-                    <button class="app-nav-btn" data-tab="trading">TERMINAL</button>
-                    <button class="app-nav-btn" data-tab="history">HISTORICO</button>
-                    <button class="app-nav-btn" data-tab="stats">ESTATISTICAS</button>
-                    <button class="app-nav-btn" data-tab="ranking">RANKING</button>
-                    <button class="app-nav-btn" data-tab="news">NOTICIAS</button>
-                    <button class="app-nav-btn" data-tab="settings">GRAFICOS</button>
-                </div>
+        <aside class="desktop-dock">
+            <div class="dock-top">
+                <button class="dock-launcher-btn" id="btn-dock-launcher" title="CYBER_OS">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#00e5ff" stroke-width="2"><circle cx="12" cy="12" r="9"/><polygon points="12,6 18,17 6,17" stroke="#00e5ff" fill="rgba(0,229,255,0.25)"/></svg>
+                </button>
             </div>
 
-            <div class="taskbar-tray">
-                <button class="btn-header-action" id="btn-desktop-graphics">GRAFICOS: ALTO</button>
-                <button class="btn-header-action" id="btn-toggle-audio">AUDIO: LIGADO</button>
-                <button class="btn-header-action" id="btn-reset-account">REINICIAR CONTA</button>
-                <button class="btn-header-action btn-leave-desk" id="btn-leave-pc">LEVANTAR DA MESA [ESC]</button>
-                <div class="system-status-indicator">
+            <div class="dock-apps" id="dynamic-taskbar-apps"></div>
+
+            <div class="dock-bottom">
+                <button class="dock-action-btn" id="btn-desktop-graphics" title="Graficos: Alto">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                </button>
+                <button class="dock-action-btn" id="btn-toggle-audio" title="Audio: Ligado">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                </button>
+                <button class="dock-action-btn" id="btn-reset-account" title="Reiniciar Conta">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                </button>
+                <button class="dock-action-btn dock-btn-exit" id="btn-leave-pc" title="Levantar da Mesa [ESC]">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ff3d71" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
+                <div class="dock-status-indicator" title="Sistema Online">
                     <span class="status-dot"></span>
-                    <span>ONLINE</span>
                 </div>
-                <span id="system-clock">00:00:00</span>
+                <span class="dock-clock" id="system-clock">00:00</span>
             </div>
-        </footer>
+        </aside>
     </div>
 
     <script src="src/audio.js"></script>
     <script src="src/market.js"></script>
     <script src="src/chart.js"></script>
     <script src="src/trading.js"></script>
+    <script src="src/portfolio.js"></script>
     <script src="src/desktop.js"></script>
     <script src="src/scene.js"></script>
 
@@ -472,8 +708,26 @@
             const btnMode3d = document.getElementById('btn-mode-3d');
             const btnMode2d = document.getElementById('btn-mode-2d');
 
+            const initialSource = window.marketEngine ? window.marketEngine.dataSource : (localStorage.getItem('night_trader_data_source') || 'real');
+            document.querySelectorAll('.launcher-source-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.source === initialSource);
+                card.addEventListener('click', () => {
+                    const src = card.dataset.source;
+                    document.querySelectorAll('.launcher-source-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    if (window.marketEngine) {
+                        window.marketEngine.setDataSource(src);
+                    }
+                    if (window.soundEngine) {
+                        window.soundEngine.playClick();
+                    }
+                });
+            });
+
             const start3D = () => {
                 if (launcher) launcher.classList.add('hidden');
+                document.body.classList.add('mode-room-3d');
+                document.body.classList.remove('mode-desktop-only');
                 if (!window.desktopUI) window.desktopUI = new window.DesktopUI();
                 if (!window.roomScene) window.roomScene = new window.RoomScene();
                 if (window.soundEngine) window.soundEngine.init();
@@ -481,12 +735,17 @@
 
             const start2D = () => {
                 if (launcher) launcher.classList.add('hidden');
+                document.body.classList.add('mode-desktop-only');
+                document.body.classList.remove('mode-room-3d');
                 const roomHud = document.getElementById('room-hud');
                 if (roomHud) roomHud.classList.add('hidden');
                 const reticle = document.getElementById('reticle');
                 if (reticle) reticle.classList.add('hidden');
                 const desktopOverlay = document.getElementById('desktop-terminal-container');
-                if (desktopOverlay) desktopOverlay.classList.remove('hidden');
+                if (desktopOverlay) {
+                    desktopOverlay.classList.remove('hidden');
+                    desktopOverlay.classList.remove('monitor-embedded');
+                }
                 if (!window.desktopUI) window.desktopUI = new window.DesktopUI();
                 if (window.soundEngine) window.soundEngine.init();
 
@@ -496,6 +755,8 @@
                     btnLeave.onclick = (e) => {
                         e.stopPropagation();
                         desktopOverlay.classList.add('hidden');
+                        document.body.classList.remove('mode-desktop-only');
+                        document.body.classList.add('mode-room-3d');
                         if (roomHud) roomHud.classList.remove('hidden');
                         if (reticle) reticle.classList.remove('hidden');
                         if (!window.roomScene) {

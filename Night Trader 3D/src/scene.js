@@ -303,7 +303,7 @@ class RoomScene {
         deskGroup.position.set(-0.95, 0, -2.1);
 
         const deskMat = new THREE.MeshStandardMaterial({ color: 0x0f1118, roughness: 0.4, metalness: 0.2 });
-        const top = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.06, 0.9), deskMat);
+        const top = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.06, 0.9), deskMat);
         top.position.set(0, 0.75, 0);
         top.castShadow = true;
         top.receiveShadow = true;
@@ -311,12 +311,12 @@ class RoomScene {
 
         const legMat = new THREE.MeshStandardMaterial({ color: 0x08090d, metalness: 0.8, roughness: 0.3 });
         const leg1 = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.75, 0.8), legMat);
-        leg1.position.set(-0.88, 0.375, 0);
+        leg1.position.set(-0.98, 0.375, 0);
         leg1.castShadow = true;
         deskGroup.add(leg1);
 
         const leg2 = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.75, 0.8), legMat);
-        leg2.position.set(0.88, 0.375, 0);
+        leg2.position.set(0.98, 0.375, 0);
         leg2.castShadow = true;
         deskGroup.add(leg2);
 
@@ -353,17 +353,16 @@ class RoomScene {
         deskGroup.add(monPole);
 
         const monFrameMat = new THREE.MeshStandardMaterial({ color: 0x0a0c12, metalness: 0.5, roughness: 0.5 });
-        const monBezel = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.48, 0.03), monFrameMat);
+        const monBezel = new THREE.Mesh(new THREE.BoxGeometry(1.42, 0.80, 0.03), monFrameMat);
         monBezel.position.set(0, 1.22, -0.2);
         monBezel.castShadow = true;
         deskGroup.add(monBezel);
 
+        const screenTexture = this.createScreenTexture();
         const screenMat = new THREE.MeshBasicMaterial({
-            color: 0x00e5ff,
-            transparent: true,
-            opacity: 0.95
+            map: screenTexture
         });
-        this.screenMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.11, 0.44), screenMat);
+        this.screenMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.38, 0.76), screenMat);
         this.screenMesh.position.set(0, 1.22, -0.184);
         deskGroup.add(this.screenMesh);
 
@@ -461,6 +460,107 @@ class RoomScene {
         tex.wrapS = THREE.RepeatWrapping;
         tex.wrapT = THREE.RepeatWrapping;
         return tex;
+    }
+
+    createScreenTexture() {
+        this.screenCanvas = document.createElement('canvas');
+        this.screenCanvas.width = 512;
+        this.screenCanvas.height = 288;
+        this.screenCtx = this.screenCanvas.getContext('2d');
+        this.screenTexture = new THREE.CanvasTexture(this.screenCanvas);
+        this.updateScreenCanvas();
+        return this.screenTexture;
+    }
+
+    updateScreenCanvas() {
+        if (!this.screenCtx) return;
+        const ctx = this.screenCtx;
+        const w = 512;
+        const h = 288;
+
+        ctx.fillStyle = '#060912';
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.strokeStyle = '#121a2c';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < w; x += 40) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, h);
+            ctx.stroke();
+        }
+        for (let y = 0; y < h; y += 30) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(w, y);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = '#0e1728';
+        ctx.fillRect(0, 0, w, 26);
+        ctx.fillStyle = '#00e5ff';
+        ctx.font = 'bold 11px monospace';
+        ctx.fillText('CYBER_OS v4.2 [TERMINAL ONLINE]', 10, 18);
+
+        const asset = window.marketEngine ? window.marketEngine.getSelectedAsset() : null;
+        const price = asset ? asset.currentPrice.toFixed(asset.decimals) : '64280.00';
+        const name = asset ? asset.name : 'BTC / USDT';
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 13px monospace';
+        ctx.fillText(name, 12, 54);
+
+        ctx.fillStyle = '#00e676';
+        ctx.font = 'bold 20px monospace';
+        ctx.fillText(price, 12, 80);
+
+        const candles = window.marketEngine && window.marketEngine.history[window.marketEngine.selectedAssetId] ? 
+            window.marketEngine.history[window.marketEngine.selectedAssetId]['1m'] : null;
+
+        if (candles && candles.length > 0) {
+            const slice = candles.slice(-24);
+            let min = Infinity, max = -Infinity;
+            slice.forEach(c => {
+                if (c.low < min) min = c.low;
+                if (c.high > max) max = c.high;
+            });
+            const range = (max - min) || 1;
+            const chartW = 300;
+            const chartH = 130;
+            const startX = 190;
+            const startY = 60;
+
+            slice.forEach((c, idx) => {
+                const cx = startX + (idx * (chartW / slice.length));
+                const isGreen = c.close >= c.open;
+                ctx.fillStyle = isGreen ? '#00e676' : '#ff3d71';
+                ctx.strokeStyle = isGreen ? '#00e676' : '#ff3d71';
+
+                const highY = startY + chartH - ((c.high - min) / range) * chartH;
+                const lowY = startY + chartH - ((c.low - min) / range) * chartH;
+                const openY = startY + chartH - ((c.open - min) / range) * chartH;
+                const closeY = startY + chartH - ((c.close - min) / range) * chartH;
+
+                ctx.beginPath();
+                ctx.moveTo(cx + 4, highY);
+                ctx.lineTo(cx + 4, lowY);
+                ctx.stroke();
+
+                const topY = Math.min(openY, closeY);
+                const botY = Math.max(openY, closeY);
+                ctx.fillRect(cx, topY, 8, Math.max(2, botY - topY));
+            });
+        }
+
+        ctx.fillStyle = '#0b101c';
+        ctx.fillRect(0, h - 24, w, 24);
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px monospace';
+        ctx.fillText('[E] SENTAR NO COMPUTADOR', 12, h - 8);
+
+        if (this.screenTexture) {
+            this.screenTexture.needsUpdate = true;
+        }
     }
 
     buildCity() {
@@ -722,7 +822,10 @@ class RoomScene {
         this.transitionProgress = 0;
 
         const desktopOverlay = document.getElementById('desktop-terminal-container');
-        if (desktopOverlay) desktopOverlay.classList.add('hidden');
+        if (desktopOverlay) {
+            desktopOverlay.classList.add('hidden');
+            desktopOverlay.classList.remove('monitor-embedded');
+        }
 
         if (window.soundEngine) {
             window.soundEngine.playClick();
@@ -810,13 +913,18 @@ class RoomScene {
         if (this.state === 'walk') {
             this.updatePlayerMovement(delta);
             this.updateCameraFromPlayer();
+            this.screenUpdateTimer = (this.screenUpdateTimer || 0) + delta;
+            if (this.screenUpdateTimer > 0.4) {
+                this.screenUpdateTimer = 0;
+                this.updateScreenCanvas();
+            }
         } else if (this.state === 'sitting_down') {
             this.transitionProgress += delta / this.transitionDuration;
             const t = Math.min(1.0, this.transitionProgress);
             const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
-            const targetPos = new THREE.Vector3(-0.95, 1.24, -1.55);
-            const targetLook = new THREE.Vector3(-0.95, 1.22, -2.28);
+            const targetPos = new THREE.Vector3(-0.95, 1.20, -1.48);
+            const targetLook = new THREE.Vector3(-0.95, 1.20, -2.28);
 
             this.camera.position.lerpVectors(this.transitionStartPos, targetPos, ease);
             const curLook = new THREE.Vector3().lerpVectors(this.transitionStartTarget, targetLook, ease);
@@ -830,16 +938,22 @@ class RoomScene {
             if (t >= 1.0) {
                 this.state = 'pc';
                 const desktopOverlay = document.getElementById('desktop-terminal-container');
-                if (desktopOverlay) desktopOverlay.classList.remove('hidden');
+                if (desktopOverlay) {
+                    desktopOverlay.classList.remove('hidden');
+                    desktopOverlay.classList.add('monitor-embedded');
+                    if (window.desktopUI && window.desktopUI.chartEngine) {
+                        window.desktopUI.chartEngine.resize();
+                    }
+                }
             }
         } else if (this.state === 'standing_up') {
             this.transitionProgress += delta / (this.transitionDuration * 0.85);
             const t = Math.min(1.0, this.transitionProgress);
             const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
-            const seatedPos = new THREE.Vector3(-0.95, 1.24, -1.55);
+            const seatedPos = new THREE.Vector3(-0.95, 1.20, -1.48);
             const standingPos = new THREE.Vector3(-0.95, 1.65, -0.6);
-            const seatedLook = new THREE.Vector3(-0.95, 1.22, -2.28);
+            const seatedLook = new THREE.Vector3(-0.95, 1.20, -2.28);
             const standingLook = new THREE.Vector3(-0.95, 1.6, -2.5);
 
             this.camera.position.lerpVectors(seatedPos, standingPos, ease);

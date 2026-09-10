@@ -1,8 +1,51 @@
 class DesktopUI {
     constructor() {
-        this.activeApp = null;
+        this.openApps = new Set();
+        this.focusedApp = null;
+        this.highestZIndex = 100;
         this.selectedCategory = 'all';
+        this.selectedExchangeCategory = 'all';
+        this.selectedExchangeAssetId = 'BTC_USDT';
+        this.activeExchangeTab = 'positions';
         this.chartEngine = null;
+
+        this.appConfigs = {
+            trading: {
+                title: 'CyberTrader',
+                svg: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#00e676" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-5 5"/><polyline points="14 9 18 9 18 13"/></svg>',
+                defaultLeft: 100, defaultTop: 25, defaultWidth: 940, defaultHeight: 570
+            },
+            exchange: {
+                title: 'Corretora Spot',
+                svg: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ffd700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="6"/><path d="M15 6l4 3-4 3"/><path d="M19 9H9"/><path d="M9 18l-4-3 4-3"/><path d="M5 15h10"/></svg>',
+                defaultLeft: 140, defaultTop: 40, defaultWidth: 900, defaultHeight: 560
+            },
+            history: {
+                title: 'Historico de Operacoes',
+                svg: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/><path d="M4 12a8 8 0 0 1 2.3-5.6L4 4"/></svg>',
+                defaultLeft: 180, defaultTop: 55, defaultWidth: 800, defaultHeight: 490
+            },
+            stats: {
+                title: 'Estatisticas & Performance',
+                svg: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>',
+                defaultLeft: 220, defaultTop: 70, defaultWidth: 720, defaultHeight: 460
+            },
+            ranking: {
+                title: 'Ranking Global',
+                svg: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3"/><path d="M18 9h3a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-3"/><path d="M6 3h12v7a6 6 0 0 1-12 0V3z"/><path d="M9 21h6"/><path d="M12 16v5"/></svg>',
+                defaultLeft: 260, defaultTop: 85, defaultWidth: 680, defaultHeight: 460
+            },
+            news: {
+                title: 'Noticias do Mercado',
+                svg: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>',
+                defaultLeft: 300, defaultTop: 100, defaultWidth: 650, defaultHeight: 460
+            },
+            settings: {
+                title: 'Graficos & Configuracoes',
+                svg: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ff8c00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+                defaultLeft: 340, defaultTop: 70, defaultWidth: 660, defaultHeight: 480
+            }
+        };
 
         this.init();
     }
@@ -10,21 +53,41 @@ class DesktopUI {
     init() {
         this.chartEngine = new window.ChartEngine('trading-canvas');
         this.bindEvents();
+        this.setupWindowDragAndResize();
         this.renderAssetList();
         this.renderHistory();
         this.renderStats();
         this.renderRanking();
         this.renderNews();
+        this.renderExchange();
         this.updateHeader();
         this.startClock();
 
+        this.openApp('trading');
+
         window.marketEngine.subscribe((asset, candles) => {
             this.updateHeader();
-            if (this.activeApp === 'trading') {
-                this.chartEngine.setActiveTrades(window.tradingEngine.activeTrades);
-                this.chartEngine.render(asset, candles);
+            if (this.openApps.has('trading')) {
+                const trdWin = document.querySelector('.desktop-window[data-window="trading"]');
+                if (trdWin && !trdWin.classList.contains('hidden') && !trdWin.classList.contains('window-minimized')) {
+                    this.chartEngine.setActiveTrades(window.tradingEngine.activeTrades);
+                    this.chartEngine.render(asset, candles);
+                }
             }
             this.updateActiveTradesList();
+            this.updateAssetListPrices();
+            if (this.openApps.has('exchange')) {
+                const excWin = document.querySelector('.desktop-window[data-window="exchange"]');
+                if (excWin && !excWin.classList.contains('hidden') && !excWin.classList.contains('window-minimized')) {
+                    this.updateExchangeSummary();
+                    if (this.activeExchangeTab === 'positions') {
+                        this.updateExchangePositionsPrices();
+                    } else if (this.activeExchangeTab === 'market') {
+                        this.updateExchangeMarketPrices();
+                        this.updateExchangeBuyPanel();
+                    }
+                }
+            }
         });
 
         window.tradingEngine.onTradeUpdate = () => {
@@ -33,7 +96,18 @@ class DesktopUI {
             this.renderHistory();
             this.renderStats();
             this.renderRanking();
+            this.updateExchangeSummary();
+            if (this.activeExchangeTab === 'positions') {
+                this.updateExchangePositionsPrices();
+            }
         };
+
+        if (window.portfolioEngine) {
+            window.portfolioEngine.onPortfolioUpdate = () => {
+                this.updateHeader();
+                this.renderExchange();
+            };
+        }
 
         window.notifyTradeResult = (trade) => {
             this.showNotification(trade);
@@ -51,20 +125,27 @@ class DesktopUI {
 
         document.querySelectorAll('.win-btn-close').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const app = e.currentTarget.dataset.app;
                 this.closeApp(app);
                 if (window.soundEngine) window.soundEngine.playClick();
             });
         });
 
-        document.querySelectorAll('.app-nav-btn').forEach(btn => {
+        document.querySelectorAll('.win-btn-minimize').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const app = e.currentTarget.dataset.tab;
-                if (this.activeApp === app) {
-                    this.closeApp(app);
-                } else {
-                    this.openApp(app);
-                }
+                e.stopPropagation();
+                const app = e.currentTarget.dataset.app;
+                this.minimizeApp(app);
+                if (window.soundEngine) window.soundEngine.playClick();
+            });
+        });
+
+        document.querySelectorAll('.win-btn-maximize').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const app = e.currentTarget.dataset.app;
+                this.toggleMaximizeApp(app);
                 if (window.soundEngine) window.soundEngine.playClick();
             });
         });
@@ -79,6 +160,16 @@ class DesktopUI {
             });
         });
 
+        document.querySelectorAll('.data-source-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const src = e.currentTarget.dataset.source;
+                if (window.marketEngine) {
+                    window.marketEngine.setDataSource(src);
+                }
+                if (window.soundEngine) window.soundEngine.playClick();
+            });
+        });
+
         document.querySelectorAll('.cat-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
@@ -88,6 +179,79 @@ class DesktopUI {
                 if (window.soundEngine) window.soundEngine.playClick();
             });
         });
+
+        document.querySelectorAll('.spot-cat-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.spot-cat-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                this.selectedExchangeCategory = e.target.dataset.category;
+                this.renderExchangeMarket();
+                if (window.soundEngine) window.soundEngine.playClick();
+            });
+        });
+
+        document.querySelectorAll('.exchange-tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.exchange-tab-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                this.activeExchangeTab = e.target.dataset.exchangeTab;
+
+                const posTab = document.getElementById('tab-positions-content');
+                const mktTab = document.getElementById('tab-market-content');
+                const hisTab = document.getElementById('tab-history-content');
+
+                if (posTab) posTab.classList.toggle('hidden', this.activeExchangeTab !== 'positions');
+                if (mktTab) mktTab.classList.toggle('hidden', this.activeExchangeTab !== 'market');
+                if (hisTab) hisTab.classList.toggle('hidden', this.activeExchangeTab !== 'history');
+
+                if (this.activeExchangeTab === 'positions') this.renderExchangePositions();
+                else if (this.activeExchangeTab === 'market') this.renderExchangeMarket();
+                else if (this.activeExchangeTab === 'history') this.renderExchangeHistory();
+
+                if (window.soundEngine) window.soundEngine.playClick();
+            });
+        });
+
+        document.querySelectorAll('.spot-quick-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const val = e.target.dataset.amount;
+                const input = document.getElementById('input-spot-buy-amount');
+                if (!input) return;
+                if (val === 'max') {
+                    const balance = window.tradingEngine ? window.tradingEngine.wallet.balance : 0;
+                    input.value = Math.floor(balance);
+                } else {
+                    input.value = val;
+                }
+                this.updateExchangeBuyPanel();
+                if (window.soundEngine) window.soundEngine.playClick();
+            });
+        });
+
+        const spotBuyInput = document.getElementById('input-spot-buy-amount');
+        if (spotBuyInput) {
+            spotBuyInput.addEventListener('input', () => {
+                this.updateExchangeBuyPanel();
+            });
+        }
+
+        const btnExecuteBuy = document.getElementById('btn-execute-spot-buy');
+        if (btnExecuteBuy) {
+            btnExecuteBuy.addEventListener('click', () => {
+                const input = document.getElementById('input-spot-buy-amount');
+                const amount = parseFloat(input ? input.value : 0);
+                if (window.portfolioEngine) {
+                    const res = window.portfolioEngine.buy(this.selectedExchangeAssetId, amount);
+                    if (!res.success) {
+                        alert(res.message);
+                    } else {
+                        this.showGenericNotification(res.message, 'success');
+                        this.renderExchangePositions();
+                        this.updateExchangeSummary();
+                    }
+                }
+            });
+        }
 
         document.querySelectorAll('.tf-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -152,7 +316,7 @@ class DesktopUI {
         if (btnCall) {
             btnCall.addEventListener('click', () => {
                 const curAsset = window.marketEngine.getSelectedAsset();
-                const res = window.tradingEngine.executeTrade(curAsset, 'SUBIR');
+                const res = window.tradingEngine.executeTrade(curAsset, 'CALL');
                 if (!res.success) {
                     alert(res.message);
                 }
@@ -163,7 +327,7 @@ class DesktopUI {
         if (btnPut) {
             btnPut.addEventListener('click', () => {
                 const curAsset = window.marketEngine.getSelectedAsset();
-                const res = window.tradingEngine.executeTrade(curAsset, 'DESCER');
+                const res = window.tradingEngine.executeTrade(curAsset, 'PUT');
                 if (!res.success) {
                     alert(res.message);
                 }
@@ -173,12 +337,14 @@ class DesktopUI {
         const btnReset = document.getElementById('btn-reset-account');
         if (btnReset) {
             btnReset.addEventListener('click', () => {
-                if (confirm('Deseja realmente reiniciar seu saldo virtual para R$ 10.000,00?')) {
+                if (confirm('Deseja realmente reiniciar todo o seu saldo virtual e investimentos para R$ 10.000,00?')) {
                     window.tradingEngine.resetAccount();
+                    if (window.portfolioEngine) window.portfolioEngine.resetPortfolio();
                     this.updateHeader();
                     this.renderHistory();
                     this.renderStats();
                     this.renderRanking();
+                    this.renderExchange();
                     if (window.soundEngine) window.soundEngine.playClick();
                 }
             });
@@ -192,30 +358,176 @@ class DesktopUI {
                 btnAudio.classList.toggle('muted', isMuted);
             });
         }
+
+        const btnLauncher = document.getElementById('btn-dock-launcher');
+        if (btnLauncher) {
+            btnLauncher.addEventListener('click', () => {
+                this.openApp('trading');
+                if (window.soundEngine) window.soundEngine.playClick();
+            });
+        }
+    }
+
+    setupWindowDragAndResize() {
+        const desktopArea = document.querySelector('.desktop-windows-area');
+
+        document.querySelectorAll('.desktop-window').forEach(win => {
+            const appName = win.dataset.window;
+            const titlebar = win.querySelector('.window-titlebar');
+            const resizeHandle = win.querySelector('.win-resize-handle');
+
+            win.addEventListener('pointerdown', () => {
+                this.focusWindow(appName);
+            });
+
+            if (titlebar) {
+                let isDragging = false;
+                let startPointerX = 0;
+                let startPointerY = 0;
+                let startWinLeft = 0;
+                let startWinTop = 0;
+
+                titlebar.addEventListener('dblclick', (e) => {
+                    if (e.target.closest('.win-btn-control')) return;
+                    this.toggleMaximizeApp(appName);
+                });
+
+                titlebar.addEventListener('pointerdown', (e) => {
+                    if (e.target.closest('.win-btn-control')) return;
+                    this.focusWindow(appName);
+
+                    if (win.classList.contains('window-maximized')) {
+                        const rect = win.getBoundingClientRect();
+                        win.classList.remove('window-maximized');
+                        const maxBtn = win.querySelector('.win-btn-maximize');
+                        if (maxBtn) maxBtn.innerHTML = '&#9633;';
+
+                        const newWidth = parseFloat(win.dataset.preMaxWidth) || 800;
+                        const newHeight = parseFloat(win.dataset.preMaxHeight) || 500;
+                        win.style.width = `${newWidth}px`;
+                        win.style.height = `${newHeight}px`;
+
+                        const ratio = (e.clientX - rect.left) / rect.width;
+                        const newLeft = Math.max(0, e.clientX - (newWidth * ratio));
+                        win.style.left = `${newLeft}px`;
+                        win.style.top = '10px';
+                    }
+
+                    isDragging = true;
+                    startPointerX = e.clientX;
+                    startPointerY = e.clientY;
+                    startWinLeft = win.offsetLeft;
+                    startWinTop = win.offsetTop;
+                    titlebar.setPointerCapture(e.pointerId);
+                });
+
+                titlebar.addEventListener('pointermove', (e) => {
+                    if (!isDragging) return;
+                    const dx = e.clientX - startPointerX;
+                    const dy = e.clientY - startPointerY;
+                    const containerWidth = desktopArea ? desktopArea.clientWidth : window.innerWidth;
+                    const containerHeight = desktopArea ? desktopArea.clientHeight : window.innerHeight;
+
+                    const newLeft = Math.min(Math.max(-win.offsetWidth + 80, startWinLeft + dx), containerWidth - 80);
+                    const newTop = Math.min(Math.max(0, startWinTop + dy), containerHeight - 40);
+
+                    win.style.left = `${newLeft}px`;
+                    win.style.top = `${newTop}px`;
+                });
+
+                const stopDrag = (e) => {
+                    if (isDragging) {
+                        isDragging = false;
+                        try { titlebar.releasePointerCapture(e.pointerId); } catch (_) {}
+                    }
+                };
+
+                titlebar.addEventListener('pointerup', stopDrag);
+                titlebar.addEventListener('pointercancel', stopDrag);
+            }
+
+            if (resizeHandle) {
+                let isResizing = false;
+                let startPointerX = 0;
+                let startPointerY = 0;
+                let startWidth = 0;
+                let startHeight = 0;
+
+                resizeHandle.addEventListener('pointerdown', (e) => {
+                    e.stopPropagation();
+                    if (win.classList.contains('window-maximized')) return;
+                    this.focusWindow(appName);
+                    isResizing = true;
+                    startPointerX = e.clientX;
+                    startPointerY = e.clientY;
+                    startWidth = win.offsetWidth;
+                    startHeight = win.offsetHeight;
+                    resizeHandle.setPointerCapture(e.pointerId);
+                });
+
+                resizeHandle.addEventListener('pointermove', (e) => {
+                    if (!isResizing) return;
+                    const dx = e.clientX - startPointerX;
+                    const dy = e.clientY - startPointerY;
+                    const containerWidth = desktopArea ? desktopArea.clientWidth : window.innerWidth;
+                    const containerHeight = desktopArea ? desktopArea.clientHeight : window.innerHeight;
+
+                    const newWidth = Math.min(Math.max(380, startWidth + dx), containerWidth - win.offsetLeft);
+                    const newHeight = Math.min(Math.max(240, startHeight + dy), containerHeight - win.offsetTop);
+
+                    win.style.width = `${newWidth}px`;
+                    win.style.height = `${newHeight}px`;
+
+                    if (appName === 'trading' && this.chartEngine) {
+                        this.chartEngine.resize();
+                    }
+                });
+
+                const stopResize = (e) => {
+                    if (isResizing) {
+                        isResizing = false;
+                        try { resizeHandle.releasePointerCapture(e.pointerId); } catch (_) {}
+                        if (appName === 'trading' && this.chartEngine) {
+                            this.chartEngine.resize();
+                        }
+                    }
+                };
+
+                resizeHandle.addEventListener('pointerup', stopResize);
+                resizeHandle.addEventListener('pointercancel', stopResize);
+            }
+        });
     }
 
     openApp(appName) {
-        this.activeApp = appName;
+        const win = document.querySelector(`.desktop-window[data-window="${appName}"]`);
+        if (!win) return;
 
-        document.querySelectorAll('.desktop-window').forEach(win => {
-            if (win.dataset.window === appName) {
-                win.classList.remove('hidden');
-            } else {
-                win.classList.add('hidden');
+        const config = this.appConfigs[appName];
+        if (!this.openApps.has(appName)) {
+            this.openApps.add(appName);
+            if (!win.dataset.initializedPos && config) {
+                win.style.left = `${config.defaultLeft}px`;
+                win.style.top = `${config.defaultTop}px`;
+                win.style.width = `${config.defaultWidth}px`;
+                win.style.height = `${config.defaultHeight}px`;
+                win.dataset.initializedPos = 'true';
             }
-        });
+        }
 
-        document.querySelectorAll('.app-nav-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.tab === appName);
-        });
+        win.classList.remove('hidden', 'window-minimized');
+        this.focusWindow(appName);
+        this.updateTaskbar();
 
         if (appName === 'trading') {
             setTimeout(() => {
-                this.chartEngine.resize();
+                if (this.chartEngine) this.chartEngine.resize();
                 const curAsset = window.marketEngine.getSelectedAsset();
                 const candles = window.marketEngine.history[window.marketEngine.selectedAssetId][window.marketEngine.selectedTimeframe];
                 this.chartEngine.render(curAsset, candles);
             }, 60);
+        } else if (appName === 'exchange') {
+            this.renderExchange();
         } else if (appName === 'history') {
             this.renderHistory();
         } else if (appName === 'stats') {
@@ -225,28 +537,157 @@ class DesktopUI {
         } else if (appName === 'news') {
             this.renderNews();
         } else if (appName === 'settings') {
-            if (window.roomScene) {
-                window.roomScene.updateGraphicsUI();
-            }
+            if (window.roomScene) window.roomScene.updateGraphicsUI();
+            if (window.marketEngine) window.marketEngine.updateConnectionStatus(window.marketEngine.isWsConnected);
         }
     }
 
-    closeApp(appName) {
-        document.querySelectorAll('.desktop-window').forEach(win => {
-            if (win.dataset.window === appName) {
-                win.classList.add('hidden');
-            }
-        });
+    focusWindow(appName) {
+        const win = document.querySelector(`.desktop-window[data-window="${appName}"]`);
+        if (!win || win.classList.contains('hidden')) return;
 
-        document.querySelectorAll('.app-nav-btn').forEach(btn => {
-            if (btn.dataset.tab === appName) {
-                btn.classList.remove('active');
-            }
-        });
-
-        if (this.activeApp === appName) {
-            this.activeApp = null;
+        if (win.classList.contains('window-minimized')) {
+            win.classList.remove('window-minimized');
         }
+
+        this.highestZIndex += 2;
+        win.style.zIndex = this.highestZIndex;
+
+        document.querySelectorAll('.desktop-window').forEach(w => {
+            w.classList.toggle('window-focused', w === win);
+        });
+
+        this.focusedApp = appName;
+        this.updateTaskbar();
+    }
+
+    minimizeApp(appName) {
+        const win = document.querySelector(`.desktop-window[data-window="${appName}"]`);
+        if (!win) return;
+
+        win.classList.add('window-minimized');
+        win.classList.remove('window-focused');
+
+        if (this.focusedApp === appName) {
+            this.focusedApp = null;
+            let nextWin = null;
+            let highestZ = -1;
+            this.openApps.forEach(otherApp => {
+                if (otherApp !== appName) {
+                    const otherEl = document.querySelector(`.desktop-window[data-window="${otherApp}"]`);
+                    if (otherEl && !otherEl.classList.contains('hidden') && !otherEl.classList.contains('window-minimized')) {
+                        const z = parseInt(otherEl.style.zIndex, 10) || 0;
+                        if (z > highestZ) {
+                            highestZ = z;
+                            nextWin = otherApp;
+                        }
+                    }
+                }
+            });
+            if (nextWin) {
+                this.focusWindow(nextWin);
+            }
+        }
+
+        this.updateTaskbar();
+    }
+
+    toggleMaximizeApp(appName) {
+        const win = document.querySelector(`.desktop-window[data-window="${appName}"]`);
+        if (!win) return;
+
+        const maxBtn = win.querySelector('.win-btn-maximize');
+        const isMaximized = win.classList.toggle('window-maximized');
+
+        if (isMaximized) {
+            win.dataset.preMaxWidth = win.offsetWidth;
+            win.dataset.preMaxHeight = win.offsetHeight;
+            win.dataset.preMaxLeft = win.offsetLeft;
+            win.dataset.preMaxTop = win.offsetTop;
+            if (maxBtn) maxBtn.innerHTML = '&#10064;';
+        } else {
+            if (maxBtn) maxBtn.innerHTML = '&#9633;';
+            const w = parseFloat(win.dataset.preMaxWidth) || 800;
+            const h = parseFloat(win.dataset.preMaxHeight) || 500;
+            const l = parseFloat(win.dataset.preMaxLeft) || 50;
+            const t = parseFloat(win.dataset.preMaxTop) || 50;
+            win.style.width = `${w}px`;
+            win.style.height = `${h}px`;
+            win.style.left = `${l}px`;
+            win.style.top = `${t}px`;
+        }
+
+        if (appName === 'trading' && this.chartEngine) {
+            setTimeout(() => this.chartEngine.resize(), 50);
+        }
+
+        this.focusWindow(appName);
+    }
+
+    closeApp(appName) {
+        const win = document.querySelector(`.desktop-window[data-window="${appName}"]`);
+        if (win) {
+            win.classList.add('hidden');
+            win.classList.remove('window-focused', 'window-minimized', 'window-maximized');
+            const maxBtn = win.querySelector('.win-btn-maximize');
+            if (maxBtn) maxBtn.innerHTML = '&#9633;';
+        }
+
+        this.openApps.delete(appName);
+
+        if (this.focusedApp === appName) {
+            this.focusedApp = null;
+            let nextWin = null;
+            let highestZ = -1;
+            this.openApps.forEach(otherApp => {
+                const otherEl = document.querySelector(`.desktop-window[data-window="${otherApp}"]`);
+                if (otherEl && !otherEl.classList.contains('hidden') && !otherEl.classList.contains('window-minimized')) {
+                    const z = parseInt(otherEl.style.zIndex, 10) || 0;
+                    if (z > highestZ) {
+                        highestZ = z;
+                        nextWin = otherApp;
+                    }
+                }
+            });
+            if (nextWin) {
+                this.focusWindow(nextWin);
+            }
+        }
+
+        this.updateTaskbar();
+    }
+
+    updateTaskbar() {
+        const container = document.getElementById('dynamic-taskbar-apps');
+        if (!container) return;
+
+        container.innerHTML = '';
+        this.openApps.forEach(appName => {
+            const config = this.appConfigs[appName] || { title: appName, svg: '' };
+            const win = document.querySelector(`.desktop-window[data-window="${appName}"]`);
+            const isMinimized = win ? win.classList.contains('window-minimized') : false;
+            const isFocused = this.focusedApp === appName && !isMinimized;
+
+            const btn = document.createElement('div');
+            btn.className = `dock-app-item ${isFocused ? 'active' : ''} ${isMinimized ? 'minimized' : ''}`;
+            btn.dataset.app = appName;
+            btn.title = config.title;
+            btn.innerHTML = `
+                <span class="dock-app-indicator"></span>
+                <div class="dock-app-icon-wrap">${config.svg}</div>
+            `;
+
+            btn.addEventListener('click', () => {
+                if (window.soundEngine) window.soundEngine.playClick();
+                if (this.focusedApp === appName && !isMinimized) {
+                    this.minimizeApp(appName);
+                } else {
+                    this.openApp(appName);
+                }
+            });
+
+            container.appendChild(btn);
+        });
     }
 
     startClock() {
@@ -254,7 +695,7 @@ class DesktopUI {
         const update = () => {
             if (clockEl) {
                 const d = new Date();
-                clockEl.textContent = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                clockEl.textContent = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             }
         };
         update();
@@ -339,6 +780,31 @@ class DesktopUI {
         });
     }
 
+    updateAssetListPrices() {
+        const listEl = document.getElementById('asset-list-container');
+        if (!listEl) return;
+        const items = listEl.querySelectorAll('.asset-item');
+        items.forEach(item => {
+            const symEl = item.querySelector('.asset-symbol');
+            if (!symEl) return;
+            const assetId = symEl.textContent.replace('/', '_');
+            const asset = window.marketEngine.assets.find(a => a.id === assetId);
+            if (asset) {
+                const priceEl = item.querySelector('.asset-price');
+                const varEl = item.querySelector('.asset-var');
+                if (priceEl) priceEl.textContent = asset.currentPrice.toFixed(asset.decimals);
+                if (varEl) {
+                    const diff = asset.currentPrice - asset.previousClose;
+                    const pct = (diff / asset.previousClose) * 100;
+                    const sign = pct >= 0 ? '+' : '';
+                    varEl.textContent = `${sign}${pct.toFixed(2)}%`;
+                    varEl.className = `asset-var ${pct >= 0 ? 'text-pos' : 'text-neg'}`;
+                }
+                item.classList.toggle('active', asset.id === window.marketEngine.selectedAssetId);
+            }
+        });
+    }
+
     updateActiveTradesList() {
         const container = document.getElementById('active-trades-container');
         if (!container) return;
@@ -352,22 +818,24 @@ class DesktopUI {
         let html = '';
         trades.forEach(t => {
             const asset = window.marketEngine.assets.find(a => a.id === t.assetId);
-            const curP = asset ? asset.currentPrice : t.strikePrice;
-            const isCall = t.direction === 'SUBIR';
-            const inMoney = isCall ? (curP > t.strikePrice) : (curP < t.strikePrice);
+            const strike = typeof t.entryPrice === 'number' ? t.entryPrice : t.strikePrice;
+            const curP = asset ? asset.currentPrice : strike;
+            const isCall = t.direction === 'CALL' || t.direction === 'SUBIR';
+            const inMoney = isCall ? (curP > strike) : (curP < strike);
             const remain = Math.max(0, Math.ceil((t.expiresAt - Date.now()) / 1000));
             const statusClass = inMoney ? 'text-pos' : 'text-neg';
             const badgeClass = isCall ? 'badge-call' : 'badge-put';
+            const dirLabel = t.displayDirection || (isCall ? 'SUBIR' : 'DESCER');
 
             html += `
                 <div class="active-trade-card">
                     <div class="atc-header">
-                        <span class="${badgeClass}">${t.direction}</span>
+                        <span class="${badgeClass}">${dirLabel}</span>
                         <span class="atc-asset">${t.assetName}</span>
                         <span class="atc-timer">${remain}s</span>
                     </div>
                     <div class="atc-body">
-                        <div>Entrada: <strong>${t.strikePrice.toFixed(t.decimals)}</strong></div>
+                        <div>Entrada: <strong>${strike.toFixed(t.decimals)}</strong></div>
                         <div>Atual: <strong class="${statusClass}">${curP.toFixed(t.decimals)}</strong></div>
                         <div>Valor: <strong>R$ ${t.amount.toFixed(2)}</strong></div>
                     </div>
@@ -476,6 +944,329 @@ class DesktopUI {
 
         if (listEl) listEl.innerHTML = html;
         if (fullListEl) fullListEl.innerHTML = html;
+    }
+
+    renderExchange() {
+        this.updateExchangeSummary();
+        if (this.activeExchangeTab === 'positions') {
+            this.renderExchangePositions();
+        } else if (this.activeExchangeTab === 'market') {
+            this.renderExchangeMarket();
+        } else if (this.activeExchangeTab === 'history') {
+            this.renderExchangeHistory();
+        }
+        this.updateExchangeBuyPanel();
+    }
+
+    updateExchangeSummary() {
+        if (!window.portfolioEngine) return;
+        const summary = window.portfolioEngine.getSummary();
+
+        const elNetWorth = document.getElementById('exchange-total-networth');
+        const elCash = document.getElementById('exchange-cash-balance');
+        const elPillCash = document.getElementById('pill-cash-balance');
+        const elPillVal = document.getElementById('pill-crypto-valuation');
+        const elPillInv = document.getElementById('pill-total-invested');
+        const elPillPnl = document.getElementById('pill-unrealized-pnl');
+
+        const netStr = `R$ ${summary.totalNetWorth.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        const cashStr = `R$ ${summary.cashBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        const valStr = `R$ ${summary.currentValuation.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        const invStr = `R$ ${summary.totalInvested.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+        const pnlSign = summary.unrealizedPnL >= 0 ? '+' : '';
+        const pnlPctSign = summary.unrealizedPnLPct >= 0 ? '+' : '';
+        const pnlStr = `${pnlSign}R$ ${summary.unrealizedPnL.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${pnlPctSign}${summary.unrealizedPnLPct.toFixed(2)}%)`;
+
+        if (elNetWorth) elNetWorth.textContent = netStr;
+        if (elCash) elCash.textContent = cashStr;
+        if (elPillCash) elPillCash.textContent = cashStr;
+        if (elPillVal) elPillVal.textContent = valStr;
+        if (elPillInv) elPillInv.textContent = invStr;
+        if (elPillPnl) {
+            elPillPnl.textContent = pnlStr;
+            elPillPnl.className = `pill-val ${summary.unrealizedPnL >= 0 ? 'text-pos' : 'text-neg'}`;
+        }
+    }
+
+    renderExchangePositions() {
+        const container = document.getElementById('exchange-positions-container');
+        if (!container || !window.portfolioEngine) return;
+
+        const positions = window.portfolioEngine.positions;
+        if (positions.length === 0) {
+            container.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1; padding: 40px; text-align: center;">Sua carteira spot esta vazia. Clique na aba <strong>COMPRAR ATIVOS</strong> para adquirir criptomoedas, moedas e acoes.</div>';
+            return;
+        }
+
+        let html = '';
+        positions.forEach(pos => {
+            const asset = window.marketEngine ? window.marketEngine.assets.find(a => a.id === pos.assetId) : null;
+            const currentPrice = asset ? asset.currentPrice : pos.avgBuyPrice;
+            const currentVal = pos.quantity * currentPrice;
+            const pnl = currentVal - pos.totalInvested;
+            const pnlPct = pos.totalInvested > 0 ? (pnl / pos.totalInvested) * 100 : 0;
+
+            const isPos = pnl >= 0;
+            const pnlColorClass = isPos ? 'badge-pos' : 'badge-neg';
+            const sign = isPos ? '+' : '';
+            const qtyStr = pos.quantity.toFixed(pos.decimals > 2 ? 6 : 4);
+
+            html += `
+                <div class="position-card" data-asset-id="${pos.assetId}">
+                    <div class="pos-card-header">
+                        <div>
+                            <div class="pos-asset-symbol">${pos.assetId.replace('_', '/')}</div>
+                            <div class="pos-asset-category">${pos.assetName}</div>
+                        </div>
+                        <div class="pos-pnl-badge ${pnlColorClass}">
+                            ${sign}${pnlPct.toFixed(2)}%
+                        </div>
+                    </div>
+                    <div class="pos-card-metrics">
+                        <div class="pos-metric">
+                            <span class="pos-metric-label">QUANTIDADE</span>
+                            <span class="pos-metric-value pos-val-qty">${qtyStr}</span>
+                        </div>
+                        <div class="pos-metric">
+                            <span class="pos-metric-label">VALOR ATUAL</span>
+                            <span class="pos-metric-value pos-val-current">R$ ${currentVal.toFixed(2)}</span>
+                        </div>
+                        <div class="pos-metric">
+                            <span class="pos-metric-label">PRECO MEDIO</span>
+                            <span class="pos-metric-value pos-val-avg">${pos.avgBuyPrice.toFixed(pos.decimals)}</span>
+                        </div>
+                        <div class="pos-metric">
+                            <span class="pos-metric-label">COTACAO ATUAL</span>
+                            <span class="pos-metric-value pos-val-price">${currentPrice.toFixed(pos.decimals)}</span>
+                        </div>
+                        <div class="pos-metric">
+                            <span class="pos-metric-label">TOTAL INVESTIDO</span>
+                            <span class="pos-metric-value pos-val-invested">R$ ${pos.totalInvested.toFixed(2)}</span>
+                        </div>
+                        <div class="pos-metric">
+                            <span class="pos-metric-label">LUCRO / PREJUIZO</span>
+                            <span class="pos-metric-value pos-val-pnl ${isPos ? 'text-pos' : 'text-neg'}">${sign}R$ ${pnl.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <div class="pos-card-actions">
+                        <button class="btn-pos-action btn-pos-buy-more" data-action="buy-more" data-asset-id="${pos.assetId}">+ COMPRAR</button>
+                        <button class="btn-pos-action btn-pos-sell-half" data-action="sell-50" data-asset-id="${pos.assetId}">VENDER 50%</button>
+                        <button class="btn-pos-action btn-pos-sell-all" data-action="sell-100" data-asset-id="${pos.assetId}">VENDER 100%</button>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+
+        container.querySelectorAll('.btn-pos-action').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const action = e.currentTarget.dataset.action;
+                const assetId = e.currentTarget.dataset.assetId;
+
+                if (action === 'buy-more') {
+                    this.selectedExchangeAssetId = assetId;
+                    const tabBtn = document.querySelector('.exchange-tab-btn[data-exchange-tab="market"]');
+                    if (tabBtn) tabBtn.click();
+                } else if (action === 'sell-50') {
+                    if (window.portfolioEngine) {
+                        const res = window.portfolioEngine.sell(assetId, 0.5);
+                        this.showGenericNotification(res.message, res.success ? 'success' : 'error');
+                        this.renderExchange();
+                    }
+                } else if (action === 'sell-100') {
+                    if (window.portfolioEngine) {
+                        const res = window.portfolioEngine.sell(assetId, 1.0);
+                        this.showGenericNotification(res.message, res.success ? 'success' : 'error');
+                        this.renderExchange();
+                    }
+                }
+            });
+        });
+    }
+
+    updateExchangePositionsPrices() {
+        const container = document.getElementById('exchange-positions-container');
+        if (!container || !window.portfolioEngine) return;
+
+        const positions = window.portfolioEngine.positions;
+        if (positions.length === 0) return;
+
+        const cards = container.querySelectorAll('.position-card');
+        cards.forEach(card => {
+            const assetId = card.dataset.assetId;
+            const pos = positions.find(p => p.assetId === assetId);
+            if (!pos) return;
+
+            const asset = window.marketEngine ? window.marketEngine.assets.find(a => a.id === pos.assetId) : null;
+            const currentPrice = asset ? asset.currentPrice : pos.avgBuyPrice;
+            const currentVal = pos.quantity * currentPrice;
+            const pnl = currentVal - pos.totalInvested;
+            const pnlPct = pos.totalInvested > 0 ? (pnl / pos.totalInvested) * 100 : 0;
+
+            const isPos = pnl >= 0;
+            const pnlColorClass = isPos ? 'badge-pos' : 'badge-neg';
+            const sign = isPos ? '+' : '';
+
+            const badgeEl = card.querySelector('.pos-pnl-badge');
+            if (badgeEl) {
+                badgeEl.className = `pos-pnl-badge ${pnlColorClass}`;
+                badgeEl.textContent = `${sign}${pnlPct.toFixed(2)}%`;
+            }
+
+            const currentValEl = card.querySelector('.pos-val-current');
+            if (currentValEl) currentValEl.textContent = `R$ ${currentVal.toFixed(2)}`;
+
+            const priceEl = card.querySelector('.pos-val-price');
+            if (priceEl) priceEl.textContent = currentPrice.toFixed(pos.decimals);
+
+            const pnlEl = card.querySelector('.pos-val-pnl');
+            if (pnlEl) {
+                pnlEl.className = `pos-metric-value pos-val-pnl ${isPos ? 'text-pos' : 'text-neg'}`;
+                pnlEl.textContent = `${sign}R$ ${pnl.toFixed(2)}`;
+            }
+        });
+    }
+
+    renderExchangeMarket() {
+        const container = document.getElementById('exchange-market-assets');
+        if (!container || !window.marketEngine) return;
+
+        const cat = this.selectedExchangeCategory;
+        const filtered = window.marketEngine.assets.filter(a => {
+            if (cat === 'all') return true;
+            return a.categoryKey === cat;
+        });
+
+        let html = '';
+        filtered.forEach(asset => {
+            const isSelected = asset.id === this.selectedExchangeAssetId;
+            const diff = asset.currentPrice - asset.previousClose;
+            const pct = (diff / asset.previousClose) * 100;
+            const sign = pct >= 0 ? '+' : '';
+            const colorClass = pct >= 0 ? 'text-pos' : 'text-neg';
+
+            html += `
+                <div class="spot-market-item ${isSelected ? 'active' : ''}" data-asset-id="${asset.id}">
+                    <div class="spot-item-left">
+                        <span class="spot-item-sym">${asset.id.replace('_', '/')}</span>
+                        <span class="spot-item-name">${asset.name}</span>
+                    </div>
+                    <div class="spot-item-right">
+                        <span class="spot-item-price">${asset.currentPrice.toFixed(asset.decimals)}</span>
+                        <span class="asset-var ${colorClass}">${sign}${pct.toFixed(2)}%</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+
+        container.querySelectorAll('.spot-market-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                this.selectedExchangeAssetId = e.currentTarget.dataset.assetId;
+                this.renderExchangeMarket();
+                this.updateExchangeBuyPanel();
+                if (window.soundEngine) window.soundEngine.playClick();
+            });
+        });
+    }
+
+    updateExchangeMarketPrices() {
+        const container = document.getElementById('exchange-market-assets');
+        if (!container) return;
+        const items = container.querySelectorAll('.spot-market-item');
+        items.forEach(item => {
+            const assetId = item.dataset.assetId;
+            const asset = window.marketEngine ? window.marketEngine.assets.find(a => a.id === assetId) : null;
+            if (asset) {
+                const priceEl = item.querySelector('.spot-item-price');
+                const varEl = item.querySelector('.asset-var');
+                if (priceEl) priceEl.textContent = asset.currentPrice.toFixed(asset.decimals);
+                if (varEl) {
+                    const diff = asset.currentPrice - asset.previousClose;
+                    const pct = (diff / asset.previousClose) * 100;
+                    const sign = pct >= 0 ? '+' : '';
+                    varEl.textContent = `${sign}${pct.toFixed(2)}%`;
+                    varEl.className = `asset-var ${pct >= 0 ? 'text-pos' : 'text-neg'}`;
+                }
+                item.classList.toggle('active', asset.id === this.selectedExchangeAssetId);
+            }
+        });
+    }
+
+    updateExchangeBuyPanel() {
+        const asset = window.marketEngine ? window.marketEngine.assets.find(a => a.id === this.selectedExchangeAssetId) : null;
+        if (!asset) return;
+
+        const symEl = document.getElementById('buy-asset-symbol');
+        const nameEl = document.getElementById('buy-asset-name');
+        const priceEl = document.getElementById('buy-asset-price');
+        const estimateEl = document.getElementById('buy-estimate-qty');
+        const input = document.getElementById('input-spot-buy-amount');
+
+        if (symEl) symEl.textContent = asset.id.replace('_', '/');
+        if (nameEl) nameEl.textContent = asset.name;
+        if (priceEl) priceEl.textContent = `R$ ${asset.currentPrice.toFixed(asset.decimals)}`;
+
+        const amount = parseFloat(input ? input.value : 0);
+        if (estimateEl && asset.currentPrice > 0) {
+            if (!isNaN(amount) && amount > 0) {
+                const qty = amount / asset.currentPrice;
+                const sym = asset.id.split('_')[0];
+                estimateEl.textContent = `${qty.toFixed(asset.decimals > 2 ? 6 : 4)} ${sym}`;
+            } else {
+                estimateEl.textContent = `0.00`;
+            }
+        }
+    }
+
+    renderExchangeHistory() {
+        const tbody = document.getElementById('spot-history-table-body');
+        if (!tbody || !window.portfolioEngine) return;
+
+        const list = window.portfolioEngine.history;
+        if (list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhuma ordem spot realizada ainda.</td></tr>';
+            return;
+        }
+
+        let html = '';
+        list.forEach(tx => {
+            const isBuy = tx.type === 'COMPRA';
+            const badgeClass = isBuy ? 'badge-call' : 'badge-put';
+            const profitStr = tx.profit !== undefined ? ((tx.profit >= 0 ? '+R$ ' : '-R$ ') + Math.abs(tx.profit).toFixed(2)) : '--';
+            const profitClass = tx.profit !== undefined ? (tx.profit >= 0 ? 'text-pos' : 'text-neg') : '';
+
+            html += `
+                <tr>
+                    <td>${tx.timestamp}</td>
+                    <td><span class="${badgeClass}">${tx.type}</span></td>
+                    <td><strong>${tx.assetName}</strong></td>
+                    <td>${tx.quantity.toFixed(tx.decimals > 2 ? 6 : 4)}</td>
+                    <td>${tx.price.toFixed(tx.decimals)}</td>
+                    <td>R$ ${tx.totalBrl.toFixed(2)}</td>
+                    <td><strong class="${profitClass}">${profitStr}</strong></td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    showGenericNotification(msg, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `trade-toast ${type === 'success' ? 'toast-win' : 'toast-loss'}`;
+        toast.innerHTML = `
+            <div class="toast-title">ORDEM EXECUTADA</div>
+            <div class="toast-desc">${msg}</div>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('toast-fadeout');
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
     }
 
     showNotification(trade) {

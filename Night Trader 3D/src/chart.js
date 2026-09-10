@@ -185,6 +185,9 @@ class ChartEngine {
             }
         }
 
+        const dpr = window.devicePixelRatio || 1;
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
         const ctx = this.ctx;
         const w = this.width;
         const h = this.height;
@@ -197,8 +200,8 @@ class ChartEngine {
         const padRight = 80;
         const padTop = 18;
         const padLeft = 14;
-        const plotW = w - padLeft - padRight;
-        const plotH = mainH - padTop;
+        const plotW = Math.max(50, w - padLeft - padRight);
+        const plotH = Math.max(50, mainH - padTop);
 
         const maxCandles = Math.min(candles.length, Math.max(30, Math.floor(plotW / 11)));
         const visibleCandles = candles.slice(candles.length - maxCandles);
@@ -211,25 +214,38 @@ class ChartEngine {
 
         for (let i = 0; i < visibleCandles.length; i++) {
             const c = visibleCandles[i];
-            if (c.low < minPrice) minPrice = c.low;
-            if (c.high > maxPrice) maxPrice = c.high;
-            if (c.volume > maxVolume) maxVolume = c.volume;
+            if (Number.isFinite(c.low) && c.low > 0 && c.low < minPrice) minPrice = c.low;
+            if (Number.isFinite(c.high) && c.high > 0 && c.high > maxPrice) maxPrice = c.high;
+            if (Number.isFinite(c.volume) && c.volume > maxVolume) maxVolume = c.volume;
         }
 
         for (let i = 0; i < this.activeTrades.length; i++) {
             const t = this.activeTrades[i];
-            if (t.assetId === asset.id) {
+            if (t.assetId === asset.id && Number.isFinite(t.strikePrice) && t.strikePrice > 0) {
                 if (t.strikePrice < minPrice) minPrice = t.strikePrice;
                 if (t.strikePrice > maxPrice) maxPrice = t.strikePrice;
             }
         }
 
+        if (!Number.isFinite(minPrice) || !Number.isFinite(maxPrice) || minPrice <= 0 || maxPrice <= 0) {
+            const curP = asset.currentPrice || 100;
+            minPrice = curP * 0.99;
+            maxPrice = curP * 1.01;
+        } else if (maxPrice - minPrice < 0.00001) {
+            minPrice = minPrice * 0.995;
+            maxPrice = maxPrice * 1.005;
+        }
+
         const priceSpan = Math.max(0.00001, maxPrice - minPrice);
         minPrice -= priceSpan * 0.08;
         maxPrice += priceSpan * 0.08;
-        const totalSpan = maxPrice - minPrice;
+        const totalSpan = Math.max(0.00001, maxPrice - minPrice);
 
-        const getY = (price) => padTop + plotH - ((price - minPrice) / totalSpan) * plotH;
+        const getY = (price) => {
+            const p = Number.isFinite(price) ? price : asset.currentPrice;
+            const ratio = (p - minPrice) / totalSpan;
+            return padTop + plotH - (Math.max(-0.5, Math.min(1.5, ratio)) * plotH);
+        };
 
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
         ctx.lineWidth = 1;
@@ -352,21 +368,30 @@ class ChartEngine {
         } else {
             for (let i = 0; i < visibleCandles.length; i++) {
                 const c = visibleCandles[i];
+                const prev = i > 0 ? visibleCandles[i - 1] : null;
                 const cx = padLeft + i * candleStep + candleStep / 2;
-                const isBull = c.close >= c.open;
-                const color = isBull ? '#00e676' : '#ff3d71';
+                const isBull = c.close > c.open || (c.close === c.open && (!prev || c.close >= prev.close));
+                const isDoji = Math.abs(c.close - c.open) < 0.000001;
+                const color = isDoji ? '#94a3b8' : (isBull ? '#00e676' : '#ff3d71');
+
+                const highY = getY(c.high);
+                const lowY = getY(c.low);
+                const openY = getY(c.open);
+                const closeY = getY(c.close);
 
                 ctx.strokeStyle = color;
                 ctx.lineWidth = 1.4;
+
+                const effectiveHighY = (highY === lowY) ? highY - 2.5 : highY;
+                const effectiveLowY = (highY === lowY) ? lowY + 2.5 : lowY;
+
                 ctx.beginPath();
-                ctx.moveTo(cx, getY(c.high));
-                ctx.lineTo(cx, getY(c.low));
+                ctx.moveTo(cx, effectiveHighY);
+                ctx.lineTo(cx, effectiveLowY);
                 ctx.stroke();
 
-                const openY = getY(c.open);
-                const closeY = getY(c.close);
                 const barTop = Math.min(openY, closeY);
-                const barHeight = Math.max(2, Math.abs(closeY - openY));
+                const barHeight = Math.max(isDoji ? 1.5 : 2, Math.abs(closeY - openY));
 
                 ctx.fillStyle = color;
                 ctx.fillRect(cx - candleBarWidth / 2, barTop, candleBarWidth, barHeight);
@@ -400,8 +425,9 @@ class ChartEngine {
             const t = this.activeTrades[i];
             if (t.assetId !== asset.id) continue;
 
-            const tY = getY(t.strikePrice);
-            const isUp = t.direction === 'SUBIR';
+            const strike = typeof t.entryPrice === 'number' ? t.entryPrice : t.strikePrice;
+            const tY = getY(strike);
+            const isUp = t.direction === 'CALL' || t.direction === 'SUBIR';
             const color = isUp ? '#00e676' : '#ff3d71';
 
             ctx.strokeStyle = color;
@@ -414,12 +440,13 @@ class ChartEngine {
             ctx.setLineDash([]);
 
             ctx.fillStyle = color;
-            ctx.fillRect(padLeft + 6, tY - 10, 95, 20);
+            ctx.fillRect(padLeft + 6, tY - 10, 105, 20);
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 10px Consolas, monospace';
             ctx.textAlign = 'left';
             const remain = Math.max(0, Math.ceil((t.expiresAt - Date.now()) / 1000));
-            ctx.fillText(`${t.direction} ${remain}s`, padLeft + 10, tY + 4);
+            const tag = t.displayDirection || (t.direction === 'CALL' ? 'SUBIR' : 'DESCER');
+            ctx.fillText(`${tag} ${remain}s`, padLeft + 10, tY + 4);
         }
 
         if (subpanelHeight > 0) {
