@@ -1,135 +1,171 @@
-﻿class StoreEngine {
+class StoreEngine {
     constructor() {
         this.activeCategory = 'all';
         this.catalog = [
             {
                 id: 'gpu_1660',
-                name: 'NVIDIA GTX 1660 Super',
+                name: 'NVIDIA GTX 1660 Super 6GB',
                 category: 'hardware',
+                type: 'gpu',
                 price: 1200.00,
                 hashrate: 60,
                 power: 125,
                 icon: '📼',
-                desc: 'GPU de entrada ideal para iniciar sua rig de mineracao de BTC.',
-                tag: '60 MH/s'
+                desc: 'GPU de entrada compacta. 6GB GDDR6, ideal para iniciar sua rig de mineracao de BTC.',
+                tag: '60 MH/s · 125W'
             },
             {
                 id: 'gpu_3070',
-                name: 'NVIDIA RTX 3070 8GB',
+                name: 'NVIDIA RTX 3070 8GB OC',
                 category: 'hardware',
+                type: 'gpu',
                 price: 3500.00,
                 hashrate: 140,
                 power: 220,
                 icon: '🎴',
-                desc: 'Placa intermediaria com alto rendimento e eficiencia energetica.',
-                tag: '140 MH/s'
+                desc: 'Excelente eficiencia energetica com dual-fan RGB. Alta estabilidade de hashrate.',
+                tag: '140 MH/s · 220W'
             },
             {
                 id: 'gpu_4090',
-                name: 'NVIDIA RTX 4090 Ti 24GB',
+                name: 'NVIDIA RTX 4090 Ti 24GB Beast',
                 category: 'hardware',
+                type: 'gpu',
                 price: 12000.00,
                 hashrate: 380,
                 power: 450,
                 icon: '⚡',
-                desc: 'O monstro do poder computacional. Hashrate massivo para mineracao pesada.',
-                tag: '380 MH/s'
+                desc: 'O ápice da computacao gráfica. Triplo cooler, 24GB GDDR6X e forca bruta de mineracao.',
+                tag: '380 MH/s · 450W'
             },
             {
                 id: 'asic_s19',
-                name: 'Antminer S19 Pro 110TH',
+                name: 'Antminer S19 Pro 110TH ASIC',
                 category: 'hardware',
+                type: 'gpu',
                 price: 28000.00,
                 hashrate: 850,
                 power: 3250,
                 icon: '🏭',
-                desc: 'Servidor ASIC industrial dedicado. Hashrate extremo para acumulacao de Bitcoin.',
-                tag: '850 MH/s'
+                desc: 'Modulo industrial especializado SHA-256 com refrigeracao forçada de alta pressao.',
+                tag: '850 MH/s · 3250W'
             },
             {
-                id: 'rig_frame',
-                name: 'Estrutura Rig Aluminio RGB',
+                id: 'rig_frame_4',
+                name: 'Rig Rack Compacto (4 Slots PCIe)',
                 category: 'hardware',
-                price: 1500.00,
+                type: 'rig',
+                price: 1200.00,
+                slots: 4,
                 icon: '🗄️',
-                permanent: true,
-                desc: 'Chassi profissional aberto com fans RGB sincronizados no quarto 3D.',
-                tag: 'DECORACAO 3D'
+                desc: 'Chassi de aluminio open-air para ate 4 GPUs. Pode ser posicionado livremente no quarto 3D.',
+                tag: 'CHASSI 4 GPUS'
+            },
+            {
+                id: 'rig_frame_6',
+                name: 'Rig Rack Pro RGB (6 Slots PCIe)',
+                category: 'hardware',
+                type: 'rig',
+                price: 2400.00,
+                slots: 6,
+                icon: '🖥️',
+                desc: 'Estrutura reforcada de 6 slots com distribuicao de energia de alta voltagem e iluminacao RGB.',
+                tag: 'CHASSI 6 GPUS'
+            },
+            {
+                id: 'rig_frame_8',
+                name: 'Rig Server Torre (8 Slots PCIe)',
+                category: 'hardware',
+                type: 'rig',
+                price: 4800.00,
+                slots: 8,
+                icon: '🏢',
+                desc: 'Gabinete industrial de 8 slots para mineracao em larga escala. Alto fluxo de ar.',
+                tag: 'CHASSI 8 GPUS'
             },
             {
                 id: 'cigarettes',
-                name: 'Maco Lucky Strike Red',
+                name: 'Maco Dunhill Cyber Red',
                 category: 'consumable',
+                type: 'consumable',
                 price: 15.00,
                 doses: 20,
                 icon: '🚬',
-                desc: 'Alivia abstinencia de nicotina instantaneamente, eliminando tremedeira e tosse.',
+                desc: 'Alivia abstinencia de nicotina instantaneamente, eliminando tremedeiras e crises de tosse.',
                 tag: '20 CIGARROS'
             },
             {
                 id: 'zippo',
-                name: 'Isqueiro Zippo Vintage Metal',
+                name: 'Isqueiro Zippo Titanio Escovado',
                 category: 'consumable',
+                type: 'consumable',
                 price: 80.00,
                 permanent: true,
                 icon: '🔥',
-                desc: 'Isqueiro de aco cromado com estalo metalico classico.',
+                desc: 'Isqueiro vintage resistente ao vento com acabamento metalico no quarto.',
                 tag: 'PERMANENTE'
             },
             {
                 id: 'energy_drink',
                 name: 'Monster Energy Cyber Punch',
                 category: 'consumable',
+                type: 'consumable',
                 price: 12.00,
                 doses: 1,
                 icon: '🥤',
-                desc: 'Aumenta sua velocidade de digitacao e foco temporariamente.',
+                desc: 'Aumenta sua velocidade de digitacao e foco em 50% temporariamente.',
                 tag: '+50% VELOCIDADE'
             },
             {
                 id: 'whisky',
-                name: 'Garrafa Johnnie Walker Black',
+                name: 'Garrafa Johnnie Walker Black 12A',
                 category: 'consumable',
+                type: 'consumable',
                 price: 160.00,
                 doses: 10,
                 icon: '🥃',
-                desc: 'Whisky 12 anos. Reduz o estresse das oscilacoes de mercado.',
+                desc: 'Whisky escoces envelhecido. Estabiliza a ansiedade em momentos de alta volatilidade.',
                 tag: '10 DOSES'
             },
             {
                 id: 'coffee',
                 name: 'Cafe Expresso Italiano Duplo',
                 category: 'consumable',
+                type: 'consumable',
                 price: 8.00,
                 doses: 1,
                 icon: '☕',
-                desc: 'Dose forte de cafeina para restaurar a concentracao do trader.',
+                desc: 'Extrato duplo de cafeina pura para restaurar a concentracao do trader.',
                 tag: 'CONCENTRACAO'
             },
             {
                 id: 'ashtray',
-                name: 'Cinzeiro de Cristal Escuro',
+                name: 'Cinzeiro de Cristal Negro',
                 category: 'decoration',
+                type: 'decoration',
                 price: 120.00,
                 permanent: true,
                 icon: '🥣',
-                desc: 'Cinzeiro sofisticado colocado sobre a mesa ao lado do monitor.',
+                desc: 'Cinzeiro de luxo colocado sobre a bancada ao lado do monitor.',
                 tag: 'MESA 3D'
             },
             {
                 id: 'whisky_glass',
-                name: 'Copo de Whisky com Gelo',
+                name: 'Copo de Cristal com Gelo',
                 category: 'decoration',
+                type: 'decoration',
                 price: 90.00,
                 permanent: true,
                 icon: '🍸',
-                desc: 'Copo de cristal lapidado decorativo posicionado na mesa.',
+                desc: 'Copo lapidado decorativo posicionado na mesa de negociacao.',
                 tag: 'MESA 3D'
             }
         ];
 
         this.inventory = this.loadInventory();
+        this.deliveries = this.loadDeliveries();
         this.eventsBound = false;
+        this.deliveryInterval = null;
         this.init();
     }
 
@@ -139,6 +175,7 @@
         } else {
             this.bindEvents();
         }
+        this.startDeliveryChecker();
     }
 
     loadInventory() {
@@ -147,8 +184,9 @@
             if (raw) return JSON.parse(raw);
         } catch (e) {}
         return {
-            cigarettes: 5,
-            zippo: 1
+            cigarettes: 10,
+            zippo: 1,
+            uninstalled_hardware: []
         };
     }
 
@@ -156,6 +194,43 @@
         try {
             localStorage.setItem('night_trader_store_inventory', JSON.stringify(this.inventory));
         } catch (e) {}
+    }
+
+    loadDeliveries() {
+        try {
+            const raw = localStorage.getItem('night_trader_store_deliveries');
+            if (raw) return JSON.parse(raw);
+        } catch (e) {}
+        return [];
+    }
+
+    saveDeliveries() {
+        try {
+            localStorage.setItem('night_trader_store_deliveries', JSON.stringify(this.deliveries));
+        } catch (e) {}
+    }
+
+    startDeliveryChecker() {
+        if (this.deliveryInterval) clearInterval(this.deliveryInterval);
+        this.deliveryInterval = setInterval(() => {
+            const now = Date.now();
+            let changed = false;
+            this.deliveries.forEach(del => {
+                if (del.status === 'shipping' && now >= del.eta) {
+                    del.status = 'delivered';
+                    changed = true;
+                    this.showToast('Encomenda entregue na porta: ' + del.name + '!', 'success');
+                    if (window.soundEngine && window.soundEngine.playTradeWin) window.soundEngine.playTradeWin();
+                }
+            });
+            if (changed) {
+                this.saveDeliveries();
+                this.render();
+                if (window.roomScene && typeof window.roomScene.updateRoomAccessories === 'function') {
+                    window.roomScene.updateRoomAccessories();
+                }
+            }
+        }, 1000);
     }
 
     getWalletBalance() {
@@ -188,6 +263,20 @@
     }
 
     getOwnedQuantity(id) {
+        if (id.startsWith('gpu_') || id.startsWith('asic_')) {
+            let count = 0;
+            if (this.inventory.uninstalled_hardware) {
+                count += this.inventory.uninstalled_hardware.filter(h => h === id).length;
+            }
+            if (window.miningEngine && window.miningEngine.rigs) {
+                window.miningEngine.rigs.forEach(rig => {
+                    if (rig.slots) {
+                        count += rig.slots.filter(s => s === id).length;
+                    }
+                });
+            }
+            return count;
+        }
         return this.inventory[id] || 0;
     }
 
@@ -202,31 +291,74 @@
 
         const bal = this.getWalletBalance();
         if (bal < item.price) {
-            this.showToast('Saldo insuficiente para comprar este item!', 'error');
+            this.showToast('Saldo insuficiente para realizar este pedido!', 'error');
             if (window.soundEngine && window.soundEngine.playTradeLoss) window.soundEngine.playTradeLoss();
             return;
         }
 
         if (this.deductWallet(item.price)) {
-            const qtyToAdd = item.doses ? item.doses : 1;
-            this.inventory[id] = (this.inventory[id] || 0) + qtyToAdd;
-            this.saveInventory();
+            const deliveryId = 'pkg_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+            const deliveryEta = Date.now() + 3500;
+
+            this.deliveries.push({
+                id: deliveryId,
+                itemId: item.id,
+                name: item.name,
+                icon: item.icon,
+                type: item.type,
+                tag: item.tag,
+                status: 'shipping',
+                orderedAt: Date.now(),
+                eta: deliveryEta
+            });
+            this.saveDeliveries();
 
             if (window.soundEngine && window.soundEngine.playTradeOpen) {
                 window.soundEngine.playTradeOpen();
             }
 
-            this.showToast('Comprado com sucesso: ' + item.name + '!', 'success');
-
-            if (window.miningEngine && typeof window.miningEngine.onHardwareUpdated === 'function') {
-                window.miningEngine.onHardwareUpdated();
-            }
-            if (window.roomScene && typeof window.roomScene.updateRoomAccessories === 'function') {
-                window.roomScene.updateRoomAccessories();
-            }
-
+            this.showToast('Pedido confirmado! Envio expresso a caminho: ' + item.name, 'success');
             this.render();
         }
+    }
+
+    openDeliveryBox(deliveryId) {
+        const idx = this.deliveries.findIndex(d => d.id === deliveryId);
+        if (idx === -1) return;
+        const delivery = this.deliveries[idx];
+        const item = this.getItem(delivery.itemId);
+
+        if (window.soundEngine && window.soundEngine.playBoxOpen) {
+            window.soundEngine.playBoxOpen();
+        }
+
+        if (item.type === 'gpu') {
+            if (!this.inventory.uninstalled_hardware) this.inventory.uninstalled_hardware = [];
+            this.inventory.uninstalled_hardware.push(item.id);
+            this.showToast('📦 Unboxing concluido! ' + item.name + ' adicionada ao estoque de GPUs.', 'success');
+        } else if (item.type === 'rig') {
+            if (window.miningEngine && typeof window.miningEngine.addNewRig === 'function') {
+                window.miningEngine.addNewRig(item.id, item.name, item.slots);
+            }
+            this.showToast('📦 Unboxing concluido! ' + item.name + ' montada no quarto 3D.', 'success');
+        } else {
+            const qtyToAdd = item.doses ? item.doses : 1;
+            this.inventory[item.id] = (this.inventory[item.id] || 0) + qtyToAdd;
+            this.showToast('📦 Unboxing concluido! ' + item.name + ' pronto para uso.', 'success');
+        }
+
+        this.deliveries.splice(idx, 1);
+        this.saveDeliveries();
+        this.saveInventory();
+
+        if (window.miningEngine && typeof window.miningEngine.onHardwareUpdated === 'function') {
+            window.miningEngine.onHardwareUpdated();
+        }
+        if (window.roomScene && typeof window.roomScene.updateRoomAccessories === 'function') {
+            window.roomScene.updateRoomAccessories();
+        }
+
+        this.render();
     }
 
     useItem(id) {
@@ -256,7 +388,7 @@
             if (window.soundEngine && window.soundEngine.playLighter) {
                 window.soundEngine.playLighter();
             }
-            this.showToast('Voce testa a chama do Zippo.', 'info');
+            this.showToast('Voce acende o isqueiro Zippo.', 'info');
         }
 
         this.render();
@@ -293,6 +425,11 @@
                 if (useBtn) {
                     const id = useBtn.dataset.useItem;
                     this.useItem(id);
+                }
+                const openBtn = e.target.closest('[data-open-delivery]');
+                if (openBtn) {
+                    const id = openBtn.dataset.openDelivery;
+                    this.openDeliveryBox(id);
                 }
             });
         }
@@ -344,7 +481,7 @@
                         '<span class="store-price-val">' + priceStr + '</span>' +
                     '</div>' +
                     '<button class="btn-store-buy ' + (isOwnedPermanent ? 'btn-disabled' : '') + '" data-buy-item="' + item.id + '" ' + (isOwnedPermanent ? 'disabled' : '') + '>' +
-                        (isOwnedPermanent ? 'ADQUIRIDO' : 'COMPRAR') +
+                        (isOwnedPermanent ? 'ADQUIRIDO' : 'COMPRAR &amp; ENTREGAR') +
                     '</button>' +
                 '</div>' +
             '</div>';
@@ -355,38 +492,90 @@
         const grid = document.getElementById('store-inventory-grid');
         if (!grid) return;
 
-        const ownedKeys = Object.keys(this.inventory).filter(k => this.inventory[k] > 0);
-        if (ownedKeys.length === 0) {
-            grid.innerHTML = '<div class="store-empty-inv">Seu inventario esta vazio. Compre consumiveis e hardware na loja acima.</div>';
+        let html = '';
+
+        if (this.deliveries.length > 0) {
+            html += '<div class="store-deliveries-section">' +
+                '<div class="store-sec-subtitle">📦 PACOTES EM RASTREIO / ENTREGUES</div>';
+            this.deliveries.forEach(del => {
+                const isReady = del.status === 'delivered' || Date.now() >= del.eta;
+                html += '<div class="store-delivery-card ' + (isReady ? 'ready' : 'shipping') + '">' +
+                    '<div class="del-icon">' + del.icon + '</div>' +
+                    '<div class="del-info">' +
+                        '<span class="del-name">' + del.name + '</span>' +
+                        '<span class="del-status">' + (isReady ? '✅ ENTREGUE NA PORTA' : '🚚 A CAMINHO...') + '</span>' +
+                    '</div>' +
+                    '<button class="btn-open-package ' + (isReady ? '' : 'btn-disabled') + '" data-open-delivery="' + del.id + '" ' + (isReady ? '' : 'disabled') + '>' +
+                        (isReady ? 'ABRIR CAIXA (UNBOXING)' : 'EM TRANSITO...') +
+                    '</button>' +
+                '</div>';
+            });
+            html += '</div>';
+        }
+
+        const uninstalledGpus = this.inventory.uninstalled_hardware || [];
+        if (uninstalledGpus.length > 0) {
+            html += '<div class="store-uninstalled-section">' +
+                '<div class="store-sec-subtitle">🔌 ESTOQUE DE GPUS DESENCAIXADAS</div>';
+            const gpuMap = {};
+            uninstalledGpus.forEach(gid => {
+                gpuMap[gid] = (gpuMap[gid] || 0) + 1;
+            });
+            Object.keys(gpuMap).forEach(gid => {
+                const item = this.getItem(gid);
+                if (item) {
+                    html += '<div class="store-inv-item hardware-stock">' +
+                        '<span class="inv-icon">' + item.icon + '</span>' +
+                        '<div class="inv-info">' +
+                            '<span class="inv-name">' + item.name + '</span>' +
+                            '<span class="inv-qty">Desinstaladas: <strong>' + gpuMap[gid] + 'x</strong> (Prontas para encaixar na Rig)</span>' +
+                        '</div>' +
+                        '<span class="inv-tag-stock">NO ESTOQUE</span>' +
+                    '</div>';
+                }
+            });
+            html += '</div>';
+        }
+
+        const consumableKeys = Object.keys(this.inventory).filter(k => k !== 'uninstalled_hardware' && this.inventory[k] > 0);
+        if (consumableKeys.length > 0) {
+            html += '<div class="store-consumables-section">' +
+                '<div class="store-sec-subtitle">🍸 CONSUMIVEIS &amp; CUIDADOS</div>';
+            consumableKeys.forEach(k => {
+                const item = this.getItem(k);
+                if (item) {
+                    const qty = this.inventory[k];
+                    const isConsumable = item.category === 'consumable' && !item.permanent;
+                    html += '<div class="store-inv-item">' +
+                        '<span class="inv-icon">' + item.icon + '</span>' +
+                        '<div class="inv-info">' +
+                            '<span class="inv-name">' + item.name + '</span>' +
+                            '<span class="inv-qty">Quantidade: <strong>' + qty + '</strong> ' + (item.doses ? 'unidades/doses' : '') + '</span>' +
+                        '</div>' +
+                        (isConsumable ? ('<button class="btn-store-use" data-use-item="' + item.id + '">USAR / CONSUMIR</button>') : '<span class="inv-tag-active">ATIVO</span>') +
+                    '</div>';
+                }
+            });
+            html += '</div>';
+        }
+
+        if (html === '') {
+            grid.innerHTML = '<div class="store-empty-inv">Seu inventario esta vazio. Compre consumiveis, placas de video e rigs no catalogo acima.</div>';
             return;
         }
 
-        grid.innerHTML = ownedKeys.map(k => {
-            const item = this.getItem(k);
-            if (!item) return '';
-            const qty = this.inventory[k];
-            const isConsumable = item.category === 'consumable' && !item.permanent;
-
-            return '<div class="store-inv-item">' +
-                '<span class="inv-icon">' + item.icon + '</span>' +
-                '<div class="inv-info">' +
-                    '<span class="inv-name">' + item.name + '</span>' +
-                    '<span class="inv-qty">Quantidade: <strong>' + qty + '</strong> ' + (item.doses ? 'unidades/doses' : '') + '</span>' +
-                '</div>' +
-                (isConsumable ? ('<button class="btn-store-use" data-use-item="' + item.id + '">USAR / CONSUMIR</button>') : '<span class="inv-tag-active">ATIVO</span>') +
-            '</div>';
-        }).join('');
+        grid.innerHTML = html;
     }
 
     showToast(msg, type = 'success') {
         const toast = document.createElement('div');
         toast.className = 'trade-toast ' + (type === 'success' ? 'toast-win' : (type === 'info' ? 'toast-tie' : 'toast-loss'));
-        toast.innerHTML = '<div class="toast-title">DARKSTORE HARDWARE &amp; CARE</div><div class="toast-desc">' + msg + '</div>';
+        toast.innerHTML = '<div class="toast-title">DARKSTORE HARDWARE &amp; LOGISTICS</div><div class="toast-desc">' + msg + '</div>';
         document.body.appendChild(toast);
         setTimeout(() => {
             toast.classList.add('toast-fadeout');
             setTimeout(() => toast.remove(), 400);
-        }, 3000);
+        }, 3200);
     }
 }
 

@@ -431,82 +431,202 @@ class RoomScene {
     }
 
     buildDynamicAccessories(parent) {
-        this.buildMiningRig(parent);
+        this.miningRigsRootGroup = new THREE.Group();
+        parent.add(this.miningRigsRootGroup);
+
+        this.deliveryBoxesGroup = new THREE.Group();
+        parent.add(this.deliveryBoxesGroup);
+
+        this.rigFanMeshes = [];
+        this.rigLights = [];
+
         this.buildAshtrayAndSmoke(parent);
         this.buildWhiskyBar(parent);
         this.updateRoomAccessories();
     }
 
-    buildMiningRig(parent) {
-        this.miningRigGroup = new THREE.Group();
-        this.miningRigGroup.position.set(-2.5, 0, -1.8);
-        this.miningRigGroup.rotation.y = Math.PI * 0.15;
+    renderRoomRigs() {
+        if (!this.miningRigsRootGroup) return;
 
-        const frameMat = new THREE.MeshStandardMaterial({ color: 0x111622, metalness: 0.9, roughness: 0.2 });
-        const psuMat = new THREE.MeshStandardMaterial({ color: 0x0a0c10, metalness: 0.8, roughness: 0.3 });
-        const gpuBodyMat = new THREE.MeshStandardMaterial({ color: 0x182030, metalness: 0.7, roughness: 0.4 });
+        while (this.miningRigsRootGroup.children.length > 0) {
+            const obj = this.miningRigsRootGroup.children[0];
+            this.miningRigsRootGroup.remove(obj);
+        }
+
+        this.rigFanMeshes = [];
+        this.rigLights = [];
+
+        const rigs = (window.miningEngine && window.miningEngine.rigs) ? window.miningEngine.rigs : [];
+        const isMasterRunning = window.miningEngine ? window.miningEngine.isRunning : true;
+
+        const frameMat = new THREE.MeshStandardMaterial({ color: 0x0f1522, metalness: 0.9, roughness: 0.2 });
+        const psuMat = new THREE.MeshStandardMaterial({ color: 0x080a0f, metalness: 0.8, roughness: 0.3 });
+        const gpuBodyMat = new THREE.MeshStandardMaterial({ color: 0x161e2e, metalness: 0.7, roughness: 0.4 });
         const heatsinkMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.95, roughness: 0.2 });
+        const asicBodyMat = new THREE.MeshStandardMaterial({ color: 0xcfd8dc, metalness: 0.9, roughness: 0.25 });
         const rgbMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
 
-        const bar1 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.02, 0.02), frameMat);
-        bar1.position.set(0, 0.02, -0.18);
-        this.miningRigGroup.add(bar1);
-        const bar2 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.02, 0.02), frameMat);
-        bar2.position.set(0, 0.02, 0.18);
-        this.miningRigGroup.add(bar2);
+        rigs.forEach((rig) => {
+            const rigGroup = new THREE.Group();
+            const posX = rig.pos && rig.pos.x !== undefined ? rig.pos.x : -2.5;
+            const posZ = rig.pos && rig.pos.z !== undefined ? rig.pos.z : -1.8;
+            const rotY = rig.pos && rig.pos.rotY !== undefined ? rig.pos.rotY : 0.45;
 
-        const bar3 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.02, 0.02), frameMat);
-        bar3.position.set(0, 0.45, -0.18);
-        this.miningRigGroup.add(bar3);
-        const bar4 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.02, 0.02), frameMat);
-        bar4.position.set(0, 0.45, 0.18);
-        this.miningRigGroup.add(bar4);
+            rigGroup.position.set(posX, 0, posZ);
+            rigGroup.rotation.y = rotY;
 
-        for (let i = 0; i < 4; i++) {
-            const leg = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.52, 0.02), frameMat);
-            leg.position.set((i % 2 === 0 ? -0.39 : 0.39), 0.26, (i < 2 ? -0.18 : 0.18));
-            leg.castShadow = true;
-            this.miningRigGroup.add(leg);
+            const slotCount = rig.slotsCount || 4;
+            const rigWidth = 0.4 + (slotCount * 0.16);
+
+            const bar1 = new THREE.Mesh(new THREE.BoxGeometry(rigWidth, 0.02, 0.02), frameMat);
+            bar1.position.set(0, 0.02, -0.18);
+            rigGroup.add(bar1);
+            const bar2 = new THREE.Mesh(new THREE.BoxGeometry(rigWidth, 0.02, 0.02), frameMat);
+            bar2.position.set(0, 0.02, 0.18);
+            rigGroup.add(bar2);
+
+            const bar3 = new THREE.Mesh(new THREE.BoxGeometry(rigWidth, 0.02, 0.02), frameMat);
+            bar3.position.set(0, 0.46, -0.18);
+            rigGroup.add(bar3);
+            const bar4 = new THREE.Mesh(new THREE.BoxGeometry(rigWidth, 0.02, 0.02), frameMat);
+            bar4.position.set(0, 0.46, 0.18);
+            rigGroup.add(bar4);
+
+            for (let i = 0; i < 4; i++) {
+                const leg = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.54, 0.02), frameMat);
+                leg.position.set((i % 2 === 0 ? -(rigWidth / 2 - 0.01) : (rigWidth / 2 - 0.01)), 0.27, (i < 2 ? -0.18 : 0.18));
+                leg.castShadow = true;
+                rigGroup.add(leg);
+            }
+
+            const psu = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.12, 0.24), psuMat);
+            psu.position.set(-(rigWidth / 2 - 0.12), 0.08, 0);
+            psu.castShadow = true;
+            rigGroup.add(psu);
+
+            const isRigOnline = isMasterRunning && rig.isRunning;
+
+            for (let s = 0; s < slotCount; s++) {
+                const gpuId = rig.slots[s];
+                const startX = -(rigWidth / 2) + 0.26;
+                const slotX = startX + (s * 0.16);
+
+                if (gpuId) {
+                    if (gpuId === 'asic_s19') {
+                        const asicGroup = new THREE.Group();
+                        asicGroup.position.set(slotX, 0.32, 0);
+
+                        const asicCase = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.26, 0.32), asicBodyMat);
+                        asicCase.castShadow = true;
+                        asicGroup.add(asicCase);
+
+                        const fanF = new THREE.Mesh(new THREE.CylinderGeometry(0.048, 0.048, 0.02, 16), frameMat);
+                        fanF.position.set(0, 0, 0.165);
+                        fanF.rotation.x = Math.PI / 2;
+                        asicGroup.add(fanF);
+
+                        const fanB = new THREE.Mesh(new THREE.CylinderGeometry(0.048, 0.048, 0.02, 16), frameMat);
+                        fanB.position.set(0, 0, -0.165);
+                        fanB.rotation.x = Math.PI / 2;
+                        asicGroup.add(fanB);
+
+                        const fanBlade = new THREE.Mesh(new THREE.TorusGeometry(0.04, 0.008, 8, 16), rgbMat);
+                        fanBlade.position.set(0, 0, 0.17);
+                        asicGroup.add(fanBlade);
+                        this.rigFanMeshes.push({ mesh: fanBlade, online: isRigOnline });
+
+                        rigGroup.add(asicGroup);
+                    } else {
+                        const gpuGroup = new THREE.Group();
+                        gpuGroup.position.set(slotX, 0.36, 0);
+
+                        const pcb = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.22, 0.34), gpuBodyMat);
+                        pcb.castShadow = true;
+                        gpuGroup.add(pcb);
+
+                        const heatsink = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.16, 0.32), heatsinkMat);
+                        heatsink.position.set(0.018, -0.01, 0);
+                        gpuGroup.add(heatsink);
+
+                        const fan1 = new THREE.Mesh(new THREE.TorusGeometry(0.042, 0.007, 8, 16), rgbMat.clone());
+                        fan1.position.set(0.036, 0, -0.075);
+                        fan1.rotation.y = Math.PI / 2;
+                        gpuGroup.add(fan1);
+                        this.rigFanMeshes.push({ mesh: fan1, online: isRigOnline });
+
+                        const fan2 = new THREE.Mesh(new THREE.TorusGeometry(0.042, 0.007, 8, 16), rgbMat.clone());
+                        fan2.position.set(0.036, 0, 0.075);
+                        fan2.rotation.y = Math.PI / 2;
+                        gpuGroup.add(fan2);
+                        this.rigFanMeshes.push({ mesh: fan2, online: isRigOnline });
+
+                        if (gpuId === 'gpu_4090') {
+                            const fan3 = new THREE.Mesh(new THREE.TorusGeometry(0.042, 0.007, 8, 16), rgbMat.clone());
+                            fan3.position.set(0.036, 0, 0);
+                            fan3.rotation.y = Math.PI / 2;
+                            gpuGroup.add(fan3);
+                            this.rigFanMeshes.push({ mesh: fan3, online: isRigOnline });
+                        }
+
+                        rigGroup.add(gpuGroup);
+                    }
+                } else {
+                    const slotRiser = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.01, 0.24), frameMat);
+                    slotRiser.position.set(slotX, 0.24, 0);
+                    rigGroup.add(slotRiser);
+                }
+            }
+
+            if (isRigOnline) {
+                const rigLight = new THREE.PointLight(0x00e5ff, 0.7, 2.6);
+                rigLight.position.set(0, 0.35, 0);
+                rigGroup.add(rigLight);
+                this.rigLights.push(rigLight);
+            }
+
+            this.miningRigsRootGroup.add(rigGroup);
+        });
+    }
+
+    renderDeliveryBoxes() {
+        if (!this.deliveryBoxesGroup) return;
+
+        while (this.deliveryBoxesGroup.children.length > 0) {
+            const obj = this.deliveryBoxesGroup.children[0];
+            this.deliveryBoxesGroup.remove(obj);
         }
 
-        const psu = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.12, 0.24), psuMat);
-        psu.position.set(-0.25, 0.08, 0);
-        psu.castShadow = true;
-        this.miningRigGroup.add(psu);
+        const deliveries = (window.storeEngine && window.storeEngine.deliveries) ? window.storeEngine.deliveries : [];
+        const readyDeliveries = deliveries.filter(d => d.status === 'delivered' || Date.now() >= d.eta);
 
-        for (let g = 0; g < 4; g++) {
-            const gpuGroup = new THREE.Group();
-            gpuGroup.position.set(-0.28 + g * 0.18, 0.36, 0);
+        if (readyDeliveries.length === 0) return;
 
-            const pcb = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.22, 0.34), gpuBodyMat);
-            pcb.castShadow = true;
-            gpuGroup.add(pcb);
+        const boxMat = new THREE.MeshStandardMaterial({ color: 0x9a7b56, roughness: 0.85, metalness: 0.05 });
+        const tapeMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
+        const beaconMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
 
-            const heatsink = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.16, 0.32), heatsinkMat);
-            heatsink.position.set(0.02, -0.01, 0);
-            gpuGroup.add(heatsink);
+        readyDeliveries.forEach((del, idx) => {
+            const pkgGroup = new THREE.Group();
+            const posX = 1.6 + (idx * 0.35);
+            const posZ = 2.4 - (idx * 0.15);
+            pkgGroup.position.set(posX, 0, posZ);
+            pkgGroup.rotation.y = 0.2 + (idx * 0.3);
 
-            const fan1 = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.008, 8, 16), rgbMat);
-            fan1.position.set(0.04, 0, -0.075);
-            fan1.rotation.y = Math.PI / 2;
-            gpuGroup.add(fan1);
-            this.rigFanMeshes.push(fan1);
+            const box = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.22, 0.32), boxMat);
+            box.position.y = 0.11;
+            box.castShadow = true;
+            pkgGroup.add(box);
 
-            const fan2 = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.008, 8, 16), rgbMat);
-            fan2.position.set(0.04, 0, 0.075);
-            fan2.rotation.y = Math.PI / 2;
-            gpuGroup.add(fan2);
-            this.rigFanMeshes.push(fan2);
+            const tape = new THREE.Mesh(new THREE.BoxGeometry(0.284, 0.04, 0.06), tapeMat);
+            tape.position.set(0, 0.221, 0);
+            pkgGroup.add(tape);
 
-            this.miningRigGroup.add(gpuGroup);
-        }
+            const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 8), beaconMat);
+            beacon.position.set(0, 0.28, 0);
+            pkgGroup.add(beacon);
 
-        this.miningRigLight = new THREE.PointLight(0x00e5ff, 0.8, 2.5);
-        this.miningRigLight.position.set(0, 0.4, 0);
-        this.miningRigGroup.add(this.miningRigLight);
-
-        this.miningRigGroup.visible = false;
-        parent.add(this.miningRigGroup);
+            this.deliveryBoxesGroup.add(pkgGroup);
+        });
     }
 
     buildAshtrayAndSmoke(parent) {
@@ -619,12 +739,10 @@ class RoomScene {
     }
 
     updateRoomAccessories() {
-        const inv = window.storeEngine ? window.storeEngine.inventory : {};
-        const hasGpu = (inv.gpu_1660 || inv.gpu_3070 || inv.gpu_4090 || inv.asic_s19 || inv.rig_frame);
-        if (this.miningRigGroup) {
-            this.miningRigGroup.visible = !!hasGpu;
-        }
+        this.renderRoomRigs();
+        this.renderDeliveryBoxes();
 
+        const inv = window.storeEngine ? window.storeEngine.inventory : {};
         const hasCig = (inv.cigarettes || inv.ashtray || inv.zippo);
         if (this.ashtrayGroup) {
             this.ashtrayGroup.visible = !!hasCig;
@@ -1838,19 +1956,20 @@ class RoomScene {
             this.screenLight.intensity = 1.2 + Math.sin(time * 2.0) * 0.15;
         }
 
-        if (this.miningRigGroup && this.miningRigGroup.visible) {
-            const isRunning = window.miningEngine ? window.miningEngine.isRunning : true;
-            if (isRunning) {
-                const rgbHue = (time * 0.4) % 1;
-                const rgbColor = new THREE.Color().setHSL(rgbHue, 0.9, 0.55);
-                this.rigFanMeshes.forEach(fan => {
-                    fan.material.color = rgbColor;
-                    fan.rotation.z += delta * 15;
-                });
-                if (this.miningRigLight) {
-                    this.miningRigLight.color = rgbColor;
-                    this.miningRigLight.intensity = 0.6 + Math.sin(time * 6.0) * 0.2;
+        if (this.rigFanMeshes && this.rigFanMeshes.length > 0) {
+            const rgbHue = (time * 0.4) % 1;
+            const rgbColor = new THREE.Color().setHSL(rgbHue, 0.9, 0.55);
+            this.rigFanMeshes.forEach(fanItem => {
+                if (fanItem.online) {
+                    fanItem.mesh.material.color = rgbColor;
+                    fanItem.mesh.rotation.z += delta * 18;
                 }
+            });
+            if (this.rigLights && this.rigLights.length > 0) {
+                this.rigLights.forEach(light => {
+                    light.color = rgbColor;
+                    light.intensity = 0.6 + Math.sin(time * 6.0) * 0.2;
+                });
             }
         }
 
