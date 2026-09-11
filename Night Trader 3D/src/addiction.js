@@ -74,22 +74,22 @@ class AddictionEngine {
     }
 
     tick() {
-        this.nicotine = Math.max(0, this.nicotine - 0.35);
-        this.alcohol = Math.max(0, this.alcohol - 0.5);
+        this.nicotine = Math.max(0, this.nicotine - 0.15);
+        this.alcohol = Math.max(0, this.alcohol - 0.4);
         this.cigarettesSmokedRecent = Math.max(0, this.cigarettesSmokedRecent - 0.005);
 
         if (this.addictionLevel > 0 && this.nicotine < 10) {
-            this.addictionLevel = Math.max(0, this.addictionLevel - 0.03);
+            this.addictionLevel = Math.max(0, this.addictionLevel - 0.04);
         }
 
         if (this.typingBoost > 0) {
             this.typingBoost = Math.max(0, this.typingBoost - 2);
         }
 
-        const isAddicted = this.addictionLevel >= 35;
+        const isAddicted = this.addictionLevel >= 45;
         if (isAddicted) {
-            if (this.nicotine < 25) {
-                this.stress = Math.min(100, this.stress + 0.45);
+            if (this.nicotine < 15) {
+                this.stress = Math.min(100, this.stress + 0.3);
             } else {
                 this.stress = Math.max(5, this.stress - 0.2);
             }
@@ -113,8 +113,8 @@ class AddictionEngine {
     }
 
     checkWithdrawal() {
-        const isAddicted = this.addictionLevel >= 35;
-        const isLowNicotine = isAddicted && this.nicotine < 25;
+        const isAddicted = this.addictionLevel >= 45;
+        const isLowNicotine = isAddicted && this.nicotine < 15;
         this.jitterActive = isLowNicotine;
 
         const terminal = document.querySelector('.desktop-terminal-container');
@@ -123,8 +123,8 @@ class AddictionEngine {
         }
 
         const now = Date.now();
-        if (isLowNicotine && this.nicotine < 18 && !this.isCoughing && (now - this.lastCoughTime > 45000)) {
-            if (Math.random() < 0.35) {
+        if (isLowNicotine && this.nicotine < 8 && !this.isCoughing && (now - this.lastCoughTime > 120000)) {
+            if (Math.random() < 0.12) {
                 this.triggerCoughFit();
             }
         }
@@ -133,18 +133,24 @@ class AddictionEngine {
     setupPointerJitter() {
         let lastJitter = 0;
         window.addEventListener('mousemove', (e) => {
-            if (!this.jitterActive || this.isCoughing || this.addictionLevel < 35) return;
+            if (!this.jitterActive || this.isCoughing || this.addictionLevel < 45) return;
             const now = performance.now();
-            if (now - lastJitter > 60) {
+            if (now - lastJitter > 350) {
                 lastJitter = now;
                 const addictRatio = Math.min(1.0, this.addictionLevel / 100);
-                const nicDeficit = (25 - this.nicotine) / 25;
+                const nicDeficit = Math.max(0, (15 - this.nicotine) / 15);
                 const intensity = addictRatio * nicDeficit;
-                const jitterX = (Math.random() - 0.5) * 8 * intensity;
-                const jitterY = (Math.random() - 0.5) * 8 * intensity;
-                if (window.roomScene && window.roomScene.camera) {
-                    window.roomScene.camera.position.x += jitterX * 0.002;
-                    window.roomScene.camera.position.y += jitterY * 0.002;
+                if (intensity > 0.08 && window.roomScene && window.roomScene.camera) {
+                    const jitterX = (Math.random() - 0.5) * 0.0012 * intensity;
+                    const jitterY = (Math.random() - 0.5) * 0.0012 * intensity;
+                    window.roomScene.camera.position.x += jitterX;
+                    window.roomScene.camera.position.y += jitterY;
+                    setTimeout(() => {
+                        if (window.roomScene && window.roomScene.camera) {
+                            window.roomScene.camera.position.x -= jitterX;
+                            window.roomScene.camera.position.y -= jitterY;
+                        }
+                    }, 80);
                 }
             }
         }, { passive: true });
@@ -235,9 +241,9 @@ class AddictionEngine {
 
         const previousAddiction = this.addictionLevel;
         if (this.cigarettesSmokedTotal === 1) {
-            this.addictionLevel = 12;
+            this.addictionLevel = 8;
         } else {
-            this.addictionLevel = Math.min(100, this.addictionLevel + 16);
+            this.addictionLevel = Math.min(100, this.addictionLevel + 10);
         }
 
         this.nicotine = 100;
@@ -257,9 +263,9 @@ class AddictionEngine {
             window.roomScene.onSmokeTriggered();
         }
 
-        if (previousAddiction >= 35) {
+        if (previousAddiction >= 45) {
             this.showToast('Voce acendeu um Lucky Strike. A abstinencia e a tremedeira cessaram.', 'success');
-        } else if (this.addictionLevel >= 35) {
+        } else if (this.addictionLevel >= 45) {
             this.showToast('Voce esta fumando com frequencia. O seu corpo comecou a criar dependencia quimica.', 'info');
         } else {
             this.showToast('Voce acendeu um Lucky Strike. Estresse reduzido.', 'success');
