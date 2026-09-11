@@ -357,15 +357,36 @@ class DesktopUI {
         const btnReset = document.getElementById('btn-reset-account');
         if (btnReset) {
             btnReset.addEventListener('click', () => {
-                if (confirm('Deseja realmente reiniciar todo o seu saldo virtual e investimentos para R$ 10.000,00?')) {
-                    window.tradingEngine.resetAccount();
-                    if (window.portfolioEngine) window.portfolioEngine.resetPortfolio();
-                    this.updateHeader();
-                    this.renderHistory();
-                    this.renderStats();
-                    this.renderRanking();
-                    this.renderExchange();
-                    if (window.soundEngine) window.soundEngine.playClick();
+                const confirmed = confirm('ATENÇÃO: Deseja realmente formatar o jogo inteiro do zero e restaurar todos os padrões de fábrica?\n\nTodo o saldo, inventário, rigs de mineração, histórico, status e dados serão completamente apagados.');
+                if (confirmed) {
+                    const explicitKeys = [
+                        'night_trader_data_source',
+                        'night_trader_graphics',
+                        'night_trader_addiction_state',
+                        'night_trader_mining_state',
+                        'night_trader_portfolio_holdings',
+                        'night_trader_portfolio_history',
+                        'night_trader_store_inventory',
+                        'night_trader_store_deliveries',
+                        'night_trader_balance',
+                        'night_trader_history',
+                        'night_trader_stats',
+                        'night_trader_ranking',
+                        'night_trader_active_asset'
+                    ];
+                    explicitKeys.forEach(k => localStorage.removeItem(k));
+                    const keys = [];
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const k = localStorage.key(i);
+                        if (k && k.toLowerCase().includes('night_trader')) {
+                            keys.push(k);
+                        }
+                    }
+                    keys.forEach(k => localStorage.removeItem(k));
+                    if (window.soundEngine && window.soundEngine.playClick) {
+                        window.soundEngine.playClick();
+                    }
+                    window.location.reload();
                 }
             });
         }

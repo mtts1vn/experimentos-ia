@@ -196,10 +196,10 @@
                         <span class="label">SALDO:</span>
                         <span class="val" id="wallpaper-user-balance">R$ 10.000,00</span>
                     </div>
-                    <div class="status-item">
+                    <div class="status-item" id="status-item-nicotine" style="cursor: pointer;" title="Fumar cigarro [se possuir no inventario]">
                         <span class="label">NICOTINA:</span>
                         <div class="vitals-mini-meter">
-                            <div class="meter-fill meter-nicotine" id="hud-nicotine-fill" style="width: 80%;"></div>
+                            <div class="meter-fill meter-nicotine" id="hud-nicotine-fill" style="width: 0%;"></div>
                         </div>
                     </div>
                     <div class="status-item">
@@ -210,7 +210,7 @@
                     </div>
                     <div class="status-item">
                         <span class="label">ESTADO:</span>
-                        <span class="vitals-badge badge-ok" id="hud-vitals-status">ESTAVEL</span>
+                        <span class="vitals-badge badge-ok" id="hud-vitals-status">SAUDAVEL</span>
                     </div>
                     <div class="status-item">
                         <span class="label">MERCADO:</span>
@@ -762,34 +762,29 @@
                                     <span>LOBBY DE JOGOS</span>
                                 </button>
                                 <div class="casino-branding" id="casino-main-branding">
-                                    <span class="casino-crown-icon">&#128081;</span>
+                                    <span class="casino-crown-icon" id="casino-brand-icon">&#128081;</span>
                                     <div class="casino-titles">
-                                        <span class="casino-main-title">ROYALE CASINO RESORT</span>
-                                        <span class="casino-sub-title">HUB DE JOGOS &bull; CARTEIRA UNIFICADA</span>
+                                        <span class="casino-main-title" id="casino-title-text">ROYALE CASINO RESORT</span>
+                                        <span class="casino-sub-title" id="casino-sub-text">HUB DE JOGOS &bull; CARTEIRA UNIFICADA</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="casino-quick-switch" id="casino-quick-switch-bar">
-                                <button class="casino-quick-pill" data-game="slots">&#127920; SLOTS</button>
-                                <button class="casino-quick-pill" data-game="crash">&#128640; CRASH</button>
-                                <button class="casino-quick-pill" data-game="roulette">&#127922; ROLETA</button>
-                                <button class="casino-quick-pill" data-game="blackjack">&#127183; 21</button>
-                                <button class="casino-quick-pill" data-game="mines">&#128163; MINAS</button>
-                                <button class="casino-quick-pill" data-game="baccarat">&#127183; BACCARAT</button>
-                                <button class="casino-quick-pill" data-game="poker">&#9824; POKER</button>
-                            </div>
-
                             <div class="casino-chip-selector-box">
-                                <span class="chip-selector-label">FICHA:</span>
-                                <div class="casino-chip-selector">
-                                    <button class="casino-chip chip-10" data-value="10">10</button>
-                                    <button class="casino-chip chip-25" data-value="25">25</button>
-                                    <button class="casino-chip chip-50 active" data-value="50">50</button>
-                                    <button class="casino-chip chip-100" data-value="100">100</button>
-                                    <button class="casino-chip chip-500" data-value="500">500</button>
-                                    <button class="casino-chip chip-1000" data-value="1000">1K</button>
-                                    <button class="casino-chip chip-allin" data-value="allin" title="Apostar Todo o Saldo da Carteira">ALL IN</button>
+                                <div class="chip-selector-info">
+                                    <span class="chip-selector-label">FICHA ATIVA</span>
+                                    <span class="chip-selected-value" id="casino-selected-chip-display">R$ 50</span>
+                                </div>
+                                <div class="casino-chip-tray">
+                                    <div class="casino-chip-selector">
+                                        <button class="casino-chip chip-10" data-value="10" title="Ficha R$ 10"><span class="chip-inner">10</span></button>
+                                        <button class="casino-chip chip-25" data-value="25" title="Ficha R$ 25"><span class="chip-inner">25</span></button>
+                                        <button class="casino-chip chip-50 active" data-value="50" title="Ficha R$ 50"><span class="chip-inner">50</span></button>
+                                        <button class="casino-chip chip-100" data-value="100" title="Ficha R$ 100"><span class="chip-inner">100</span></button>
+                                        <button class="casino-chip chip-500" data-value="500" title="Ficha R$ 500"><span class="chip-inner">500</span></button>
+                                        <button class="casino-chip chip-1000" data-value="1000" title="Ficha R$ 1.000"><span class="chip-inner">1K</span></button>
+                                        <button class="casino-chip chip-allin" data-value="allin" title="Apostar Todo o Saldo da Carteira"><span class="chip-inner">ALL IN</span></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1042,17 +1037,6 @@
                                 </div>
 
                                 <div class="bj-action-bar">
-                                    <div class="bj-bet-selector-group">
-                                        <span class="action-label">VALOR DA APOSTA:</span>
-                                        <div class="bet-pills-row">
-                                            <button class="bj-bet-pill" data-amount="25">R$ 25</button>
-                                            <button class="bj-bet-pill active" data-amount="50">R$ 50</button>
-                                            <button class="bj-bet-pill" data-amount="100">R$ 100</button>
-                                            <button class="bj-bet-pill" data-amount="250">R$ 250</button>
-                                            <button class="bj-bet-pill" data-amount="500">R$ 500</button>
-                                            <button class="bj-bet-pill bet-pill-allin" data-amount="allin">ALL IN</button>
-                                        </div>
-                                    </div>
                                     <div class="bj-buttons-group">
                                         <button class="btn-casino-action btn-casino-deal" id="btn-bj-deal">&#127183; APOSTAR &amp; DAR CARTAS</button>
                                         <button class="btn-casino-action btn-casino-hit" id="btn-bj-hit" disabled>+ COMPRAR (HIT)</button>
@@ -1083,17 +1067,6 @@
                                     <div class="paytable-item"><span>QUALQUER PAR</span><strong>2x</strong></div>
                                 </div>
                                 <div class="slots-action-bar">
-                                    <div class="slot-bet-selector-group">
-                                        <span class="action-label">VALOR POR GIRO:</span>
-                                        <div class="bet-pills-row">
-                                            <button class="slot-bet-pill" data-amount="10">R$ 10</button>
-                                            <button class="slot-bet-pill" data-amount="25">R$ 25</button>
-                                            <button class="slot-bet-pill active" data-amount="50">R$ 50</button>
-                                            <button class="slot-bet-pill" data-amount="100">R$ 100</button>
-                                            <button class="slot-bet-pill" data-amount="200">R$ 200</button>
-                                            <button class="slot-bet-pill bet-pill-allin" data-amount="allin">ALL IN</button>
-                                        </div>
-                                    </div>
                                     <button class="btn-casino-action btn-casino-spin-slots" id="btn-spin-slots">&#127920; GIRAR ROLETA 777</button>
                                 </div>
                             </div>
@@ -1106,17 +1079,6 @@
                                     <div class="crash-multiplier-text" id="crash-live-multiplier">1.00x</div>
                                 </div>
                                 <div class="crash-action-bar">
-                                    <div class="crash-bet-selector-group">
-                                        <span class="action-label">VALOR DO LANCAMENTO:</span>
-                                        <div class="bet-pills-row">
-                                            <button class="crash-bet-pill" data-amount="25">R$ 25</button>
-                                            <button class="crash-bet-pill active" data-amount="50">R$ 50</button>
-                                            <button class="crash-bet-pill" data-amount="100">R$ 100</button>
-                                            <button class="crash-bet-pill" data-amount="250">R$ 250</button>
-                                            <button class="crash-bet-pill" data-amount="500">R$ 500</button>
-                                            <button class="crash-bet-pill bet-pill-allin" data-amount="allin">ALL IN</button>
-                                        </div>
-                                    </div>
                                     <button class="btn-casino-action btn-casino-launch" id="btn-crash-action">&#128640; INICIAR VOO (APOSTAR)</button>
                                 </div>
                             </div>
@@ -1133,16 +1095,6 @@
                                             <button class="mines-count-pill" data-mines="5">5</button>
                                             <button class="mines-count-pill" data-mines="10">10</button>
                                             <button class="mines-count-pill" data-mines="24">24</button>
-                                        </div>
-                                    </div>
-                                    <div class="mines-config-group">
-                                        <span class="action-label">VALOR DA APOSTA:</span>
-                                        <div class="bet-pills-row">
-                                            <button class="mines-bet-pill" data-amount="25">R$ 25</button>
-                                            <button class="mines-bet-pill active" data-amount="50">R$ 50</button>
-                                            <button class="mines-bet-pill" data-amount="100">R$ 100</button>
-                                            <button class="mines-bet-pill" data-amount="250">R$ 250</button>
-                                            <button class="mines-bet-pill bet-pill-allin" data-amount="allin">ALL IN</button>
                                         </div>
                                     </div>
                                     <div class="mines-status-box">
@@ -1192,17 +1144,6 @@
                                         </div>
                                     </div>
                                     <div class="bac-action-bar">
-                                        <div class="bac-bet-selector-group">
-                                            <span class="action-label">VALOR DA APOSTA:</span>
-                                            <div class="bet-pills-row">
-                                                <button class="bac-bet-pill" data-amount="25">R$ 25</button>
-                                                <button class="bac-bet-pill active" data-amount="50">R$ 50</button>
-                                                <button class="bac-bet-pill" data-amount="100">R$ 100</button>
-                                                <button class="bac-bet-pill" data-amount="250">R$ 250</button>
-                                                <button class="bac-bet-pill" data-amount="500">R$ 500</button>
-                                                <button class="bac-bet-pill bet-pill-allin" data-amount="allin">ALL IN</button>
-                                            </div>
-                                        </div>
                                         <button class="btn-casino-action btn-bac-deal-btn" id="btn-bac-deal">&#127183; DAR CARTAS BACCARAT</button>
                                     </div>
                                 </div>
@@ -1227,17 +1168,6 @@
                                     <div class="poker-result-label" id="poker-result-label"></div>
                                 </div>
                                 <div class="poker-action-bar">
-                                    <div class="poker-bet-selector-group">
-                                        <span class="action-label">VALOR DA APOSTA:</span>
-                                        <div class="bet-pills-row">
-                                            <button class="poker-bet-pill" data-amount="25">R$ 25</button>
-                                            <button class="poker-bet-pill active" data-amount="50">R$ 50</button>
-                                            <button class="poker-bet-pill" data-amount="100">R$ 100</button>
-                                            <button class="poker-bet-pill" data-amount="250">R$ 250</button>
-                                            <button class="poker-bet-pill" data-amount="500">R$ 500</button>
-                                            <button class="poker-bet-pill bet-pill-allin" data-amount="allin">ALL IN</button>
-                                        </div>
-                                    </div>
                                     <button class="btn-casino-action btn-poker-deal-btn" id="btn-poker-action">&#9824; DISTRIBUIR (DEAL)</button>
                                 </div>
                             </div>
@@ -1456,7 +1386,7 @@
                 <button class="dock-action-btn" id="btn-toggle-audio" title="Audio: Ligado (Clique para mutar)">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
                 </button>
-                <button class="dock-action-btn" id="btn-reset-account" title="Reiniciar Saldo e Conta">
+                <button class="dock-action-btn" id="btn-reset-account" title="Formatar e Reiniciar Jogo do Zero">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ff8c00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                 </button>
                 <button class="dock-action-btn dock-btn-exit" id="btn-leave-pc" title="Levantar da Mesa [ESC]">
@@ -1470,6 +1400,9 @@
         </aside>
     </div>
 
+    <div id="drunk-screen-overlay"></div>
+    <div id="consumables-hotbar" class="consumables-hotbar"></div>
+
     <script src="src/audio.js"></script>
     <script src="src/market.js"></script>
     <script src="src/chart.js"></script>
@@ -1477,7 +1410,9 @@
     <script src="src/portfolio.js"></script>
     <script src="src/store.js"></script>
     <script src="src/mining.js"></script>
+    <script src="src/smoking.js"></script>
     <script src="src/addiction.js"></script>
+    <script src="src/hotbar.js"></script>
     <script src="src/casino.js"></script>
     <script src="src/copywriter.js"></script>
     <script src="src/desktop.js"></script>
@@ -1512,6 +1447,7 @@
                 if (!window.desktopUI) window.desktopUI = new window.DesktopUI();
                 if (!window.roomScene) window.roomScene = new window.RoomScene();
                 if (window.soundEngine) window.soundEngine.init();
+                if (window.consumablesHotbar) window.consumablesHotbar.update();
                 const btnLeave = document.getElementById('btn-leave-pc');
                 if (btnLeave) {
                     btnLeave.title = 'Levantar da Mesa [ESC]';
@@ -1534,6 +1470,7 @@
                 }
                 if (!window.desktopUI) window.desktopUI = new window.DesktopUI();
                 if (window.soundEngine) window.soundEngine.init();
+                if (window.consumablesHotbar) window.consumablesHotbar.update();
 
                 const btnLeave = document.getElementById('btn-leave-pc');
                 if (btnLeave) {

@@ -1688,6 +1688,11 @@ class RoomScene {
                 if (key === 'd' || code === 'KeyD' || code === 'ArrowRight') this.keys.right = true;
 
                 if (key === 'e' || code === 'KeyE') {
+                    const distToWhisky = this.whiskyGroup && this.whiskyGroup.visible ? this.player.pos.distanceTo(new THREE.Vector3(-0.48, 1.0, -2.42)) : 999;
+                    if (distToWhisky < 1.8) {
+                        if (window.addictionEngine) window.addictionEngine.drinkWhisky();
+                        return;
+                    }
                     const distToDesk = this.player.pos.distanceTo(new THREE.Vector3(-0.95, 1.65, -1.45));
                     if (distToDesk < 2.6) {
                         this.startSitAnimation();
@@ -1852,7 +1857,12 @@ class RoomScene {
         const distToDesk = this.player.pos.distanceTo(new THREE.Vector3(-0.95, 1.65, -1.45));
         const promptEl = document.getElementById('room-interaction-prompt');
         if (promptEl) {
-            if (distToDesk < 2.5) {
+            const distToWhisky = this.whiskyGroup && this.whiskyGroup.visible ? this.player.pos.distanceTo(new THREE.Vector3(-0.48, 1.0, -2.42)) : 999;
+            if (distToWhisky < 1.8) {
+                promptEl.textContent = 'Pressione [E] para Beber Whisky';
+                promptEl.classList.remove('hidden');
+            } else if (distToDesk < 2.5) {
+                promptEl.textContent = 'Pressione [E] para Sentar na Mesa';
                 promptEl.classList.remove('hidden');
             } else {
                 promptEl.classList.add('hidden');

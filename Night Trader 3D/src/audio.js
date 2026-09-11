@@ -338,6 +338,81 @@ class SoundEngine {
         noise.start(now);
     }
 
+    playCigaretteInhale() {
+        if (this.muted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const duration = 1.4;
+        const bufferSize = Math.floor(this.ctx.sampleRate * duration);
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        for (let i = 0; i < bufferSize; i++) {
+            const t = i / bufferSize;
+            let crackle = 0;
+            if (Math.random() < 0.035) {
+                crackle = (Math.random() * 2 - 1) * 0.45;
+            }
+            const wind = (Math.random() * 2 - 1) * 0.15;
+            const env = Math.sin(t * Math.PI);
+            data[i] = (wind + crackle) * env;
+        }
+
+        const source = this.ctx.createBufferSource();
+        source.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1200, now);
+        filter.frequency.linearRampToValueAtTime(1800, now + duration * 0.6);
+        filter.frequency.linearRampToValueAtTime(1000, now + duration);
+        filter.Q.setValueAtTime(1.8, now);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.01, now);
+        gain.gain.linearRampToValueAtTime(0.12, now + duration * 0.5);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.effectsGain);
+        source.start(now);
+        source.stop(now + duration);
+    }
+
+    playCigaretteExhale() {
+        if (this.muted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const duration = 1.8;
+        const bufferSize = Math.floor(this.ctx.sampleRate * duration);
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        for (let i = 0; i < bufferSize; i++) {
+            const t = i / bufferSize;
+            const env = Math.sin(t * Math.PI) * Math.exp(-t * 1.5);
+            data[i] = (Math.random() * 2 - 1) * env * 0.2;
+        }
+
+        const source = this.ctx.createBufferSource();
+        source.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(700, now);
+        filter.frequency.exponentialRampToValueAtTime(350, now + duration);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.01, now);
+        gain.gain.linearRampToValueAtTime(0.09, now + 0.3);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.effectsGain);
+        source.start(now);
+        source.stop(now + duration);
+    }
+
     playDrink() {
         if (this.muted || !this.ctx) return;
         const now = this.ctx.currentTime;

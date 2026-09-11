@@ -358,6 +358,10 @@ class StoreEngine {
             window.roomScene.updateRoomAccessories();
         }
 
+        if (window.consumablesHotbar) {
+            window.consumablesHotbar.update();
+        }
+
         this.render();
     }
 
@@ -389,6 +393,10 @@ class StoreEngine {
                 window.soundEngine.playLighter();
             }
             this.showToast('Voce acende o isqueiro Zippo.', 'info');
+        }
+
+        if (window.consumablesHotbar) {
+            window.consumablesHotbar.update();
         }
 
         this.render();
