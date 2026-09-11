@@ -700,6 +700,48 @@ class RoomScene {
         return nearest;
     }
 
+    getTargetRig() {
+        if (!window.miningEngine || !window.miningEngine.rigs || window.miningEngine.rigs.length === 0) return null;
+        if (!this.camera) return null;
+
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(new THREE.Vector2(0, 0), this.camera);
+        if (this.miningRigsRootGroup && this.miningRigsRootGroup.children.length > 0) {
+            const hits = raycaster.intersectObjects(this.miningRigsRootGroup.children, true);
+            if (hits.length > 0 && hits[0].distance < 3.8) {
+                let obj = hits[0].object;
+                while (obj && obj !== this.miningRigsRootGroup) {
+                    if (obj.userData && obj.userData.rigId) {
+                        const found = window.miningEngine.rigs.find(r => r.id === obj.userData.rigId);
+                        if (found) return found;
+                    }
+                    obj = obj.parent;
+                }
+            }
+        }
+
+        const camDir = new THREE.Vector3();
+        this.camera.getWorldDirection(camDir);
+        let bestRig = null;
+        let maxScore = -1;
+
+        window.miningEngine.rigs.forEach(r => {
+            const rigCenter = new THREE.Vector3(r.pos.x, 0.35, r.pos.z);
+            const toRig = rigCenter.clone().sub(this.camera.position);
+            const dist = toRig.length();
+            if (dist < 3.2) {
+                const dirToRig = toRig.normalize();
+                const dot = camDir.dot(dirToRig);
+                if (dot > 0.55 && dot > maxScore) {
+                    maxScore = dot;
+                    bestRig = r;
+                }
+            }
+        });
+
+        return bestRig;
+    }
+
     startMovingRig(rigId) {
         if (!window.miningEngine) return;
         const rig = window.miningEngine.rigs.find(r => r.id === rigId) || window.miningEngine.rigs[0];
@@ -1932,9 +1974,9 @@ class RoomScene {
                 if (key === 'd' || code === 'KeyD' || code === 'ArrowRight') this.keys.right = true;
 
                 if (key === 'f' || code === 'KeyF') {
-                    const nearestRig = this.getNearestRig(2.4);
-                    if (nearestRig) {
-                        this.startMovingRig(nearestRig.id);
+                    const targetRig = this.getTargetRig() || this.getNearestRig(2.4);
+                    if (targetRig) {
+                        this.startMovingRig(targetRig.id);
                         return;
                     }
                 }
@@ -2112,15 +2154,15 @@ class RoomScene {
                 promptEl.textContent = '[F] ou Clique: Fixar Rig no Chão | [R]: Girar 45° | [Scroll]: Distância | [Esc]: Cancelar';
                 promptEl.classList.remove('hidden');
             } else {
+                const targetRig = this.getTargetRig();
                 const distToDesk = this.player.pos.distanceTo(new THREE.Vector3(-0.95, 1.65, -1.45));
                 const distToWhisky = this.whiskyGroup && this.whiskyGroup.visible ? this.player.pos.distanceTo(new THREE.Vector3(-0.48, 1.0, -2.42)) : 999;
-                const nearestRig = this.getNearestRig(2.4);
 
-                if (distToWhisky < 1.8) {
-                    promptEl.textContent = 'Pressione [E] para Beber Whisky';
+                if (targetRig) {
+                    promptEl.textContent = 'Aperte "F" para mover';
                     promptEl.classList.remove('hidden');
-                } else if (nearestRig) {
-                    promptEl.textContent = 'Pressione [F] para Mover a Rig de Mineração';
+                } else if (distToWhisky < 1.8) {
+                    promptEl.textContent = 'Pressione [E] para Beber Whisky';
                     promptEl.classList.remove('hidden');
                 } else if (distToDesk < 2.5) {
                     promptEl.textContent = 'Pressione [E] para Sentar na Mesa';

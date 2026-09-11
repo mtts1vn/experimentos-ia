@@ -359,11 +359,35 @@ class DesktopUI {
             btnReset.addEventListener('click', () => {
                 const confirmed = confirm('ATENÇÃO: Deseja realmente formatar o jogo inteiro do zero e restaurar todos os padrões de fábrica?\n\nTodo o saldo, inventário, rigs de mineração, histórico, status e dados serão completamente apagados.');
                 if (confirmed) {
+                    if (window.miningEngine) {
+                        if (typeof window.miningEngine.resetState === 'function') {
+                            window.miningEngine.resetState();
+                        } else {
+                            if (window.miningEngine.tickInterval) clearInterval(window.miningEngine.tickInterval);
+                            window.miningEngine.saveState = () => {};
+                            window.miningEngine.rigs = [];
+                        }
+                    }
+                    if (window.tradingEngine) {
+                        window.tradingEngine.saveState = () => {};
+                    }
+                    if (window.portfolioEngine) {
+                        window.portfolioEngine.saveHoldings = () => {};
+                    }
+                    if (window.storeEngine) {
+                        if (window.storeEngine.deliveryInterval) clearInterval(window.storeEngine.deliveryInterval);
+                        window.storeEngine.saveInventory = () => {};
+                        window.storeEngine.saveDeliveries = () => {};
+                    }
+                    if (window.addictionEngine) {
+                        window.addictionEngine.saveState = () => {};
+                    }
                     const explicitKeys = [
                         'night_trader_data_source',
                         'night_trader_graphics',
                         'night_trader_addiction_state',
                         'night_trader_mining_state',
+                        'night_trader_mining_state_v2',
                         'night_trader_portfolio_holdings',
                         'night_trader_portfolio_history',
                         'night_trader_store_inventory',
@@ -374,7 +398,9 @@ class DesktopUI {
                         'night_trader_ranking',
                         'night_trader_active_asset'
                     ];
-                    explicitKeys.forEach(k => localStorage.removeItem(k));
+                    explicitKeys.forEach(k => {
+                        try { localStorage.removeItem(k); } catch (e) {}
+                    });
                     const keys = [];
                     for (let i = 0; i < localStorage.length; i++) {
                         const k = localStorage.key(i);
@@ -382,7 +408,13 @@ class DesktopUI {
                             keys.push(k);
                         }
                     }
-                    keys.forEach(k => localStorage.removeItem(k));
+                    keys.forEach(k => {
+                        try { localStorage.removeItem(k); } catch (e) {}
+                    });
+                    try {
+                        localStorage.clear();
+                        sessionStorage.clear();
+                    } catch (e) {}
                     if (window.soundEngine && window.soundEngine.playClick) {
                         window.soundEngine.playClick();
                     }

@@ -139,24 +139,31 @@ class MiningEngine {
                     this.totalMinedCoins.btc = data.totalBtcMined;
                 }
 
-                if (Array.isArray(data.rigs) && data.rigs.length > 0) {
+                if (Array.isArray(data.rigs)) {
                     return data.rigs;
                 }
             }
         } catch (e) {}
 
-        return [
-            {
-                id: 'rig_1',
-                name: 'Rig Rack Alpha (4 Slots)',
-                type: 'rig_frame_4',
-                slotsCount: 4,
-                slots: [null, null, null, null],
-                pos: { x: -2.5, y: 0, z: -1.8, rotY: 0.45 },
-                presetId: 'desk_left',
-                isRunning: true
-            }
-        ];
+        return [];
+    }
+
+    resetState() {
+        if (this.tickInterval) {
+            clearInterval(this.tickInterval);
+            this.tickInterval = null;
+        }
+        this.saveState = () => {};
+        this.rigs = [];
+        this.unminedCoins = { btc: 0, eth: 0, doge: 0, sol: 0 };
+        this.totalMinedCoins = { btc: 0, eth: 0, doge: 0, sol: 0 };
+        this.totalHashrate = 0;
+        this.totalPower = 0;
+        this.selectedCoinId = 'btc';
+        try {
+            localStorage.removeItem('night_trader_mining_state_v2');
+            localStorage.removeItem('night_trader_mining_state');
+        } catch (e) {}
     }
 
     saveState() {
@@ -825,6 +832,15 @@ class MiningEngine {
     }
 
     renderRoomPlacementTab(container) {
+        if (this.rigs.length === 0) {
+            container.innerHTML = '<div class="mining-empty-panel">' +
+                '<div class="empty-icon">🗄️</div>' +
+                '<div class="empty-title">NENHUMA ESTRUTURA DE RIG ADQUIRIDA</div>' +
+                '<p>Visite a <strong>DarkStore</strong> para adquirir um Chassi de Mineração Open-Air.</p>' +
+            '</div>';
+            return;
+        }
+
         let html = '<div class="room-placement-container">' +
             '<div class="placement-header">' +
                 '<span class="placement-title">🏠 ORGANIZACAO LIVRE DOS RIGS NO QUARTO 3D</span>' +
