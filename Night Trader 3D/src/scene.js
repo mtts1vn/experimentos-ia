@@ -722,29 +722,17 @@ class RoomScene {
             -Math.cos(this.player.yaw) * Math.cos(this.player.pitch)
         ).normalize();
 
-        if (this.miningRigsRootGroup && this.miningRigsRootGroup.children.length > 0) {
-            const raycaster = new THREE.Raycaster(eyePos, lookDir, 0.05, 5.0);
-            const hits = raycaster.intersectObjects(this.miningRigsRootGroup.children, true);
-            if (hits.length > 0) {
-                let obj = hits[0].object;
-                while (obj && obj !== this.miningRigsRootGroup) {
-                    if (obj.userData && obj.userData.rigId) {
-                        const found = window.miningEngine.rigs.find(r => r.id === obj.userData.rigId);
-                        if (found) return found;
-                    }
-                    obj = obj.parent;
-                }
-            }
-        }
-
         let bestAimRig = null;
-        let minAimDist = 1.35;
+        let minAimDist = 0.75;
 
         window.miningEngine.rigs.forEach(r => {
+            const horizDist = Math.hypot(r.pos.x - this.player.pos.x, r.pos.z - this.player.pos.z);
+            if (horizDist > 2.2) return;
+
             const rigCenter = new THREE.Vector3(r.pos.x, 0.35, r.pos.z);
             const toRig = rigCenter.clone().sub(eyePos);
             const proj = toRig.dot(lookDir);
-            if (proj > 0.1 && proj < 4.8) {
+            if (proj > 0.2 && proj <= 2.4) {
                 const closestPointOnRay = eyePos.clone().add(lookDir.clone().multiplyScalar(proj));
                 const aimDist = closestPointOnRay.distanceTo(rigCenter);
                 if (aimDist < minAimDist) {
@@ -756,23 +744,25 @@ class RoomScene {
 
         if (bestAimRig) return bestAimRig;
 
-        let bestFacingRig = null;
-        let minPlayerDist = 2.8;
-
-        window.miningEngine.rigs.forEach(r => {
-            const toRig2D = new THREE.Vector2(r.pos.x - eyePos.x, r.pos.z - eyePos.z);
-            const dist2D = toRig2D.length();
-            if (dist2D < minPlayerDist) {
-                const look2D = new THREE.Vector2(-Math.sin(this.player.yaw), -Math.cos(this.player.yaw)).normalize();
-                const dot2D = look2D.dot(toRig2D.normalize());
-                if (dot2D > 0.50 && this.player.pitch < 0.55) {
-                    minPlayerDist = dist2D;
-                    bestFacingRig = r;
+        if (this.miningRigsRootGroup && this.miningRigsRootGroup.children.length > 0) {
+            const raycaster = new THREE.Raycaster(eyePos, lookDir, 0.05, 2.3);
+            const hits = raycaster.intersectObjects(this.miningRigsRootGroup.children, true);
+            if (hits.length > 0 && hits[0].distance <= 2.2) {
+                let obj = hits[0].object;
+                while (obj && obj !== this.miningRigsRootGroup) {
+                    if (obj.userData && obj.userData.rigId) {
+                        const found = window.miningEngine.rigs.find(r => r.id === obj.userData.rigId);
+                        if (found) {
+                            const horizDist = Math.hypot(found.pos.x - this.player.pos.x, found.pos.z - this.player.pos.z);
+                            if (horizDist <= 2.2) return found;
+                        }
+                    }
+                    obj = obj.parent;
                 }
             }
-        });
+        }
 
-        return bestFacingRig;
+        return null;
     }
 
     startMovingRig(rigId) {
@@ -2007,7 +1997,7 @@ class RoomScene {
                 if (key === 'd' || code === 'KeyD' || code === 'ArrowRight') this.keys.right = true;
 
                 if (key === 'f' || code === 'KeyF') {
-                    const targetRig = this.getTargetRig() || this.getNearestRig(2.4);
+                    const targetRig = this.getTargetRig();
                     if (targetRig) {
                         this.startMovingRig(targetRig.id);
                         return;
