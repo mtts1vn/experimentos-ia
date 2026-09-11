@@ -1,4 +1,4 @@
-﻿class PortfolioEngine {
+class PortfolioEngine {
     constructor() {
         this.portfolioKey = 'night_trader_spot_portfolio';
         this.historyKey = 'night_trader_spot_history';
@@ -178,6 +178,64 @@
         return { 
             success: true, 
             message: 'Vendeu ' + sellQuantity.toFixed(asset.decimals > 2 ? 6 : 4) + ' ' + asset.name + ' por R$ ' + grossReturn.toFixed(2) + ' (Lucro: ' + (realizedPnL >= 0 ? '+' : '') + 'R$ ' + realizedPnL.toFixed(2) + ')' 
+        };
+    }
+
+    depositMined(assetId, quantity) {
+        const qty = parseFloat(quantity);
+        if (isNaN(qty) || qty <= 0) {
+            return { success: false, message: 'Quantidade invalida de criptomoeda minerada.' };
+        }
+
+        const asset = window.marketEngine ? window.marketEngine.assets.find(a => a.id === assetId) : null;
+        if (!asset) {
+            return { success: false, message: 'Ativo de mineracao nao encontrado no mercado.' };
+        }
+
+        const existing = this.getPosition(assetId);
+        const now = Date.now();
+
+        if (existing) {
+            existing.quantity += qty;
+            existing.lastUpdatedAt = now;
+        } else {
+            this.positions.push({
+                assetId: asset.id,
+                assetName: asset.name,
+                category: asset.category,
+                categoryKey: asset.categoryKey,
+                decimals: asset.decimals,
+                quantity: qty,
+                totalInvested: 0,
+                avgBuyPrice: 0,
+                firstBoughtAt: now,
+                lastUpdatedAt: now
+            });
+        }
+
+        const historyItem = {
+            id: 'TX_MINE_' + now + '_' + Math.floor(Math.random() * 10000),
+            type: 'MINERACAO',
+            assetId: asset.id,
+            assetName: asset.name,
+            quantity: qty,
+            price: asset.currentPrice,
+            totalBrl: qty * asset.currentPrice,
+            decimals: asset.decimals,
+            timestamp: new Date(now).toLocaleTimeString('pt-BR')
+        };
+        this.history.unshift(historyItem);
+
+        this.saveState();
+        if (this.onPortfolioUpdate) this.onPortfolioUpdate();
+        if (window.desktopUI) {
+            if (typeof window.desktopUI.updateExchangeSummary === 'function') window.desktopUI.updateExchangeSummary();
+            if (typeof window.desktopUI.renderExchangePositions === 'function') window.desktopUI.renderExchangePositions();
+        }
+
+        return {
+            success: true,
+            message: 'Transferido ' + qty.toFixed(asset.decimals > 2 ? 6 : 4) + ' ' + asset.name + ' para sua Carteira Spot!'
         };
     }
 

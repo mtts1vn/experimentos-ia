@@ -1,8 +1,6 @@
 class MiningEngine {
     constructor() {
         this.isRunning = true;
-        this.unminedBtc = 0;
-        this.totalBtcMined = 0;
         this.totalHashrate = 0;
         this.totalPower = 0;
         this.farmTemp = 42;
@@ -11,6 +9,69 @@ class MiningEngine {
         this.lastTickTime = Date.now();
         this.tickInterval = null;
         this.eventsBound = false;
+
+        this.availableCoins = [
+            {
+                id: 'btc',
+                assetId: 'BTC_USDT',
+                symbol: 'BTC',
+                name: 'Bitcoin',
+                icon: '₿',
+                algorithm: 'SHA-256',
+                difficultyDisplay: '88.50 T',
+                globalHashrateDisplay: '670 EH/s',
+                blockTime: 600,
+                blockReward: 3.125,
+                unitDecimals: 8,
+                algoEfficiency: 0.000000035
+            },
+            {
+                id: 'eth',
+                assetId: 'ETH_USDT',
+                symbol: 'ETH',
+                name: 'Ethereum',
+                icon: '⟠',
+                algorithm: 'Ethash',
+                difficultyDisplay: '185.20 GH',
+                globalHashrateDisplay: '1.15 TH/s',
+                blockTime: 13,
+                blockReward: 2.05,
+                unitDecimals: 6,
+                algoEfficiency: 0.00000092
+            },
+            {
+                id: 'doge',
+                assetId: 'DOGE_USDT',
+                symbol: 'DOGE',
+                name: 'Dogecoin',
+                icon: '🐕',
+                algorithm: 'Scrypt',
+                difficultyDisplay: '17.20 MH',
+                globalHashrateDisplay: '1.20 TH/s',
+                blockTime: 60,
+                blockReward: 10000,
+                unitDecimals: 2,
+                algoEfficiency: 0.0084
+            },
+            {
+                id: 'sol',
+                assetId: 'SOL_USDT',
+                symbol: 'SOL',
+                name: 'Solana',
+                icon: '☀️',
+                algorithm: 'PoH Validator',
+                difficultyDisplay: '432K Slots',
+                globalHashrateDisplay: '2.4K TPS',
+                blockTime: 0.4,
+                blockReward: 0.05,
+                unitDecimals: 5,
+                algoEfficiency: 0.000015
+            }
+        ];
+
+        this.selectedCoinId = 'btc';
+        this.unminedCoins = { btc: 0, eth: 0, doge: 0, sol: 0 };
+        this.totalMinedCoins = { btc: 0, eth: 0, doge: 0, sol: 0 };
 
         this.rigPresets = [
             { id: 'desk_left', name: 'Ao Lado da Bancada (Esquerda)', x: -2.5, z: -1.8, rotY: 0.45 },
@@ -34,14 +95,50 @@ class MiningEngine {
         this.startMiningLoop();
     }
 
+    getActiveCoin() {
+        return this.availableCoins.find(c => c.id === this.selectedCoinId) || this.availableCoins[0];
+    }
+
+    selectCoin(coinId) {
+        const found = this.availableCoins.find(c => c.id === coinId);
+        if (!found) return;
+
+        this.selectedCoinId = coinId;
+        this.saveState();
+
+        if (window.soundEngine && window.soundEngine.playClick) {
+            window.soundEngine.playClick();
+        }
+
+        this.showToast('Moeda de mineração alterada para: ' + found.name + ' (' + found.symbol + ')', 'info');
+
+        if (window.roomScene && typeof window.roomScene.updateRoomAccessories === 'function') {
+            window.roomScene.updateRoomAccessories();
+        }
+
+        this.render();
+    }
+
     loadState() {
         try {
             const raw = localStorage.getItem('night_trader_mining_state_v2');
             if (raw) {
                 const data = JSON.parse(raw);
                 this.isRunning = data.isRunning !== undefined ? data.isRunning : true;
-                this.unminedBtc = data.unminedBtc || 0;
-                this.totalBtcMined = data.totalBtcMined || 0;
+                this.selectedCoinId = data.selectedCoinId || 'btc';
+
+                if (data.unminedCoins && typeof data.unminedCoins === 'object') {
+                    this.unminedCoins = Object.assign({ btc: 0, eth: 0, doge: 0, sol: 0 }, data.unminedCoins);
+                } else if (data.unminedBtc) {
+                    this.unminedCoins.btc = data.unminedBtc;
+                }
+
+                if (data.totalMinedCoins && typeof data.totalMinedCoins === 'object') {
+                    this.totalMinedCoins = Object.assign({ btc: 0, eth: 0, doge: 0, sol: 0 }, data.totalMinedCoins);
+                } else if (data.totalBtcMined) {
+                    this.totalMinedCoins.btc = data.totalBtcMined;
+                }
+
                 if (Array.isArray(data.rigs) && data.rigs.length > 0) {
                     return data.rigs;
                 }
@@ -66,8 +163,9 @@ class MiningEngine {
         try {
             const data = {
                 isRunning: this.isRunning,
-                unminedBtc: this.unminedBtc,
-                totalBtcMined: this.totalBtcMined,
+                selectedCoinId: this.selectedCoinId,
+                unminedCoins: this.unminedCoins,
+                totalMinedCoins: this.totalMinedCoins,
                 rigs: this.rigs
             };
             localStorage.setItem('night_trader_mining_state_v2', JSON.stringify(data));
@@ -207,15 +305,47 @@ class MiningEngine {
         const rig = this.rigs.find(r => r.id === rigId);
         if (!rig) return;
 
-        rig.pos.x = parseFloat(x);
-        rig.pos.z = parseFloat(z);
-        rig.pos.rotY = parseFloat(rotY);
+        rig.pos.x = Math.max(-2.8, Math.min(2.8, parseFloat(x) || 0));
+        rig.pos.z = Math.max(-2.8, Math.min(2.8, parseFloat(z) || 0));
+        rig.pos.rotY = parseFloat(rotY) || 0;
         rig.presetId = 'custom';
         this.saveState();
 
         if (window.roomScene && typeof window.roomScene.updateRoomAccessories === 'function') {
             window.roomScene.updateRoomAccessories();
         }
+    }
+
+    nudgeRig(rigId, dx, dz, dRotYDeg) {
+        const rig = this.rigs.find(r => r.id === rigId);
+        if (!rig) return;
+
+        const currentRotDeg = (rig.pos.rotY * (180 / Math.PI)) + (dRotYDeg || 0);
+        const newRotY = (currentRotDeg * Math.PI) / 180;
+        const newX = (rig.pos.x || 0) + (dx || 0);
+        const newZ = (rig.pos.z || 0) + (dz || 0);
+
+        this.setRigFinePosition(rigId, newX, newZ, newRotY);
+        this.render();
+    }
+
+    startMoveRigInFirstPerson(rigId) {
+        if (!window.roomScene) return;
+
+        const miningWin = document.querySelector('.desktop-window[data-window="mining"]');
+        if (miningWin) {
+            miningWin.classList.add('hidden');
+        }
+
+        if (typeof window.roomScene.startStandAnimation === 'function' && window.roomScene.state === 'pc') {
+            window.roomScene.startStandAnimation();
+        }
+
+        setTimeout(() => {
+            if (typeof window.roomScene.startMovingRig === 'function') {
+                window.roomScene.startMovingRig(rigId);
+            }
+        }, 350);
     }
 
     toggleRigPower(rigId) {
@@ -286,62 +416,60 @@ class MiningEngine {
         const deltaSec = (now - this.lastTickTime) / 1000;
         this.lastTickTime = now;
 
-        if (this.isRunning && this.totalHashrate > 0) {
-            const btcPerSec = (this.totalHashrate / 1000) * 0.000000035;
-            const mined = btcPerSec * deltaSec;
-            this.unminedBtc += mined;
-            this.totalBtcMined += mined;
+        const activeCoin = this.getActiveCoin();
+
+        if (this.isRunning && this.totalHashrate > 0 && activeCoin) {
+            const mined = (this.totalHashrate * activeCoin.algoEfficiency * (deltaSec / 10));
+            this.unminedCoins[activeCoin.id] = (this.unminedCoins[activeCoin.id] || 0) + mined;
+            this.totalMinedCoins[activeCoin.id] = (this.totalMinedCoins[activeCoin.id] || 0) + mined;
             this.saveState();
         }
 
         this.updateLiveDisplays();
     }
 
-    getBtcPriceInBrl() {
-        if (window.tradingEngine && window.tradingEngine.assets) {
-            const btc = window.tradingEngine.assets.find(a => a.symbol === 'BTC/USDT' || a.id === 'btc');
-            if (btc && btc.price) return btc.price;
+    getCoinPriceInBrl(coin) {
+        const target = coin || this.getActiveCoin();
+        if (window.marketEngine && window.marketEngine.assets) {
+            const asset = window.marketEngine.assets.find(a => a.id === target.assetId);
+            if (asset && asset.currentPrice > 0) return asset.currentPrice;
         }
-        return 385000.00;
+        const fallbacks = {
+            btc: 540000.00,
+            eth: 16200.00,
+            doge: 1.25,
+            sol: 1140.00
+        };
+        return fallbacks[target.id] || 100.00;
     }
 
-    getEstimatedBrlValue() {
-        return this.unminedBtc * this.getBtcPriceInBrl();
+    getEstimatedBrlValue(coin) {
+        const target = coin || this.getActiveCoin();
+        const unmined = this.unminedCoins[target.id] || 0;
+        return unmined * this.getCoinPriceInBrl(target);
     }
 
-    transferBtcToWallet() {
-        if (this.unminedBtc <= 0.000001) {
-            this.showToast('Nenhum Bitcoin minerado disponivel para transferir!', 'error');
+    transferMinedToSpotWallet() {
+        const activeCoin = this.getActiveCoin();
+        const unmined = this.unminedCoins[activeCoin.id] || 0;
+
+        if (unmined <= 0.00000001) {
+            this.showToast('Nenhuma quantidade de ' + activeCoin.name + ' minerada para resgatar!', 'error');
             return;
         }
 
-        const brlAmount = this.getEstimatedBrlValue();
-        const btcTransferred = this.unminedBtc;
-        this.unminedBtc = 0;
+        const coinAmount = unmined;
+        this.unminedCoins[activeCoin.id] = 0;
         this.saveState();
 
-        if (window.tradingEngine && window.tradingEngine.wallet) {
-            window.tradingEngine.wallet.balance += brlAmount;
-            window.tradingEngine.wallet.totalProfit += brlAmount;
-            if (window.tradingEngine.saveState) {
-                window.tradingEngine.saveState();
-            } else if (window.tradingEngine.saveWallet) {
-                window.tradingEngine.saveWallet();
+        if (window.portfolioEngine) {
+            const res = window.portfolioEngine.depositMined(activeCoin.assetId, coinAmount);
+            if (window.soundEngine && window.soundEngine.playWin) {
+                window.soundEngine.playWin();
             }
+            this.showToast('⚡ ' + res.message + ' Acesse a Corretora Spot para manter ou vender.', 'success');
         }
 
-        if (window.desktopUI) {
-            if (typeof window.desktopUI.updateHeader === 'function') window.desktopUI.updateHeader();
-            if (typeof window.desktopUI.updateExchangeSummary === 'function') window.desktopUI.updateExchangeSummary();
-        }
-
-        if (window.soundEngine && window.soundEngine.playWin) {
-            window.soundEngine.playWin();
-        }
-
-        const btcStr = btcTransferred.toFixed(7);
-        const brlStr = brlAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        this.showToast('Transferido ' + btcStr + ' BTC (~R$ ' + brlStr + ') para sua carteira!', 'success');
         this.render();
     }
 
@@ -360,7 +488,7 @@ class MiningEngine {
 
         const btnTransfer = document.getElementById('btn-mining-transfer');
         if (btnTransfer) {
-            btnTransfer.addEventListener('click', () => this.transferBtcToWallet());
+            btnTransfer.addEventListener('click', () => this.transferMinedToSpotWallet());
         }
 
         const btnToggle = document.getElementById('btn-mining-power-toggle');
@@ -412,6 +540,62 @@ class MiningEngine {
                     this.setRigPreset(rigId, presetId);
                     return;
                 }
+
+                const btnCarry = e.target.closest('[data-carry-rig]');
+                if (btnCarry) {
+                    const rigId = btnCarry.dataset.carryRig;
+                    this.startMoveRigInFirstPerson(rigId);
+                    return;
+                }
+
+                const btnNudge = e.target.closest('[data-nudge-rig]');
+                if (btnNudge) {
+                    const rigId = btnNudge.dataset.rigId;
+                    const dx = parseFloat(btnNudge.dataset.dx) || 0;
+                    const dz = parseFloat(btnNudge.dataset.dz) || 0;
+                    const dRot = parseFloat(btnNudge.dataset.drot) || 0;
+                    this.nudgeRig(rigId, dx, dz, dRot);
+                    return;
+                }
+            });
+
+            activeRigsContainer.addEventListener('input', (e) => {
+                const slider = e.target.closest('.rig-coord-slider');
+                if (slider) {
+                    const rigId = slider.dataset.rigId;
+                    const axis = slider.dataset.axis;
+                    const rig = this.rigs.find(r => r.id === rigId);
+                    if (!rig) return;
+
+                    let newX = rig.pos.x;
+                    let newZ = rig.pos.z;
+                    let newRot = rig.pos.rotY;
+
+                    if (axis === 'x') newX = parseFloat(slider.value);
+                    if (axis === 'z') newZ = parseFloat(slider.value);
+                    if (axis === 'rot') newRot = (parseFloat(slider.value) * Math.PI) / 180;
+
+                    this.setRigFinePosition(rigId, newX, newZ, newRot);
+
+                    const labelVal = slider.parentElement.querySelector('.slider-val-readout');
+                    if (labelVal) {
+                        if (axis === 'rot') {
+                            labelVal.textContent = Math.round(parseFloat(slider.value)) + '°';
+                        } else {
+                            labelVal.textContent = parseFloat(slider.value).toFixed(2) + 'm';
+                        }
+                    }
+                }
+            });
+        }
+
+        const coinSelectorContainer = document.getElementById('mining-coins-selector');
+        if (coinSelectorContainer) {
+            coinSelectorContainer.addEventListener('click', (e) => {
+                const btnCoin = e.target.closest('[data-coin-id]');
+                if (btnCoin) {
+                    this.selectCoin(btnCoin.dataset.coinId);
+                }
             });
         }
     }
@@ -420,24 +604,60 @@ class MiningEngine {
         if (!this.eventsBound) this.bindEvents();
         this.calculateHardwareStats();
         this.updateLiveDisplays();
+        this.renderCoinSelector();
         this.renderTabs();
     }
 
+    renderCoinSelector() {
+        const container = document.getElementById('mining-coins-selector');
+        if (!container) return;
+
+        const activeCoin = this.getActiveCoin();
+
+        container.innerHTML = this.availableCoins.map(coin => {
+            const isSelected = coin.id === activeCoin.id;
+            const unmined = this.unminedCoins[coin.id] || 0;
+            return `
+                <button class="mining-coin-chip ${isSelected ? 'active' : ''}" data-coin-id="${coin.id}">
+                    <span class="coin-chip-icon">${coin.icon}</span>
+                    <div class="coin-chip-meta">
+                        <span class="coin-chip-title">${coin.name} (${coin.symbol})</span>
+                        <span class="coin-chip-diff">${coin.difficultyDisplay} · ${coin.algorithm}</span>
+                    </div>
+                    <span class="coin-chip-balance">${unmined.toFixed(coin.unitDecimals > 4 ? 6 : coin.unitDecimals)} ${coin.symbol}</span>
+                </button>
+            `;
+        }).join('');
+    }
+
     updateLiveDisplays() {
+        const activeCoin = this.getActiveCoin();
+
         const hashrateEl = document.getElementById('mining-hashrate-val');
-        const btcUnminedEl = document.getElementById('mining-unmined-btc-val');
+        const coinUnminedEl = document.getElementById('mining-unmined-btc-val');
+        const coinSymbolLabel = document.getElementById('mining-active-coin-label');
         const brlEstEl = document.getElementById('mining-unmined-brl-val');
         const powerEl = document.getElementById('mining-power-val');
         const tempEl = document.getElementById('mining-temp-val');
         const statusEl = document.getElementById('mining-status-badge');
         const btnToggle = document.getElementById('btn-mining-power-toggle');
+        const btnTransfer = document.getElementById('btn-mining-transfer');
+
+        const diffEl = document.getElementById('mining-net-difficulty-val');
+        const globalHashEl = document.getElementById('mining-global-hash-val');
+        const algoEl = document.getElementById('mining-algo-val');
 
         if (hashrateEl) {
             hashrateEl.textContent = this.totalHashrate.toLocaleString('pt-BR') + ' MH/s';
         }
 
-        if (btcUnminedEl) {
-            btcUnminedEl.textContent = this.unminedBtc.toFixed(8) + ' BTC';
+        if (coinSymbolLabel) {
+            coinSymbolLabel.textContent = `${activeCoin.icon} ${activeCoin.name.toUpperCase()} MINERADO`;
+        }
+
+        if (coinUnminedEl) {
+            const unmined = this.unminedCoins[activeCoin.id] || 0;
+            coinUnminedEl.textContent = unmined.toFixed(activeCoin.unitDecimals) + ' ' + activeCoin.symbol;
         }
 
         if (brlEstEl) {
@@ -454,6 +674,14 @@ class MiningEngine {
             tempEl.className = this.farmTemp > 75 ? 'metric-val text-neg' : 'metric-val text-pos';
         }
 
+        if (diffEl) diffEl.textContent = activeCoin.difficultyDisplay;
+        if (globalHashEl) globalHashEl.textContent = activeCoin.globalHashrateDisplay;
+        if (algoEl) algoEl.textContent = activeCoin.algorithm;
+
+        if (btnTransfer) {
+            btnTransfer.innerHTML = `&#9889; RESGATAR ${activeCoin.symbol} PARA CARTEIRA SPOT`;
+        }
+
         if (statusEl) {
             if (!this.isRunning) {
                 statusEl.textContent = 'PAUSADA';
@@ -462,7 +690,7 @@ class MiningEngine {
                 statusEl.textContent = 'SLOTS VAZIOS';
                 statusEl.className = 'status-badge badge-warning';
             } else {
-                statusEl.textContent = 'MINERANDO ONLINE';
+                statusEl.textContent = 'MINERANDO ' + activeCoin.symbol;
                 statusEl.className = 'status-badge badge-online';
             }
         }
@@ -599,34 +827,75 @@ class MiningEngine {
     renderRoomPlacementTab(container) {
         let html = '<div class="room-placement-container">' +
             '<div class="placement-header">' +
-                '<span class="placement-title">🏠 ORGANIZACAO DOS RIGS NO QUARTO 3D</span>' +
-                '<p class="placement-desc">Escolha onde cada rig físico ficará posicionado dentro do seu quarto. Os modelos 3D com as GPUs encaixadas e luzes RGB serao renderizados instantaneamente em tempo real.</p>' +
+                '<span class="placement-title">🏠 ORGANIZACAO LIVRE DOS RIGS NO QUARTO 3D</span>' +
+                '<p class="placement-desc">Mova e rotacione a sua rig com precisao milimetrica no quarto ou entre no modo de transporte em primeira pessoa para carregar e colocar a rig onde desejar.</p>' +
             '</div>' +
             '<div class="rigs-placement-list">';
 
         this.rigs.forEach((rig, rIndex) => {
-            html += '<div class="rig-placement-card">' +
-                '<div class="placement-card-top">' +
-                    '<span class="placement-rig-name">🗄️ ' + rig.name + ' (Rack #' + (rIndex + 1) + ')</span>' +
-                    '<span class="placement-current-zone">Local: <strong>' + (this.rigPresets.find(p => p.id === rig.presetId)?.name || 'Personalizado') + '</strong></span>' +
-                '</div>' +
-                '<div class="preset-buttons-row">' +
-                    '<span class="presets-row-label">ZONAS PREDEFINIDAS:</span>' +
-                    '<div class="presets-grid">';
+            const rotDeg = Math.round((rig.pos.rotY * (180 / Math.PI)) % 360);
+            const normalizedRotDeg = rotDeg < 0 ? rotDeg + 360 : rotDeg;
+
+            html += `
+                <div class="rig-placement-card" data-rig-card-id="${rig.id}">
+                    <div class="placement-card-top">
+                        <div>
+                            <span class="placement-rig-name">🗄️ ${rig.name} (Rack #${rIndex + 1})</span>
+                            <span class="placement-current-zone">Posição: <strong>X: ${rig.pos.x.toFixed(2)}m | Z: ${rig.pos.z.toFixed(2)}m | ${normalizedRotDeg}°</strong></span>
+                        </div>
+                        <button class="btn-placement-carry" data-carry-rig="${rig.id}">
+                            🚚 CARREGAR &amp; MOVER NO QUARTO 3D
+                        </button>
+                    </div>
+
+                    <div class="placement-free-controls">
+                        <div class="control-row">
+                            <span class="slider-title">EIXO X (Leste / Oeste):</span>
+                            <input type="range" class="rig-coord-slider" data-rig-id="${rig.id}" data-axis="x" min="-2.7" max="2.7" step="0.05" value="${rig.pos.x.toFixed(2)}">
+                            <span class="slider-val-readout">${rig.pos.x.toFixed(2)}m</span>
+                        </div>
+                        <div class="control-row">
+                            <span class="slider-title">EIXO Z (Norte / Sul):</span>
+                            <input type="range" class="rig-coord-slider" data-rig-id="${rig.id}" data-axis="z" min="-2.7" max="2.7" step="0.05" value="${rig.pos.z.toFixed(2)}">
+                            <span class="slider-val-readout">${rig.pos.z.toFixed(2)}m</span>
+                        </div>
+                        <div class="control-row">
+                            <span class="slider-title">ROTACAO (Ângulo Y):</span>
+                            <input type="range" class="rig-coord-slider" data-rig-id="${rig.id}" data-axis="rot" min="0" max="360" step="5" value="${normalizedRotDeg}">
+                            <span class="slider-val-readout">${normalizedRotDeg}°</span>
+                        </div>
+                    </div>
+
+                    <div class="placement-nudge-bar">
+                        <span class="nudge-title">AJUSTE FINO DIRECIONAL:</span>
+                        <div class="nudge-btn-group">
+                            <button class="btn-nudge" data-nudge-rig="true" data-rig-id="${rig.id}" data-dx="0" data-dz="-0.15" data-drot="0" title="Mover para Frente (Norte)">⬆ Frente</button>
+                            <button class="btn-nudge" data-nudge-rig="true" data-rig-id="${rig.id}" data-dx="0" data-dz="0.15" data-drot="0" title="Mover para Trás (Sul)">⬇ Trás</button>
+                            <button class="btn-nudge" data-nudge-rig="true" data-rig-id="${rig.id}" data-dx="-0.15" data-dz="0" data-drot="0" title="Mover para Esquerda (Oeste)">⬅ Esquerda</button>
+                            <button class="btn-nudge" data-nudge-rig="true" data-rig-id="${rig.id}" data-dx="0.15" data-dz="0" data-drot="0" title="Mover para Direita (Leste)">➡ Direita</button>
+                            <button class="btn-nudge btn-nudge-rot" data-nudge-rig="true" data-rig-id="${rig.id}" data-dx="0" data-dz="0" data-drot="45" title="Girar 45 graus">⟲ Girar 45°</button>
+                        </div>
+                    </div>
+
+                    <div class="preset-buttons-row">
+                        <span class="presets-row-label">ZONAS FAVORITAS:</span>
+                        <div class="presets-grid">
+            `;
 
             this.rigPresets.forEach(preset => {
                 const isActive = rig.presetId === preset.id;
-                html += '<button class="btn-placement-preset ' + (isActive ? 'active' : '') + '" data-set-preset="' + preset.id + '" data-rig-id="' + rig.id + '">' +
-                    preset.name +
-                '</button>';
+                html += `
+                    <button class="btn-placement-preset ${isActive ? 'active' : ''}" data-set-preset="${preset.id}" data-rig-id="${rig.id}">
+                        ${preset.name}
+                    </button>
+                `;
             });
 
-            html += '</div></div>' +
-                '<div class="fine-tuning-box">' +
-                    '<span class="fine-label">COORDENADAS 3D:</span>' +
-                    '<span class="fine-coords">X: ' + rig.pos.x.toFixed(2) + 'm | Z: ' + rig.pos.z.toFixed(2) + 'm | Rotacao: ' + (rig.pos.rotY * (180 / Math.PI)).toFixed(0) + '°</span>' +
-                '</div>' +
-            '</div>';
+            html += `
+                        </div>
+                    </div>
+                </div>
+            `;
         });
 
         html += '</div></div>';

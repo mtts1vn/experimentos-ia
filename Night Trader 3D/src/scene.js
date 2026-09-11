@@ -51,6 +51,12 @@ class RoomScene {
         this.smokeParticles = null;
         this.smokeTimer = 0;
 
+        this.isMovingRig = false;
+        this.movingRigId = null;
+        this.movingRigDistance = 1.8;
+        this.movingRigOriginalPos = null;
+        this.placementRingMesh = null;
+
         this.init();
     }
 
@@ -458,16 +464,34 @@ class RoomScene {
 
         const rigs = (window.miningEngine && window.miningEngine.rigs) ? window.miningEngine.rigs : [];
         const isMasterRunning = window.miningEngine ? window.miningEngine.isRunning : true;
+        const activeCoin = (window.miningEngine && typeof window.miningEngine.getActiveCoin === 'function') ? window.miningEngine.getActiveCoin() : { id: 'btc', symbol: 'BTC' };
 
-        const frameMat = new THREE.MeshStandardMaterial({ color: 0x0f1522, metalness: 0.9, roughness: 0.2 });
-        const psuMat = new THREE.MeshStandardMaterial({ color: 0x080a0f, metalness: 0.8, roughness: 0.3 });
-        const gpuBodyMat = new THREE.MeshStandardMaterial({ color: 0x161e2e, metalness: 0.7, roughness: 0.4 });
-        const heatsinkMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.95, roughness: 0.2 });
-        const asicBodyMat = new THREE.MeshStandardMaterial({ color: 0xcfd8dc, metalness: 0.9, roughness: 0.25 });
-        const rgbMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
+        let coinGlowHex = 0x00f0ff;
+        if (activeCoin.id === 'btc') coinGlowHex = 0xf7931a;
+        else if (activeCoin.id === 'eth') coinGlowHex = 0x627eea;
+        else if (activeCoin.id === 'doge') coinGlowHex = 0xfac031;
+        else if (activeCoin.id === 'sol') coinGlowHex = 0x14f195;
+
+        const frameMat = new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.9, roughness: 0.2 });
+        const rubberFootMat = new THREE.MeshStandardMaterial({ color: 0x030712, roughness: 0.9, metalness: 0.1 });
+        const moboMat = new THREE.MeshStandardMaterial({ color: 0x081528, roughness: 0.5, metalness: 0.3 });
+        const heatsinkSilverMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.95, roughness: 0.18 });
+        const copperMat = new THREE.MeshStandardMaterial({ color: 0xc27a42, metalness: 0.9, roughness: 0.25 });
+        const psuMat = new THREE.MeshStandardMaterial({ color: 0x0a0e17, metalness: 0.85, roughness: 0.25 });
+        const gpuBodyMat = new THREE.MeshStandardMaterial({ color: 0x151d2a, metalness: 0.7, roughness: 0.35 });
+        const gpuBackplateMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.25 });
+        const asicBodyMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, metalness: 0.92, roughness: 0.2 });
+        const fanHubMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.8, roughness: 0.2 });
+        const oledFrameMat = new THREE.MeshStandardMaterial({ color: 0x030712, metalness: 0.95, roughness: 0.1 });
+        const oledScreenMat = new THREE.MeshBasicMaterial({ color: coinGlowHex });
+        const statusLedOnMat = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+        const statusLedOffMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+        const rgbMat = new THREE.MeshBasicMaterial({ color: coinGlowHex });
 
         rigs.forEach((rig) => {
             const rigGroup = new THREE.Group();
+            rigGroup.userData = { rigId: rig.id };
+
             const posX = rig.pos && rig.pos.x !== undefined ? rig.pos.x : -2.5;
             const posZ = rig.pos && rig.pos.z !== undefined ? rig.pos.z : -1.8;
             const rotY = rig.pos && rig.pos.rotY !== undefined ? rig.pos.rotY : 0.45;
@@ -476,116 +500,304 @@ class RoomScene {
             rigGroup.rotation.y = rotY;
 
             const slotCount = rig.slotsCount || 4;
-            const rigWidth = 0.4 + (slotCount * 0.16);
+            const rigWidth = 0.46 + (slotCount * 0.18);
+            const isRigOnline = isMasterRunning && rig.isRunning;
 
-            const bar1 = new THREE.Mesh(new THREE.BoxGeometry(rigWidth, 0.02, 0.02), frameMat);
-            bar1.position.set(0, 0.02, -0.18);
-            rigGroup.add(bar1);
-            const bar2 = new THREE.Mesh(new THREE.BoxGeometry(rigWidth, 0.02, 0.02), frameMat);
-            bar2.position.set(0, 0.02, 0.18);
-            rigGroup.add(bar2);
+            const barB1 = new THREE.Mesh(new THREE.BoxGeometry(rigWidth, 0.024, 0.024), frameMat);
+            barB1.position.set(0, 0.025, -0.19);
+            rigGroup.add(barB1);
+            const barB2 = new THREE.Mesh(new THREE.BoxGeometry(rigWidth, 0.024, 0.024), frameMat);
+            barB2.position.set(0, 0.025, 0.19);
+            rigGroup.add(barB2);
 
-            const bar3 = new THREE.Mesh(new THREE.BoxGeometry(rigWidth, 0.02, 0.02), frameMat);
-            bar3.position.set(0, 0.46, -0.18);
-            rigGroup.add(bar3);
-            const bar4 = new THREE.Mesh(new THREE.BoxGeometry(rigWidth, 0.02, 0.02), frameMat);
-            bar4.position.set(0, 0.46, 0.18);
-            rigGroup.add(bar4);
+            const barT1 = new THREE.Mesh(new THREE.BoxGeometry(rigWidth, 0.024, 0.024), frameMat);
+            barT1.position.set(0, 0.48, -0.19);
+            rigGroup.add(barT1);
+            const barT2 = new THREE.Mesh(new THREE.BoxGeometry(rigWidth, 0.024, 0.024), frameMat);
+            barT2.position.set(0, 0.48, 0.19);
+            rigGroup.add(barT2);
 
             for (let i = 0; i < 4; i++) {
-                const leg = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.54, 0.02), frameMat);
-                leg.position.set((i % 2 === 0 ? -(rigWidth / 2 - 0.01) : (rigWidth / 2 - 0.01)), 0.27, (i < 2 ? -0.18 : 0.18));
+                const legX = (i % 2 === 0 ? -(rigWidth / 2 - 0.012) : (rigWidth / 2 - 0.012));
+                const legZ = (i < 2 ? -0.19 : 0.19);
+
+                const leg = new THREE.Mesh(new THREE.BoxGeometry(0.024, 0.56, 0.024), frameMat);
+                leg.position.set(legX, 0.28, legZ);
                 leg.castShadow = true;
                 rigGroup.add(leg);
+
+                const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.02, 0.018, 12), rubberFootMat);
+                foot.position.set(legX, 0.009, legZ);
+                rigGroup.add(foot);
             }
 
-            const psu = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.12, 0.24), psuMat);
-            psu.position.set(-(rigWidth / 2 - 0.12), 0.08, 0);
+            const moboTray = new THREE.Mesh(new THREE.BoxGeometry(rigWidth - 0.05, 0.008, 0.36), moboMat);
+            moboTray.position.set(0, 0.045, 0);
+            rigGroup.add(moboTray);
+
+            const chipsetCooler = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.018, 0.08), heatsinkSilverMat);
+            chipsetCooler.position.set(0.12, 0.055, -0.06);
+            rigGroup.add(chipsetCooler);
+
+            const moboPowerLed = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.008, 0.008), isRigOnline ? statusLedOnMat : statusLedOffMat);
+            moboPowerLed.position.set(0.18, 0.055, 0.12);
+            rigGroup.add(moboPowerLed);
+
+            const psu = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.12, 0.26), psuMat);
+            psu.position.set(-(rigWidth / 2 - 0.13), 0.105, 0);
             psu.castShadow = true;
             rigGroup.add(psu);
 
-            const isRigOnline = isMasterRunning && rig.isRunning;
+            const psuBreakout = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.07, 0.18), heatsinkSilverMat);
+            psuBreakout.position.set(-(rigWidth / 2 - 0.23), 0.105, 0);
+            rigGroup.add(psuBreakout);
+
+            const oledFrame = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.042, 0.018), oledFrameMat);
+            oledFrame.position.set(0, 0.48, 0.202);
+            rigGroup.add(oledFrame);
+
+            const oledScreen = new THREE.Mesh(new THREE.PlaneGeometry(0.145, 0.032), oledScreenMat);
+            oledScreen.position.set(0, 0.48, 0.212);
+            rigGroup.add(oledScreen);
 
             for (let s = 0; s < slotCount; s++) {
                 const gpuId = rig.slots[s];
-                const startX = -(rigWidth / 2) + 0.26;
-                const slotX = startX + (s * 0.16);
+                const startX = -(rigWidth / 2) + 0.30;
+                const slotX = startX + (s * 0.18);
+
+                const riser = new THREE.Mesh(new THREE.BoxGeometry(0.026, 0.012, 0.26), frameMat);
+                riser.position.set(slotX, 0.24, 0);
+                rigGroup.add(riser);
+
+                const riserLed = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.006, 0.006), isRigOnline && gpuId ? statusLedOnMat : statusLedOffMat);
+                riserLed.position.set(slotX, 0.248, 0.11);
+                rigGroup.add(riserLed);
 
                 if (gpuId) {
                     if (gpuId === 'asic_s19') {
                         const asicGroup = new THREE.Group();
-                        asicGroup.position.set(slotX, 0.32, 0);
+                        asicGroup.position.set(slotX, 0.34, 0);
 
-                        const asicCase = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.26, 0.32), asicBodyMat);
+                        const asicCase = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.27, 0.34), asicBodyMat);
                         asicCase.castShadow = true;
                         asicGroup.add(asicCase);
 
-                        const fanF = new THREE.Mesh(new THREE.CylinderGeometry(0.048, 0.048, 0.02, 16), frameMat);
-                        fanF.position.set(0, 0, 0.165);
+                        const fanF = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.052, 0.024, 18), frameMat);
+                        fanF.position.set(0, 0, 0.175);
                         fanF.rotation.x = Math.PI / 2;
                         asicGroup.add(fanF);
 
-                        const fanB = new THREE.Mesh(new THREE.CylinderGeometry(0.048, 0.048, 0.02, 16), frameMat);
-                        fanB.position.set(0, 0, -0.165);
+                        const fanB = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.052, 0.024, 18), frameMat);
+                        fanB.position.set(0, 0, -0.175);
                         fanB.rotation.x = Math.PI / 2;
                         asicGroup.add(fanB);
 
-                        const fanBlade = new THREE.Mesh(new THREE.TorusGeometry(0.04, 0.008, 8, 16), rgbMat);
-                        fanBlade.position.set(0, 0, 0.17);
+                        const fanBlade = new THREE.Mesh(new THREE.TorusGeometry(0.044, 0.009, 8, 16), rgbMat);
+                        fanBlade.position.set(0, 0, 0.185);
                         asicGroup.add(fanBlade);
                         this.rigFanMeshes.push({ mesh: fanBlade, online: isRigOnline });
 
                         rigGroup.add(asicGroup);
                     } else {
                         const gpuGroup = new THREE.Group();
-                        gpuGroup.position.set(slotX, 0.36, 0);
+                        gpuGroup.position.set(slotX, 0.37, 0);
 
-                        const pcb = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.22, 0.34), gpuBodyMat);
+                        const pcb = new THREE.Mesh(new THREE.BoxGeometry(0.026, 0.23, 0.36), gpuBodyMat);
                         pcb.castShadow = true;
                         gpuGroup.add(pcb);
 
-                        const heatsink = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.16, 0.32), heatsinkMat);
-                        heatsink.position.set(0.018, -0.01, 0);
+                        const backplate = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.22, 0.35), gpuBackplateMat);
+                        backplate.position.set(-0.016, 0, 0);
+                        gpuGroup.add(backplate);
+
+                        const heatsink = new THREE.Mesh(new THREE.BoxGeometry(0.024, 0.17, 0.34), heatsinkSilverMat);
+                        heatsink.position.set(0.016, -0.01, 0);
                         gpuGroup.add(heatsink);
 
-                        const fan1 = new THREE.Mesh(new THREE.TorusGeometry(0.042, 0.007, 8, 16), rgbMat.clone());
-                        fan1.position.set(0.036, 0, -0.075);
+                        for (let p = 0; p < 3; p++) {
+                            const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.32, 8), copperMat);
+                            pipe.position.set(0.03, 0.04 - (p * 0.04), 0);
+                            pipe.rotation.x = Math.PI / 2;
+                            gpuGroup.add(pipe);
+                        }
+
+                        const pwrPlug = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.015, 0.036), frameMat);
+                        pwrPlug.position.set(0, 0.118, -0.08);
+                        gpuGroup.add(pwrPlug);
+
+                        const rgbEdgeStrip = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.012, 0.32), rgbMat.clone());
+                        rgbEdgeStrip.position.set(0.018, 0.112, 0);
+                        gpuGroup.add(rgbEdgeStrip);
+
+                        const fan1 = new THREE.Mesh(new THREE.TorusGeometry(0.044, 0.008, 8, 16), rgbMat.clone());
+                        fan1.position.set(0.034, -0.01, -0.085);
                         fan1.rotation.y = Math.PI / 2;
                         gpuGroup.add(fan1);
                         this.rigFanMeshes.push({ mesh: fan1, online: isRigOnline });
 
-                        const fan2 = new THREE.Mesh(new THREE.TorusGeometry(0.042, 0.007, 8, 16), rgbMat.clone());
-                        fan2.position.set(0.036, 0, 0.075);
+                        const hub1 = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.008, 12), fanHubMat);
+                        hub1.position.set(0.035, -0.01, -0.085);
+                        hub1.rotation.z = Math.PI / 2;
+                        gpuGroup.add(hub1);
+
+                        const fan2 = new THREE.Mesh(new THREE.TorusGeometry(0.044, 0.008, 8, 16), rgbMat.clone());
+                        fan2.position.set(0.034, -0.01, 0.085);
                         fan2.rotation.y = Math.PI / 2;
                         gpuGroup.add(fan2);
                         this.rigFanMeshes.push({ mesh: fan2, online: isRigOnline });
 
+                        const hub2 = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.008, 12), fanHubMat);
+                        hub2.position.set(0.035, -0.01, 0.085);
+                        hub2.rotation.z = Math.PI / 2;
+                        gpuGroup.add(hub2);
+
                         if (gpuId === 'gpu_4090') {
-                            const fan3 = new THREE.Mesh(new THREE.TorusGeometry(0.042, 0.007, 8, 16), rgbMat.clone());
-                            fan3.position.set(0.036, 0, 0);
+                            const fan3 = new THREE.Mesh(new THREE.TorusGeometry(0.044, 0.008, 8, 16), rgbMat.clone());
+                            fan3.position.set(0.034, -0.01, 0);
                             fan3.rotation.y = Math.PI / 2;
                             gpuGroup.add(fan3);
                             this.rigFanMeshes.push({ mesh: fan3, online: isRigOnline });
+
+                            const hub3 = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.008, 12), fanHubMat);
+                            hub3.position.set(0.035, -0.01, 0);
+                            hub3.rotation.z = Math.PI / 2;
+                            gpuGroup.add(hub3);
                         }
 
                         rigGroup.add(gpuGroup);
                     }
                 } else {
-                    const slotRiser = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.01, 0.24), frameMat);
-                    slotRiser.position.set(slotX, 0.24, 0);
-                    rigGroup.add(slotRiser);
+                    const slotEmpty = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.014, 0.22), copperMat);
+                    slotEmpty.position.set(slotX, 0.252, 0);
+                    rigGroup.add(slotEmpty);
                 }
             }
 
             if (isRigOnline) {
-                const rigLight = new THREE.PointLight(0x00e5ff, 0.7, 2.6);
-                rigLight.position.set(0, 0.35, 0);
+                const rigLight = new THREE.PointLight(coinGlowHex, 0.85, 3.2);
+                rigLight.position.set(0, 0.38, 0);
                 rigGroup.add(rigLight);
                 this.rigLights.push(rigLight);
             }
 
             this.miningRigsRootGroup.add(rigGroup);
         });
+    }
+
+    getNearestRig(maxDist = 2.4) {
+        if (!window.miningEngine || !window.miningEngine.rigs) return null;
+        let nearest = null;
+        let minDist = maxDist;
+        window.miningEngine.rigs.forEach(r => {
+            const rigPos = new THREE.Vector3(r.pos.x, 0, r.pos.z);
+            const playerPos = new THREE.Vector3(this.player.pos.x, 0, this.player.pos.z);
+            const dist = playerPos.distanceTo(rigPos);
+            if (dist < minDist) {
+                minDist = dist;
+                nearest = r;
+            }
+        });
+        return nearest;
+    }
+
+    startMovingRig(rigId) {
+        if (!window.miningEngine) return;
+        const rig = window.miningEngine.rigs.find(r => r.id === rigId) || window.miningEngine.rigs[0];
+        if (!rig) return;
+
+        this.isMovingRig = true;
+        this.movingRigId = rig.id;
+        this.movingRigOriginalPos = { x: rig.pos.x, y: rig.pos.y || 0, z: rig.pos.z, rotY: rig.pos.rotY };
+        this.movingRigDistance = 1.8;
+
+        if (!this.placementRingMesh) {
+            const ringGeo = new THREE.RingGeometry(0.35, 0.44, 32);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.65, side: THREE.DoubleSide });
+            this.placementRingMesh = new THREE.Mesh(ringGeo, ringMat);
+            this.placementRingMesh.rotation.x = -Math.PI / 2;
+            this.scene.add(this.placementRingMesh);
+        }
+        this.placementRingMesh.visible = true;
+
+        if (window.soundEngine && typeof window.soundEngine.playClick === 'function') {
+            window.soundEngine.playClick();
+        }
+
+        if (window.miningEngine && typeof window.miningEngine.showToast === 'function') {
+            window.miningEngine.showToast('🚚 Modo transporte ativado! [F] ou Clique para fixar.', 'info');
+        }
+
+        this.updateMovingRig();
+    }
+
+    rotateMovingRig() {
+        if (!this.isMovingRig || !window.miningEngine) return;
+        const rig = window.miningEngine.rigs.find(r => r.id === this.movingRigId);
+        if (!rig) return;
+
+        rig.pos.rotY = (rig.pos.rotY || 0) + Math.PI / 4;
+        if (window.soundEngine && typeof window.soundEngine.playClick === 'function') {
+            window.soundEngine.playClick();
+        }
+        this.updateMovingRig();
+    }
+
+    updateMovingRig() {
+        if (!this.isMovingRig || !window.miningEngine) return;
+        const rig = window.miningEngine.rigs.find(r => r.id === this.movingRigId);
+        if (!rig) return;
+
+        const targetX = this.player.pos.x - Math.sin(this.player.yaw) * this.movingRigDistance;
+        const targetZ = this.player.pos.z - Math.cos(this.player.yaw) * this.movingRigDistance;
+
+        rig.pos.x = Math.max(-2.7, Math.min(2.7, targetX));
+        rig.pos.z = Math.max(-2.7, Math.min(2.7, targetZ));
+
+        if (this.miningRigsRootGroup) {
+            const group = this.miningRigsRootGroup.children.find(c => c.userData && c.userData.rigId === rig.id);
+            if (group) {
+                group.position.set(rig.pos.x, 0, rig.pos.z);
+                group.rotation.y = rig.pos.rotY;
+            }
+        }
+
+        if (this.placementRingMesh) {
+            this.placementRingMesh.position.set(rig.pos.x, 0.015, rig.pos.z);
+        }
+    }
+
+    finishMovingRig(confirmed) {
+        if (!this.isMovingRig || !window.miningEngine) return;
+        const rig = window.miningEngine.rigs.find(r => r.id === this.movingRigId);
+
+        if (rig) {
+            if (!confirmed && this.movingRigOriginalPos) {
+                rig.pos.x = this.movingRigOriginalPos.x;
+                rig.pos.z = this.movingRigOriginalPos.z;
+                rig.pos.rotY = this.movingRigOriginalPos.rotY;
+            }
+            rig.presetId = 'custom';
+            window.miningEngine.saveState();
+        }
+
+        this.isMovingRig = false;
+        this.movingRigId = null;
+        this.movingRigOriginalPos = null;
+
+        if (this.placementRingMesh) {
+            this.placementRingMesh.visible = false;
+        }
+
+        if (confirmed) {
+            if (window.soundEngine && typeof window.soundEngine.playPcieSnap === 'function') {
+                window.soundEngine.playPcieSnap();
+            }
+            if (window.miningEngine && typeof window.miningEngine.showToast === 'function') {
+                window.miningEngine.showToast('📍 Rig fixada no quarto com sucesso!', 'success');
+            }
+        }
+
+        this.updateRoomAccessories();
     }
 
     renderDeliveryBoxes() {
@@ -1634,6 +1846,10 @@ class RoomScene {
 
         const handlePointerDown = (e) => {
             if (this.state === 'walk') {
+                if (this.isMovingRig && e.button === 0) {
+                    this.finishMovingRig(true);
+                    return;
+                }
                 this.isMouseDown = true;
                 this.lastMouseX = e.clientX;
                 this.lastMouseY = e.clientY;
@@ -1651,6 +1867,14 @@ class RoomScene {
         window.addEventListener('mouseup', () => {
             this.isMouseDown = false;
         });
+
+        window.addEventListener('wheel', (e) => {
+            if (this.state === 'walk' && this.isMovingRig) {
+                const delta = e.deltaY > 0 ? 0.2 : -0.2;
+                this.movingRigDistance = Math.max(1.1, Math.min(2.8, this.movingRigDistance - delta));
+                this.updateMovingRig();
+            }
+        }, { passive: true });
 
         document.addEventListener('pointerlockchange', () => {
             this.isPointerLocked = document.pointerLockElement === this.container;
@@ -1675,6 +1899,10 @@ class RoomScene {
                     this.player.pitch -= dy * sensitivity;
                 }
                 this.player.pitch = Math.max(-Math.PI / 2.3, Math.min(Math.PI / 2.3, this.player.pitch));
+
+                if (this.isMovingRig) {
+                    this.updateMovingRig();
+                }
             }
         });
 
@@ -1682,10 +1910,34 @@ class RoomScene {
             if (this.state === 'walk') {
                 const key = e.key.toLowerCase();
                 const code = e.code;
+
+                if (this.isMovingRig) {
+                    if (key === 'f' || code === 'KeyF') {
+                        this.finishMovingRig(true);
+                        return;
+                    }
+                    if (key === 'r' || code === 'KeyR') {
+                        this.rotateMovingRig();
+                        return;
+                    }
+                    if (key === 'escape' || code === 'Escape') {
+                        this.finishMovingRig(false);
+                        return;
+                    }
+                }
+
                 if (key === 'w' || code === 'KeyW' || code === 'ArrowUp') this.keys.forward = true;
                 if (key === 's' || code === 'KeyS' || code === 'ArrowDown') this.keys.backward = true;
                 if (key === 'a' || code === 'KeyA' || code === 'ArrowLeft') this.keys.left = true;
                 if (key === 'd' || code === 'KeyD' || code === 'ArrowRight') this.keys.right = true;
+
+                if (key === 'f' || code === 'KeyF') {
+                    const nearestRig = this.getNearestRig(2.4);
+                    if (nearestRig) {
+                        this.startMovingRig(nearestRig.id);
+                        return;
+                    }
+                }
 
                 if (key === 'e' || code === 'KeyE') {
                     const distToWhisky = this.whiskyGroup && this.whiskyGroup.visible ? this.player.pos.distanceTo(new THREE.Vector3(-0.48, 1.0, -2.42)) : 999;
@@ -1854,18 +2106,28 @@ class RoomScene {
             this.player.bobTimer = 0;
         }
 
-        const distToDesk = this.player.pos.distanceTo(new THREE.Vector3(-0.95, 1.65, -1.45));
         const promptEl = document.getElementById('room-interaction-prompt');
         if (promptEl) {
-            const distToWhisky = this.whiskyGroup && this.whiskyGroup.visible ? this.player.pos.distanceTo(new THREE.Vector3(-0.48, 1.0, -2.42)) : 999;
-            if (distToWhisky < 1.8) {
-                promptEl.textContent = 'Pressione [E] para Beber Whisky';
-                promptEl.classList.remove('hidden');
-            } else if (distToDesk < 2.5) {
-                promptEl.textContent = 'Pressione [E] para Sentar na Mesa';
+            if (this.isMovingRig) {
+                promptEl.textContent = '[F] ou Clique: Fixar Rig no Chão | [R]: Girar 45° | [Scroll]: Distância | [Esc]: Cancelar';
                 promptEl.classList.remove('hidden');
             } else {
-                promptEl.classList.add('hidden');
+                const distToDesk = this.player.pos.distanceTo(new THREE.Vector3(-0.95, 1.65, -1.45));
+                const distToWhisky = this.whiskyGroup && this.whiskyGroup.visible ? this.player.pos.distanceTo(new THREE.Vector3(-0.48, 1.0, -2.42)) : 999;
+                const nearestRig = this.getNearestRig(2.4);
+
+                if (distToWhisky < 1.8) {
+                    promptEl.textContent = 'Pressione [E] para Beber Whisky';
+                    promptEl.classList.remove('hidden');
+                } else if (nearestRig) {
+                    promptEl.textContent = 'Pressione [F] para Mover a Rig de Mineração';
+                    promptEl.classList.remove('hidden');
+                } else if (distToDesk < 2.5) {
+                    promptEl.textContent = 'Pressione [E] para Sentar na Mesa';
+                    promptEl.classList.remove('hidden');
+                } else {
+                    promptEl.classList.add('hidden');
+                }
             }
         }
     }
@@ -1878,6 +2140,9 @@ class RoomScene {
 
         if (this.state === 'walk') {
             this.updatePlayerMovement(delta);
+            if (this.isMovingRig) {
+                this.updateMovingRig();
+            }
             this.updateCameraFromPlayer();
             this.screenUpdateTimer = (this.screenUpdateTimer || 0) + delta;
             if (this.screenUpdateTimer > 0.4) {

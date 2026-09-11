@@ -4965,6 +4965,88 @@ body.mode-desktop-only #desktop-terminal-container {
     font-family: var(--font-mono);
 }
 
+.mining-coins-bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: #0a0f1c;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 12px 14px;
+}
+
+.mining-coins-bar-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: #94a3b8;
+    letter-spacing: 1px;
+}
+
+.mining-coins-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.mining-coin-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #060910;
+    border: 1px solid #1e293b;
+    border-radius: 6px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: var(--font-mono);
+    text-align: left;
+    color: #cbd5e1;
+}
+
+.mining-coin-chip:hover {
+    border-color: #38bdf8;
+    background: #0f172a;
+    transform: translateY(-1px);
+}
+
+.mining-coin-chip.active {
+    border-color: #00e5ff;
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.12) 0%, rgba(2, 132, 199, 0.18) 100%);
+    box-shadow: 0 0 14px rgba(0, 229, 255, 0.2);
+    color: #f8fafc;
+}
+
+.coin-chip-icon {
+    font-size: 20px;
+}
+
+.coin-chip-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.coin-chip-title {
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.coin-chip-diff {
+    font-size: 9px;
+    color: #64748b;
+}
+
+.coin-chip-balance {
+    font-size: 10px;
+    font-weight: 900;
+    color: #00e5ff;
+}
+
+.text-yellow {
+    color: #fbbf24 !important;
+}
+
 .mining-metrics-bar {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -5517,26 +5599,118 @@ body.mode-desktop-only #desktop-terminal-container {
     box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
 }
 
-.fine-tuning-box {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #060910;
-    border: 1px solid #1e293b;
-    border-radius: 4px;
-    padding: 6px 10px;
+.btn-placement-carry {
+    padding: 8px 14px;
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.2) 0%, rgba(56, 189, 248, 0.3) 100%);
+    border: 1px solid #00e5ff;
+    border-radius: 6px;
+    color: #00e5ff;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.18s;
+    letter-spacing: 0.5px;
 }
 
-.fine-label {
+.btn-placement-carry:hover {
+    background: #00e5ff;
+    color: #040810;
+    box-shadow: 0 0 16px rgba(0, 229, 255, 0.4);
+    transform: scale(1.02);
+}
+
+.placement-free-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: #060910;
+    border: 1px solid #1e293b;
+    border-radius: 6px;
+    padding: 10px 14px;
+}
+
+.control-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.slider-title {
+    font-size: 9px;
+    font-weight: 800;
+    color: #94a3b8;
+    width: 170px;
+    flex-shrink: 0;
+}
+
+.rig-coord-slider {
+    flex: 1;
+    accent-color: #00e5ff;
+    cursor: pointer;
+}
+
+.slider-val-readout {
+    font-size: 10px;
+    font-weight: 900;
+    color: #00e5ff;
+    width: 60px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.placement-nudge-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #080d1a;
+    border: 1px solid #1e293b;
+    border-radius: 6px;
+    padding: 8px 12px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.nudge-title {
     font-size: 9px;
     font-weight: 800;
     color: #64748b;
+    letter-spacing: 0.5px;
 }
 
-.fine-coords {
-    font-size: 10px;
-    color: #00e676;
-    font-weight: 700;
+.nudge-btn-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.btn-nudge {
+    padding: 6px 10px;
+    background: #111e33;
+    border: 1px solid #1e293b;
+    border-radius: 4px;
+    color: #cbd5e1;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-nudge:hover {
+    background: #1e293b;
+    border-color: #38bdf8;
+    color: #fff;
+}
+
+.btn-nudge-rot {
+    border-color: #00e5ff;
+    color: #00e5ff;
+}
+
+.btn-nudge-rot:hover {
+    background: #00e5ff;
+    color: #040810;
 }
 
 .status-vitals {

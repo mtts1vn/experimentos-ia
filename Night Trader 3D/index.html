@@ -1325,19 +1325,30 @@
                         </div>
                     </div>
                     <div class="window-view-panel mining-view-panel">
+                        <div class="mining-coins-bar-wrapper">
+                            <span class="mining-coins-bar-label">SELECIONE A CRIPTOMOEDA PARA MINERAR:</span>
+                            <div class="mining-coins-selector" id="mining-coins-selector"></div>
+                        </div>
+
                         <div class="mining-metrics-bar">
                             <div class="mining-metric-card">
-                                <span class="metric-label">HASHRATE TOTAL</span>
+                                <span class="metric-label">HASHRATE TOTAL DA RIG</span>
                                 <span class="metric-val text-pos" id="mining-hashrate-val">0 MH/s</span>
                             </div>
                             <div class="mining-metric-card">
-                                <span class="metric-label">BITCOIN MINERADO</span>
+                                <span class="metric-label" id="mining-active-coin-label">CRIPTOMOEDA MINERADA</span>
                                 <span class="metric-val text-cyan" id="mining-unmined-btc-val">0.00000000 BTC</span>
                                 <span class="metric-sub" id="mining-unmined-brl-val">~ R$ 0,00</span>
                             </div>
                             <div class="mining-metric-card">
-                                <span class="metric-label">CONSUMO ENERGETICO</span>
-                                <span class="metric-val" id="mining-power-val">0 W</span>
+                                <span class="metric-label">DIFICULDADE DA REDE</span>
+                                <span class="metric-val text-yellow" id="mining-net-difficulty-val">88.50 T</span>
+                                <span class="metric-sub" id="mining-global-hash-val">670 EH/s Global</span>
+                            </div>
+                            <div class="mining-metric-card">
+                                <span class="metric-label">ALGORITMO &amp; POTENCIA</span>
+                                <span class="metric-val" id="mining-algo-val">SHA-256</span>
+                                <span class="metric-sub" id="mining-power-val">0 W</span>
                             </div>
                             <div class="mining-metric-card">
                                 <span class="metric-label">TEMP MEDIA RIG</span>
@@ -1347,11 +1358,11 @@
 
                         <div class="mining-actions-banner">
                             <div class="mining-banner-info">
-                                <span class="banner-title">&#128176; TRANSFERENCIA DIRETA PARA A CARTEIRA</span>
-                                <span class="banner-desc">Converta instantaneamente o seu Bitcoin minerado para Reais (BRL) e deposite na sua conta unificada.</span>
+                                <span class="banner-title">&#128142; RESGATE DIRETO PARA CARTEIRA SPOT &amp; CORRETORA</span>
+                                <span class="banner-desc">Transfira a moeda minerada para suas posições na Corretora Spot. Mantenha em carteira (HODL) para valorização ou venda quando quiser!</span>
                             </div>
                             <div class="mining-banner-btns">
-                                <button class="btn-mining-transfer" id="btn-mining-transfer">&#9889; RESGATAR BTC PARA CARTEIRA</button>
+                                <button class="btn-mining-transfer" id="btn-mining-transfer">&#9889; RESGATAR PARA CARTEIRA SPOT</button>
                                 <button class="btn-power-off" id="btn-mining-power-toggle">DESLIGAR RIG</button>
                             </div>
                         </div>
