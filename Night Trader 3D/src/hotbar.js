@@ -1,7 +1,7 @@
 class ConsumablesHotbar {
     constructor() {
         this.container = null;
-        this.selectedIndex = 0;
+        this.selectedIndex = -1;
         this.items = [
             { id: 'cigarettes', name: 'Lucky Strike', icon: '🚬', key: '1' },
             { id: 'whisky', name: 'Whisky 12A', icon: '🥃', key: '2' },
@@ -45,24 +45,30 @@ class ConsumablesHotbar {
             if (['1', '2', '3', '4', '5'].includes(e.key)) {
                 const idx = parseInt(e.key, 10) - 1;
                 if (idx >= 0 && idx < this.items.length) {
-                    this.selectSlot(idx);
+                    if (this.selectedIndex === idx) {
+                        this.selectSlot(-1);
+                    } else {
+                        this.selectSlot(idx);
+                    }
                 }
-            } else if (e.key === 'e' || e.key === 'E') {
-                if (window.roomScene && window.roomScene.state === 'walk') {
-                    const lookedAtDesk = window.roomScene.isLookingAtDesk && window.roomScene.isLookingAtDesk();
-                    if (lookedAtDesk) return;
+            } else if (e.key === 'q' || e.key === 'Q' || e.code === 'KeyQ') {
+                if (this.selectedIndex !== -1) {
+                    this.useSelected();
                 }
-                this.useSelected();
             }
         });
 
         if (this.container) {
             this.container.addEventListener('wheel', (e) => {
                 e.preventDefault();
-                if (e.deltaY > 0) {
-                    this.selectedIndex = (this.selectedIndex + 1) % this.items.length;
+                if (this.selectedIndex === -1) {
+                    this.selectedIndex = e.deltaY > 0 ? 0 : this.items.length - 1;
                 } else {
-                    this.selectedIndex = (this.selectedIndex - 1 + this.items.length) % this.items.length;
+                    if (e.deltaY > 0) {
+                        this.selectedIndex = (this.selectedIndex + 1) % this.items.length;
+                    } else {
+                        this.selectedIndex = (this.selectedIndex - 1 + this.items.length) % this.items.length;
+                    }
                 }
                 if (window.soundEngine && window.soundEngine.playKeyClick) {
                     window.soundEngine.playKeyClick();
@@ -75,7 +81,7 @@ class ConsumablesHotbar {
                 if (!slot) return;
                 const idx = parseInt(slot.dataset.index, 10);
                 if (this.selectedIndex === idx) {
-                    this.useSelected();
+                    this.selectSlot(-1);
                 } else {
                     this.selectSlot(idx);
                 }
@@ -92,6 +98,7 @@ class ConsumablesHotbar {
     }
 
     useSelected() {
+        if (this.selectedIndex < 0 || this.selectedIndex >= this.items.length) return;
         const item = this.items[this.selectedIndex];
         if (!item) return;
 
@@ -129,7 +136,7 @@ class ConsumablesHotbar {
                         <span class="hotbar-name">${item.name}</span>
                         <span class="hotbar-count">${item.id === 'zippo' ? (count > 0 ? '✓' : '0') : 'x' + count}</span>
                     </span>
-                    ${isSelected ? '<span class="hotbar-action-badge">USAR [E]</span>' : ''}
+                    ${isSelected ? '<span class="hotbar-action-badge">USAR [Q]</span>' : ''}
                 </div>
             `;
         });
