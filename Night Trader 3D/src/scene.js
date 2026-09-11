@@ -503,6 +503,13 @@ class RoomScene {
             const rigWidth = 0.46 + (slotCount * 0.18);
             const isRigOnline = isMasterRunning && rig.isRunning;
 
+            const hitBoxGeo = new THREE.BoxGeometry(rigWidth + 0.35, 0.75, 0.58);
+            const hitBoxMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+            const hitBoxMesh = new THREE.Mesh(hitBoxGeo, hitBoxMat);
+            hitBoxMesh.position.set(0, 0.35, 0);
+            hitBoxMesh.userData = { rigId: rig.id };
+            rigGroup.add(hitBoxMesh);
+
             const barB1 = new THREE.Mesh(new THREE.BoxGeometry(rigWidth, 0.024, 0.024), frameMat);
             barB1.position.set(0, 0.025, -0.19);
             rigGroup.add(barB1);
@@ -702,13 +709,23 @@ class RoomScene {
 
     getTargetRig() {
         if (!window.miningEngine || !window.miningEngine.rigs || window.miningEngine.rigs.length === 0) return null;
-        if (!this.camera) return null;
 
-        const raycaster = new THREE.Raycaster();
-        raycaster.setFromCamera(new THREE.Vector2(0, 0), this.camera);
+        const eyePos = new THREE.Vector3(
+            this.player.pos.x,
+            this.player.pos.y + (Math.sin(this.player.bobTimer || 0) * 0.035),
+            this.player.pos.z
+        );
+
+        const lookDir = new THREE.Vector3(
+            -Math.sin(this.player.yaw) * Math.cos(this.player.pitch),
+            Math.sin(this.player.pitch),
+            -Math.cos(this.player.yaw) * Math.cos(this.player.pitch)
+        ).normalize();
+
         if (this.miningRigsRootGroup && this.miningRigsRootGroup.children.length > 0) {
+            const raycaster = new THREE.Raycaster(eyePos, lookDir, 0.05, 5.0);
             const hits = raycaster.intersectObjects(this.miningRigsRootGroup.children, true);
-            if (hits.length > 0 && hits[0].distance < 3.8) {
+            if (hits.length > 0) {
                 let obj = hits[0].object;
                 while (obj && obj !== this.miningRigsRootGroup) {
                     if (obj.userData && obj.userData.rigId) {
@@ -720,26 +737,42 @@ class RoomScene {
             }
         }
 
-        const camDir = new THREE.Vector3();
-        this.camera.getWorldDirection(camDir);
-        let bestRig = null;
-        let maxScore = -1;
+        let bestAimRig = null;
+        let minAimDist = 1.35;
 
         window.miningEngine.rigs.forEach(r => {
             const rigCenter = new THREE.Vector3(r.pos.x, 0.35, r.pos.z);
-            const toRig = rigCenter.clone().sub(this.camera.position);
-            const dist = toRig.length();
-            if (dist < 3.2) {
-                const dirToRig = toRig.normalize();
-                const dot = camDir.dot(dirToRig);
-                if (dot > 0.55 && dot > maxScore) {
-                    maxScore = dot;
-                    bestRig = r;
+            const toRig = rigCenter.clone().sub(eyePos);
+            const proj = toRig.dot(lookDir);
+            if (proj > 0.1 && proj < 4.8) {
+                const closestPointOnRay = eyePos.clone().add(lookDir.clone().multiplyScalar(proj));
+                const aimDist = closestPointOnRay.distanceTo(rigCenter);
+                if (aimDist < minAimDist) {
+                    minAimDist = aimDist;
+                    bestAimRig = r;
                 }
             }
         });
 
-        return bestRig;
+        if (bestAimRig) return bestAimRig;
+
+        let bestFacingRig = null;
+        let minPlayerDist = 2.8;
+
+        window.miningEngine.rigs.forEach(r => {
+            const toRig2D = new THREE.Vector2(r.pos.x - eyePos.x, r.pos.z - eyePos.z);
+            const dist2D = toRig2D.length();
+            if (dist2D < minPlayerDist) {
+                const look2D = new THREE.Vector2(-Math.sin(this.player.yaw), -Math.cos(this.player.yaw)).normalize();
+                const dot2D = look2D.dot(toRig2D.normalize());
+                if (dot2D > 0.50 && this.player.pitch < 0.55) {
+                    minPlayerDist = dist2D;
+                    bestFacingRig = r;
+                }
+            }
+        });
+
+        return bestFacingRig;
     }
 
     startMovingRig(rigId) {
@@ -2102,6 +2135,7 @@ class RoomScene {
         );
 
         this.camera.lookAt(lookTarget);
+        this.camera.updateMatrixWorld(true);
     }
 
     updatePlayerMovement(delta) {
@@ -2148,6 +2182,8 @@ class RoomScene {
             this.player.bobTimer = 0;
         }
 
+        this.updateCameraFromPlayer();
+
         const promptEl = document.getElementById('room-interaction-prompt');
         if (promptEl) {
             if (this.isMovingRig) {
@@ -2159,13 +2195,13 @@ class RoomScene {
                 const distToWhisky = this.whiskyGroup && this.whiskyGroup.visible ? this.player.pos.distanceTo(new THREE.Vector3(-0.48, 1.0, -2.42)) : 999;
 
                 if (targetRig) {
-                    promptEl.textContent = 'Aperte "F" para mover';
+                    promptEl.innerHTML = '<div class="room-prompt-title" style="color:#00f0ff;font-size:14px;font-weight:bold;letter-spacing:0.5px;">Aperte "F" para mover</div><div class="room-prompt-desc" style="color:#94a3b8;font-size:12px;margin-top:2px;">Rig de Mineração</div>';
                     promptEl.classList.remove('hidden');
                 } else if (distToWhisky < 1.8) {
-                    promptEl.textContent = 'Pressione [E] para Beber Whisky';
+                    promptEl.innerHTML = '<div class="room-prompt-title">WHISKY BLACK</div><div class="room-prompt-desc">Pressione [E] para Beber Whisky</div>';
                     promptEl.classList.remove('hidden');
                 } else if (distToDesk < 2.5) {
-                    promptEl.textContent = 'Pressione [E] para Sentar na Mesa';
+                    promptEl.innerHTML = '<div class="room-prompt-title">ESTAÇÃO DE TRADING</div><div class="room-prompt-desc">Pressione [E] para Sentar na Mesa</div>';
                     promptEl.classList.remove('hidden');
                 } else {
                     promptEl.classList.add('hidden');
