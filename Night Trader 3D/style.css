@@ -2484,6 +2484,14 @@ body.mode-desktop-only #desktop-terminal-container {
     box-shadow: 0 0 15px rgba(225, 29, 72, 0.35);
 }
 
+.icon-casino svg {
+    stroke: #ffffff;
+}
+
+.icon-casino svg circle {
+    fill: #ffffff;
+}
+
 .desktop-window[data-window="casino"] {
     border-color: rgba(212, 175, 55, 0.45);
     box-shadow: 0 14px 44px rgba(0, 0, 0, 0.85), 0 0 22px rgba(184, 134, 11, 0.2);

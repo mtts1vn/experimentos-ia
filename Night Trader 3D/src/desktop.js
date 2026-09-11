@@ -47,7 +47,7 @@ class DesktopUI {
             },
             casino: {
                 title: 'Cassino Royale',
-                svg: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="8.5" cy="8.5" r="1.5" fill="#e11d48"/><circle cx="15.5" cy="8.5" r="1.5" fill="#e11d48"/><circle cx="12" cy="12" r="1.5" fill="#e11d48"/><circle cx="8.5" cy="15.5" r="1.5" fill="#e11d48"/><circle cx="15.5" cy="15.5" r="1.5" fill="#e11d48"/></svg>',
+                svg: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="8.5" cy="8.5" r="1.5" fill="#ffffff"/><circle cx="15.5" cy="8.5" r="1.5" fill="#ffffff"/><circle cx="12" cy="12" r="1.5" fill="#ffffff"/><circle cx="8.5" cy="15.5" r="1.5" fill="#ffffff"/><circle cx="15.5" cy="15.5" r="1.5" fill="#ffffff"/></svg>',
                 defaultLeft: 120, defaultTop: 30, defaultWidth: 980, defaultHeight: 620
             },
             store: {
