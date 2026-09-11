@@ -16,40 +16,179 @@ class CopywriterEngine {
             { name: 'Quantum Growth', tag: 'Consultoria de Escala', avatar: '⚡' },
             { name: 'CryptoWhale Alpha', tag: 'Comunidade DeFi VIP', avatar: '🐋' },
             { name: 'Visionary Tech', tag: 'SaaS B2B Inteligência', avatar: '🤖' },
-            { name: 'Apex Digital Labs', tag: 'Lançamentos High-Ticket', avatar: '💎' }
-        ];
-
-        this.wordPool = [
-            'transforme', 'resultados', 'estratégia', 'lucro', 'conversão', 'mercado', 'oportunidade',
-            'exclusivo', 'segredo', 'método', 'inovação', 'impacto', 'escala', 'visão', 'crescimento',
-            'solução', 'potencial', 'financeiro', 'algoritmo', 'liberdade', 'autoridade', 'garantia',
-            'performance', 'retorno', 'investimento', 'vantagem', 'inteligência', 'futuro', 'alta',
-            'demanda', 'execução', 'sucesso', 'decisão', 'posicionamento', 'domínio', 'métricas',
-            'gatilhos', 'retenção', 'fidelização', 'tráfego', 'qualificado', 'copywriting', 'persuasão',
-            'vendas', 'oferta', 'irresistível', 'proposta', 'única', 'posicionamento', 'autoridade',
-            'aceleração', 'precisão', 'consistência', 'estrutura', 'revolucionário', 'lucratividade'
+            { name: 'Apex Digital Labs', tag: 'Lançamentos High-Ticket', avatar: '💎' },
+            { name: 'Vanguard Trading Desk', tag: 'Mesa Proprietária Global', avatar: '📈' },
+            { name: 'CyberPulse Media', tag: 'Growth & Tráfego Pago', avatar: '🌐' },
+            { name: 'BlackSwan Intelligence', tag: 'Relatórios Macroeconômicos', avatar: '🦅' },
+            { name: 'Aether Web3 Protocols', tag: 'Ecossistema Blockchain & DAO', avatar: '⛓️' },
+            { name: 'Titanium Mind Academy', tag: 'Treinamento de Alta Performance', avatar: '🧠' },
+            { name: 'BullRun Press', tag: 'Portal de Notícias Financeiras', avatar: '🐂' },
+            { name: 'OmniChannel Syndicate', tag: 'E-commerce & Logística Global', avatar: '📦' },
+            { name: 'IronClad Audits', tag: 'Auditoria e Cibersegurança', avatar: '🛡️' },
+            { name: 'Vortex AI Labs', tag: 'Algoritmos Preditivos & Quant', avatar: '🔮' },
+            { name: 'Zenith Private Wealth', tag: 'Gestão Exclusiva de Patrimônio', avatar: '🏛️' }
         ];
 
         this.templates = [
             {
                 category: 'Página de Vendas VSL',
-                prefix: 'Descubra como dominar o mercado financeiro com alta precisão e consistência. Nossa estratégia exclusiva desbloqueia resultados exponenciais através de algoritmos de inteligência e controle rigoroso de risco. Tome a decisão agora e alcance a verdadeira liberdade com suporte de elite.'
+                text: 'Descubra o método validado por mais de quinhentos operadores profissionais para extrair lucros consistentes do mercado financeiro todos os dias. Nossa metodologia combina análise de fluxo institucional, gerenciamento rigoroso de capital e psicologia comportamental avançada. Clique no botão abaixo e desbloqueie seu acesso imediato à sala de operações ao vivo.'
+            },
+            {
+                category: 'Página de Vendas VSL',
+                text: 'Se você continua operando no escuro e devolvendo seus ganhos para o mercado no final da tarde, precisa conhecer esta nova ferramenta de inteligência quantitativa. Ela detecta zonas ocultas de liquidez antes dos grandes players agirem. Pare de arriscar seu patrimônio sem vantagem estatística e comece a lucrar com precisão cirúrgica agora.'
             },
             {
                 category: 'Email de Conversão Rápida',
-                prefix: 'Atenção investidor: esta oportunidade única no mercado cripto foi liberada apenas para nosso grupo restrito. Implemente o método de escala validado para multiplicar suas métricas de conversão e faturamento diário sem depender de sorte.'
+                text: 'A janela de oportunidade identificada pela nossa mesa proprietária está prestes a fechar. Os indicadores macroeconômicos apontam para um movimento direcional de alta volatilidade nas próximas quarenta e oito horas. Posicione sua carteira estrategicamente antes que o anúncio oficial seja divulgado e aproveite as margens extraordinárias deste ciclo.'
+            },
+            {
+                category: 'Email de Conversão Rápida',
+                text: 'Apenas hoje você tem a chance de acessar o nosso ecossistema fechado com condições nunca antes disponibilizadas. Analisamos centenas de ativos para entregar somente as três operações de maior assimetria positiva desta semana. Abra o link seguro agora e veja o relatório completo antes da abertura do pregão.'
             },
             {
                 category: 'Anúncio de Alta Performance',
-                prefix: 'Pare de perder tempo com estratégias ultrapassadas. Conheça a ferramenta que os maiores traders utilizam para antecipar movimentos de alta liquidez com segurança total e lucros consistentes todos os dias no mercado internacional.'
+                text: 'Pare de tentar adivinhar topos e fundos no gráfico. Traders experientes não dependem de intuição, mas de algoritmos matemáticos que encontram desequilíbrios de oferta em frações de segundo. Toque em saiba mais e descubra como aplicar essa mesma tecnologia em suas operações diárias com taxa de acerto surpreendente.'
+            },
+            {
+                category: 'Anúncio de Alta Performance',
+                text: 'O mercado financeiro mudou completamente e as estratégias tradicionais já não funcionam como antes. Quem domina análise de fluxo e inteligência artificial está capturando os melhores movimentos com risco mínimo. Assista à nossa aula prática gratuita e aprenda a identificar acumulações institucionais em tempo real.'
             },
             {
                 category: 'Script Pitch para Investidores',
-                prefix: 'Apresentamos uma solução revolucionária que integra tecnologia de ponta e análise preditiva em tempo real. Uma estrutura robusta pronta para escalar operações financeiras com retorno garantido e vantagens competitivas imbatíveis.'
+                text: 'Apresentamos uma solução escalável de inteligência preditiva que processa milhões de ordens por segundo para capturar microineficiências no mercado global de capitais. Com uma equipe experiente e infraestrutura de baixíssima latência, oferecemos retornos assimétricos e sólida proteção de patrimônio contra eventos de cisne negro.'
+            },
+            {
+                category: 'Script Pitch para Investidores',
+                text: 'Nosso modelo proprietário de liquidez descentralizada une governança algorítmica e yield farming automatizado para oferecer rentabilidade consistente a investidores qualificados. Projetamos um crescimento exponencial para os próximos trimestres impulsionado pela expansão para os mercados internacionais e parcerias com grandes formadores de mercado.'
             },
             {
                 category: 'Copy de Lançamento VIP',
-                prefix: 'As vagas para o treinamento fechado de alta lucratividade estão se esgotando rapidamente. Garanta seu acesso exclusivo aos gatilhos mais poderosos de vendas e domine as melhores técnicas de negociação de ativos.'
+                text: 'Chegou o momento de dar o próximo passo na sua carreira no mercado financeiro. As inscrições para a mentoria exclusiva da nossa mesa de operações estão abertas por tempo estritamente limitado. Você receberá acompanhamento diário com gestores renomados e ferramentas profissionais de análise técnica avançada.'
+            },
+            {
+                category: 'Copy de Lançamento VIP',
+                text: 'Restam menos de vinte vagas para a nossa sala de mentoria presencial deste semestre. Desenvolva disciplina operacional de ferro, aprenda a blindar suas emoções e opere lado a lado com os maiores especialistas do país. Garanta sua vaga exclusiva antes do esgotamento definitivo dos acessos.'
+            },
+            {
+                category: 'Roteiro Viral de Reels & TikTok',
+                text: 'O que os traders que faturam cinco dígitos por mês não te contam sobre o gerenciamento de risco? Eles nunca arriscam mais de um por cento da banca por operação. Salve este vídeo agora mesmo e aplique esta regra simples amanhã para nunca mais quebrar a sua conta no mercado.'
+            },
+            {
+                category: 'Roteiro Viral de Reels & TikTok',
+                text: 'Três erros fatais que destroem noventa por cento dos traders iniciantes logo na primeira semana: operar alavancado sem stop loss, tentar recuperar prejuízos por impulso e ignorar o calendário econômico global. Compartilhe este alerta com um amigo antes que ele cometa esses deslizes no pregão.'
+            },
+            {
+                category: 'Advertorial & Caso de Estudo',
+                text: 'Como um analista independente conseguiu transformar uma banca modesta em patrimônio sólido utilizando apenas leitura de fluxo e paciência calculada. Neste estudo de caso detalhado, revelamos as métricas exatas, os indicadores proprietários e a rotina diária que tornaram esses resultados possíveis sem atalhos mágicos.'
+            },
+            {
+                category: 'Advertorial & Caso de Estudo',
+                text: 'Descubra a história real de quem quase desistiu do day trade após consecutivas perdas, mas virou a chave ao implementar um modelo estruturado de gestão estatística de risco. Entenda o ponto exato da virada e confira o relatório de auditoria que comprova mais de doze meses de consistência positiva.'
+            },
+            {
+                category: 'Carta de Vendas High-Ticket',
+                text: 'Se a sua meta é operar capital institucional de sete dígitos com o respaldo de uma infraestrutura bancária de elite, esta convocação é para você. Selecionamos profissionais disciplinados para gerenciar contas financiadas por nossa empresa com repasse de até oitenta por cento do lucro líquido gerado.'
+            },
+            {
+                category: 'Carta de Vendas High-Ticket',
+                text: 'A consultoria executiva da nossa boutique de investimentos é personalizada para empresários e investidores com patrimônio relevante que buscam dolarização inteligente de ativos e proteção patrimonial contra oscilações cambiais severas. Agende uma reunião confidencial com nossos diretores sêniores ainda hoje.'
+            },
+            {
+                category: 'Sequência de Escassez & Urgência',
+                text: 'Este é o último aviso antes do encerramento definitivo desta rodada promocional. O cronômetro na página principal está nos minutos finais e as condições especiais não serão renovadas sob nenhuma hipótese. Conclua sua inscrição imediatamente e não fique de fora desta oportunidade transformadora.'
+            },
+            {
+                category: 'Sequência de Escassez & Urgência',
+                text: 'Restam apenas três licenças ativas para o nosso robô quantitativo de arbitragem neste trimestre. Uma vez preenchidas essas vagas, fecharemos os novos acessos para preservar a liquidez das operações e a rentabilidade dos usuários atuais. Tome a sua decisão agora.'
+            },
+            {
+                category: 'Landing Page de Captura',
+                text: 'Baixe gratuitamente o guia definitivo com as dez regras fundamentais de sobrevivência no mercado financeiro moderno. Aprenda a ler os movimentos das grandes instituições, proteja seu capital da inflação e comece a construir uma mentalidade vitoriosa hoje mesmo preenchendo o formulário abaixo.'
+            },
+            {
+                category: 'Landing Page de Captura',
+                text: 'Cadastre seu melhor email para receber nosso relatório semanal confidencial com a análise técnica dos principais ativos do mercado internacional. Informações precisas, projeções econômicas e oportunidades selecionadas diretamente dos nossos analistas para a sua caixa de entrada.'
+            },
+            {
+                category: 'Comunicado de Governança DeFi',
+                text: 'A proposta de melhoria do protocolo foi aprovada por ampla maioria dos detentores de tokens de governança. As novas taxas de staking dinâmico e o mecanismo aprimorado de queima deflacionária entrarão em vigor nas próximas semanas, fortalecendo a liquidez e garantindo sustentabilidade ao ecossistema.'
+            },
+            {
+                category: 'Comunicado de Governança DeFi',
+                text: 'Convocamos todos os validadores da rede para o teste de estresse da nova camada de escalabilidade modular. Essa atualização reduzirá as taxas de transação em mais de noventa por cento e aumentará a taxa de transferência para mais de dez mil transações simultâneas por segundo.'
+            },
+            {
+                category: 'Boletim Macroeconômico',
+                text: 'A decisão sobre as taxas de juros globais gerou forte volatilidade nas bolsas internacionais nesta manhã. Nosso comitê de política monetária recomenda cautela na exposição a ativos de risco e reforça posições estratégicas em títulos soberanos de curto prazo para capturar retornos atrativos com liquidez imediata.'
+            },
+            {
+                category: 'Boletim Macroeconômico',
+                text: 'A divulgação dos índices de inflação ao consumidor surpreendeu positivamente as projeções do mercado, indicando possível alívio nas pressões de custos. Observamos um influxo recorde de capital estrangeiro nos mercados emergentes, abrindo oportunidades táticas em ações de alta liquidez e commodities negociadas internacionalmente.'
+            },
+            {
+                category: 'Onboarding de Produto SaaS',
+                text: 'Seja muito bem-vindo à nossa plataforma analítica de alta velocidade. Para começar a extrair o potencial máximo do seu terminal financeiro, recomendamos configurar seus pares de negociação favoritos e ativar os alertas preditivos de volume no painel lateral de preferências.'
+            },
+            {
+                category: 'Onboarding de Produto SaaS',
+                text: 'Sua conta corporativa foi ativada com sucesso no ambiente em nuvem de baixa latência. Conecte suas chaves de integração segura agora mesmo e comece a monitorar ordens executadas, métricas de rentabilidade e relatórios fiscais em um único painel centralizado e interativo.'
+            },
+            {
+                category: 'Campanha de Remarketing Agressivo',
+                text: 'Notamos que você visitou nossa página de inscrição, mas não finalizou seu cadastro. Sabemos que tomar uma grande decisão financeira exige segurança, por isso liberamos um desconto exclusivo de vinte por cento válido apenas até a meia-noite de hoje. Volte agora e conclua seu acesso.'
+            },
+            {
+                category: 'Campanha de Remarketing Agressivo',
+                text: 'Você deixou sua vaga reservada no carrinho e faltam poucos minutos para ela ser liberada para a lista de espera. Não permita que o medo ou a procrastinação impeçam você de conquistar a liberdade financeira com um método testado e comprovado por centenas de alunos.'
+            },
+            {
+                category: 'Manifesto de Marca Exclusiva',
+                text: 'Nós não acreditamos em fórmulas fáceis ou promessas milagrosas de enriquecimento rápido. Acreditamos na disciplina inegociável, no estudo aprofundado dos dados e na execução metódica de planos operacionais rigorosos. Aqui formamos os traders que moldam o futuro do mercado financeiro mundial.'
+            },
+            {
+                category: 'Manifesto de Marca Exclusiva',
+                text: 'Liberdade não é trabalhar pouco, é ter o poder irrestrito de escolher onde, quando e com quem você deseja construir riqueza. Criamos uma infraestrutura onde a meritocracia é absoluta e o seu resultado depende única e exclusivamente da sua dedicação e precisão técnica.'
+            },
+            {
+                category: 'Proposta Comercial B2B',
+                text: 'Nossa proposta técnica contempla a integração completa de pipelines de dados em tempo real com os sistemas legados de sua tesouraria corporativa. Garantimos conformidade regulatória rigorosa, redundância de servidores em múltiplos data centers e suporte técnico especializado vinte e quatro horas por dia.'
+            },
+            {
+                category: 'Proposta Comercial B2B',
+                text: 'Oferecemos uma solução sob medida para otimizar o fluxo de pagamentos internacionais da sua empresa, reduzindo spreads de câmbio e eliminando burocracias intermediárias. Descubra como economizar milhares de reais por mês em operações transfronteiriças com nossa tecnologia.'
+            },
+            {
+                category: 'Roteiro de Fechamento por WhatsApp',
+                text: 'Olá, percebi que você solicitou mais informações sobre nossa assessoria de investimentos. Temos uma condição especial reservada para o seu perfil patrimonial que vence hoje. Se tiver cinco minutos, posso te apresentar os detalhes agora mesmo pelo telefone ou por mensagem.'
+            },
+            {
+                category: 'Roteiro de Fechamento por WhatsApp',
+                text: 'Boa tarde, acabei de analisar suas respostas no questionário de alocação de ativos e identifiquei dois pontos de melhoria urgente na sua carteira atual. Podemos agendar uma conversa rápida de quinze minutos para alinhar sua estratégia com nosso especialista de plantão?'
+            },
+            {
+                category: 'Storytelling de Superação Financeira',
+                text: 'Há três anos eu operava em um notebook antigo, sem qualquer orientação e acumulando frustrações diárias. A virada aconteceu quando parei de buscar atalhos e passei a seguir um plano de gerenciamento rigoroso de risco. Hoje compartilho essa jornada para mostrar que a consistência é construída tijolo por tijolo.'
+            },
+            {
+                category: 'Storytelling de Superação Financeira',
+                text: 'Muitos acham que o sucesso no mercado é sorte, mas ninguém vê as madrugadas estudando gráficos e refinando estratégias quando o resto do mundo está dormindo. Se você tem determinação para pagar o preço da disciplina diária, o mercado recompensará todo o seu esforço com juros compostos.'
+            },
+            {
+                category: 'Newsletter Alpha Semanal',
+                text: 'Bem-vindo ao boletim semanal com os principais insights da nossa mesa de operações. Nesta edição detalhamos o reposicionamento dos grandes fundos globais frente à recente valorização das commodities e apontamos os setores da economia com maior potencial de valorização defensiva nas próximas semanas.'
+            },
+            {
+                category: 'Copy de Tráfego Direto',
+                text: 'Você já calculou quanto dinheiro perde todos os meses pagando taxas abusivas de corretagem e aceitando spreads desvantajosos? Desenvolvemos uma plataforma direta sem intermediários que conecta sua ordem à ponta da liquidez global com custo operacional quase zero. Faça o teste hoje mesmo.'
+            },
+            {
+                category: 'Pitch de Parceria Estratégica',
+                text: 'Buscamos sinergia operacional com plataformas que compartilham nossa obsessão por inovação tecnológica e atendimento de alto padrão. Ao unir nossa liquidez proprietária à sua base de usuários ativos, podemos criar uma experiência incomparável de negociação e multiplicar a receita de ambos os lados.'
+            },
+            {
+                category: 'Roteiro de Vídeo Institucional',
+                text: 'Por trás de cada gráfico e de cada vela que se move na tela, existem bilhões de reais trocando de mãos em frações de segundo. Nós fornecemos a tecnologia, os dados e a infraestrutura para você competir em igualdade com as maiores tesourarias do planeta. O futuro do trading começa aqui.'
             }
         ];
 
@@ -67,35 +206,28 @@ class CopywriterEngine {
 
     generateContractPool() {
         this.contracts = [];
+        const usedTexts = [];
         for (let i = 0; i < 4; i++) {
-            this.contracts.push(this.createRandomContract(i + 1));
+            const contract = this.createRandomContract(i + 1, usedTexts);
+            usedTexts.push(contract.text);
+            this.contracts.push(contract);
         }
     }
 
-    createRandomContract(id) {
+    createRandomContract(id, excludeTexts = []) {
         const client = this.clients[Math.floor(Math.random() * this.clients.length)];
-        const template = this.templates[Math.floor(Math.random() * this.templates.length)];
-
-        const targetWordCount = Math.floor(Math.random() * 26) + 25;
-        let words = template.prefix.split(' ');
-
-        while (words.length < targetWordCount) {
-            const nextWord = this.wordPool[Math.floor(Math.random() * this.wordPool.length)];
-            words.push(nextWord);
+        let pool = this.templates.filter(t => !excludeTexts.includes(t.text));
+        if (pool.length === 0) {
+            pool = this.templates;
         }
-
-        if (words.length > targetWordCount) {
-            words = words.slice(0, targetWordCount);
-        }
-
-        let fullText = words.join(' ');
-        if (!fullText.endsWith('.')) {
-            fullText += '.';
-        }
+        const template = pool[Math.floor(Math.random() * pool.length)];
+        const text = template.text;
+        const words = text.split(/\s+/).filter(w => w.length > 0);
+        const wordCount = words.length;
 
         const baseReward = 85;
-        const extraPerWord = 0.95;
-        const reward = Math.round(baseReward + (words.length - 25) * extraPerWord + (Math.random() * 10 - 5));
+        const extraPerWord = 1.15;
+        const reward = Math.round(baseReward + (wordCount - 25) * extraPerWord + (Math.random() * 8 - 4));
 
         return {
             id: `contract_${Date.now()}_${id}_${Math.floor(Math.random() * 1000)}`,
@@ -104,9 +236,9 @@ class CopywriterEngine {
             clientName: client.name,
             clientTag: client.tag,
             clientAvatar: client.avatar,
-            wordCount: words.length,
-            text: fullText,
-            reward: Math.max(88, Math.min(138, reward))
+            wordCount: wordCount,
+            text: text,
+            reward: Math.max(88, Math.min(185, reward))
         };
     }
 
@@ -201,8 +333,9 @@ class CopywriterEngine {
         this.showCompletionModal(reward);
         this.showToast(`DOCUMENTO ENTREGUE! +R$ ${reward.toFixed(2)} depositados na carteira!`, 'success');
 
+        const existingTexts = this.contracts.map(c => c.text);
         this.contracts = this.contracts.filter(c => c.id !== this.activeContract.id);
-        this.contracts.push(this.createRandomContract(Date.now()));
+        this.contracts.push(this.createRandomContract(Date.now(), existingTexts));
 
         this.renderStatsHeader();
         this.renderContractsList();
