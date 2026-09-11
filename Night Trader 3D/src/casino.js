@@ -11,8 +11,9 @@ class CasinoEngine {
         this.rouletteLastNumbers = [17, 32, 0, 7, 21, 4];
         this.rouletteSpinning = false;
         this.rouletteAngle = 0;
-        this.rouletteBallAngle = 0;
-        this.rouletteBallRadius = 0;
+        this.rouletteBallAngle = 8 * (Math.PI * 2 / 37) + (Math.PI * 2 / 37) / 2;
+        this.rouletteBallRadius = 84;
+        this.rouletteHasBall = true;
 
         this.bjState = 'betting';
         this.bjDeck = [];
@@ -393,13 +394,13 @@ class CasinoEngine {
 
         ctx.restore();
 
-        if (this.rouletteSpinning || ballAngle !== 0) {
+        if (this.rouletteSpinning || this.rouletteHasBall || ballRadiusCustom > 0 || ballAngle !== 0) {
             ctx.save();
             ctx.translate(cx, cy);
             ctx.rotate(ballAngle);
-            const ballDist = ballRadiusCustom > 0 ? ballRadiusCustom : (radius * 0.76);
+            const ballDist = ballRadiusCustom > 0 ? ballRadiusCustom : (radius * 0.70);
             ctx.beginPath();
-            ctx.arc(ballDist, 0, 5, 0, Math.PI * 2);
+            ctx.arc(ballDist, 0, 4.5, 0, Math.PI * 2);
             ctx.fillStyle = '#ffffff';
             ctx.shadowColor = '#ffd700';
             ctx.shadowBlur = 6;
@@ -458,6 +459,7 @@ class CasinoEngine {
 
         this.clearFeltWinnerHighlight();
         this.rouletteSpinning = true;
+        this.rouletteHasBall = true;
         const btnSpin = document.getElementById('btn-spin-roulette');
         if (btnSpin) btnSpin.disabled = true;
 
@@ -469,35 +471,67 @@ class CasinoEngine {
         const winningIndex = Math.floor(Math.random() * numbers.length);
         const winningNumber = numbers[winningIndex];
 
-        const duration = 4000;
+        const duration = 4600;
         const start = performance.now();
         const numPockets = numbers.length;
         const arc = (Math.PI * 2) / numPockets;
-        const targetWheelSpins = 5;
-        const targetBallSpins = 12;
-        const finalPocketAngle = (numPockets - winningIndex) * arc - (arc / 2);
 
         const canvas = document.getElementById('roulette-wheel-canvas');
-        const outerRadius = canvas ? (canvas.width / 2 - 14) : 95;
-        const pocketRadius = outerRadius * 0.70;
+        const radius = canvas ? (canvas.width / 2 - 10) : 120;
+        const outerBallRadius = radius - 7;
+        const pocketRadius = radius * 0.70;
+
+        const startWheelAngle = this.rouletteAngle;
+        const totalWheelDelta = (4 + Math.random() * 1.5) * Math.PI * 2;
+        const finalWheelAngle = startWheelAngle + totalWheelDelta;
+
+        const totalBallDelta = (9 + Math.random() * 2) * Math.PI * 2;
+        let dropSoundPlayed = false;
 
         const animateWheel = (now) => {
             const elapsed = now - start;
-            const progress = Math.min(1, elapsed / duration);
-            const easeOutWheel = 1 - Math.pow(1 - progress, 3);
-            const easeOutBall = 1 - Math.pow(1 - progress, 2.5);
+            const p = Math.min(1, elapsed / duration);
 
-            this.rouletteAngle = easeOutWheel * (targetWheelSpins * Math.PI * 2) + (finalPocketAngle * 0.5);
-            this.rouletteBallAngle = -(easeOutBall * (targetBallSpins * Math.PI * 2) - finalPocketAngle);
+            const easeWheel = 1 - Math.pow(1 - p, 3);
+            const easeBall = 1 - Math.pow(1 - p, 2.6);
 
-            const spiralFactor = Math.pow(progress, 1.8);
-            this.rouletteBallRadius = outerRadius - (outerRadius - pocketRadius) * spiralFactor;
+            const currentWheelAngle = startWheelAngle + totalWheelDelta * easeWheel;
+            const currentPocketAngle = currentWheelAngle + (winningIndex * arc + arc / 2);
+            const remainingBallTravel = (1 - easeBall) * totalBallDelta;
+            const currentBallAngle = currentPocketAngle - remainingBallTravel;
+
+            let currentBallRadius;
+            if (p < 0.68) {
+                currentBallRadius = outerBallRadius;
+            } else if (p < 0.90) {
+                if (!dropSoundPlayed) {
+                    dropSoundPlayed = true;
+                    if (window.soundEngine && window.soundEngine.playRouletteDrop) {
+                        window.soundEngine.playRouletteDrop();
+                    }
+                }
+                const dropProgress = (p - 0.68) / (0.90 - 0.68);
+                const dropEase = Math.sin(dropProgress * Math.PI * 0.5);
+                currentBallRadius = outerBallRadius - (outerBallRadius - pocketRadius) * dropEase;
+            } else {
+                const settleProgress = (p - 0.90) / 0.10;
+                const bounce = Math.sin(settleProgress * Math.PI * 3) * (1 - settleProgress) * 2.5;
+                currentBallRadius = pocketRadius + bounce;
+            }
+
+            this.rouletteAngle = currentWheelAngle;
+            this.rouletteBallAngle = currentBallAngle;
+            this.rouletteBallRadius = currentBallRadius;
 
             this.drawRouletteWheel(this.rouletteAngle, this.rouletteBallAngle, this.rouletteBallRadius);
 
-            if (progress < 1) {
+            if (p < 1) {
                 requestAnimationFrame(animateWheel);
             } else {
+                this.rouletteAngle = finalWheelAngle;
+                this.rouletteBallAngle = finalWheelAngle + (winningIndex * arc + arc / 2);
+                this.rouletteBallRadius = pocketRadius;
+                this.drawRouletteWheel(this.rouletteAngle, this.rouletteBallAngle, this.rouletteBallRadius);
                 this.finishRoulette(winningNumber);
             }
         };
@@ -507,6 +541,7 @@ class CasinoEngine {
 
     finishRoulette(winningNumber) {
         this.rouletteSpinning = false;
+        this.rouletteHasBall = true;
         const btnSpin = document.getElementById('btn-spin-roulette');
         if (btnSpin) btnSpin.disabled = false;
 

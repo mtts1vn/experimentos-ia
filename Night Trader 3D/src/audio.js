@@ -576,6 +576,48 @@ class SoundEngine {
         osc.start(now);
         osc.stop(now + 0.04);
     }
+
+    playRouletteSpin() {
+        if (this.muted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const duration = 4.2;
+        const totalClicks = 32;
+        for (let i = 0; i < totalClicks; i++) {
+            const progress = i / totalClicks;
+            const timeOffset = Math.pow(progress, 1.8) * duration;
+            const time = now + timeOffset;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1400 - progress * 400, time);
+            osc.frequency.exponentialRampToValueAtTime(600, time + 0.02);
+            gain.gain.setValueAtTime(0.04, time);
+            gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.02);
+            osc.connect(gain);
+            gain.connect(this.effectsGain);
+            osc.start(time);
+            osc.stop(time + 0.02);
+        }
+    }
+
+    playRouletteDrop() {
+        if (this.muted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        for (let i = 0; i < 3; i++) {
+            const time = now + (i * 0.08);
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(900 - i * 150, time);
+            osc.frequency.exponentialRampToValueAtTime(400, time + 0.04);
+            gain.gain.setValueAtTime(0.08, time);
+            gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.04);
+            osc.connect(gain);
+            gain.connect(this.effectsGain);
+            osc.start(time);
+            osc.stop(time + 0.04);
+        }
+    }
 }
 
 window.soundEngine = new SoundEngine();
